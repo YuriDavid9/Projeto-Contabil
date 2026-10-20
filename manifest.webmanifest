@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "AutoContábil Hub",
+  "short_name": "AutoContábil",
+  "description": "Ferramentas contábeis e fiscais processadas localmente no navegador.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

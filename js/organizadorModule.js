@@ -1,6 +1,7 @@
-import { $, $$, esc, fmtISODate, parseMoney, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV } from './utils.js';
+import { $, $$, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV } from './utils.js';
 
 const OG = { docs: [], seq: 1 };
+const RULES_KEY = 'autocontabil-organizador-rules-v1';
 const TIPOS = ['PIX', 'NFE', 'BOLETO', 'RECIBO', 'GUIA', 'EXTRATO', 'CONTRATO', 'COMPROVANTE', 'DOCUMENTO'];
 const TIPO_RE = [
   ['PIX', /pix/],
@@ -94,6 +95,106 @@ function folderOf(documentItem, mode) {
   return folders[mode] ?? '';
 }
 
+let pdfJSLoader;
+function loadPDFJS() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (!pdfJSLoader) {
+    pdfJSLoader = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = () => {
+        if (!window.pdfjsLib) return reject(new Error('PDF.js não inicializou.'));
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve(window.pdfjsLib);
+      };
+      script.onerror = () => reject(new Error('PDF.js não carregou. Verifique a conexão e tente novamente.'));
+      document.head.appendChild(script);
+    });
+  }
+  return pdfJSLoader;
+}
+
+async function extractPdfText(file) {
+  const pdfjs = await loadPDFJS();
+  const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+  const pages = [];
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    pages.push(content.items.map((item) => item.str).join(' '));
+  }
+  return pages.join('\n');
+}
+
+function detectPdfMetadata(text) {
+  const cnpjMatch = text.match(/\b\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}\b/);
+  const dateMatch = text.match(/(?:emiss[aã]o|emitido\s+em|vencimento|vcto\.?)[^\d]{0,40}(\d{2}[/.\-]\d{2}[/.\-]\d{4}|\d{4}-\d{2}-\d{2})/i) || text.match(/\b(\d{2}[/.\-]\d{2}[/.\-]\d{4})\b/);
+  const valueMatch = text.match(/(?:valor\s+total|total\s+(?:do\s+documento|a\s+pagar|geral)|valor\s+cobrado)[^\d]{0,40}(?:R\$\s*)?([\d.]+,\d{2}|\d+\.\d{2})/i);
+  const cnpj = cnpjMatch ? cnpjMatch[0].replace(/\D/g, '') : '';
+  const data = dateMatch ? parseDateAny(dateMatch[1]) || '' : '';
+  const parsedValue = valueMatch ? parseMoney(valueMatch[1]) : NaN;
+  const valor = Number.isFinite(parsedValue) ? String(Math.abs(parsedValue)) : '';
+  return { cnpj, data, valor, detected: Boolean(cnpj || data || valor) };
+}
+
+function readSavedRules() {
+  try {
+    const rules = JSON.parse(localStorage.getItem(RULES_KEY) || '[]');
+    return Array.isArray(rules) ? rules : [];
+  } catch {
+    return [];
+  }
+}
+
+function renderSavedRules(selectedName = $('#og-saved-rules').value) {
+  const select = $('#og-saved-rules');
+  const rules = readSavedRules();
+  select.innerHTML = rules.length
+    ? rules.map((rule) => `<option value="${esc(rule.name)}">${esc(rule.name)}</option>`).join('')
+    : '<option value="">Nenhuma regra salva</option>';
+  if (rules.some((rule) => rule.name === selectedName)) select.value = selectedName;
+}
+
+function saveOGRule() {
+  const name = $('#og-rule-name').value.trim();
+  if (!name) return toast('Informe um nome para a regra.', 'warn');
+  try {
+    const rules = readSavedRules();
+    const rule = { name, template: ogTemplate(), treeMode: $('#og-tree-mode').value };
+    const index = rules.findIndex((entry) => entry.name.toLowerCase() === name.toLowerCase());
+    if (index < 0) rules.push(rule); else rules[index] = rule;
+    localStorage.setItem(RULES_KEY, JSON.stringify(rules));
+    renderSavedRules(name);
+    toast('Regra salva neste navegador.', 'ok');
+  } catch {
+    toast('Não foi possível salvar a regra neste navegador.', 'err');
+  }
+}
+
+function loadOGRule() {
+  const rule = readSavedRules().find((entry) => entry.name === $('#og-saved-rules').value);
+  if (!rule) return toast('Selecione uma regra salva.', 'warn');
+  const isPreset = [...$('#og-rule').options].some((option) => option.value === rule.template);
+  $('#og-rule').value = isPreset ? rule.template : 'custom';
+  $('#og-custom').value = rule.template;
+  $('#og-custom').classList.toggle('hidden', isPreset);
+  $('#og-tree-mode').value = rule.treeMode;
+  refreshOGNames();
+  toast('Regra carregada.', 'ok');
+}
+
+function deleteOGRule() {
+  const name = $('#og-saved-rules').value;
+  if (!name) return toast('Selecione uma regra salva.', 'warn');
+  try {
+    localStorage.setItem(RULES_KEY, JSON.stringify(readSavedRules().filter((rule) => rule.name !== name)));
+    renderSavedRules();
+    toast('Regra apagada.', 'ok');
+  } catch {
+    toast('Não foi possível apagar a regra salva.', 'err');
+  }
+}
+
 function renderTree(plan) {
   if (!plan.length) {
     $('#og-tree').innerHTML = '<p class="text-slate-400 text-sm">A árvore aparecerá aqui.</p>';
@@ -147,14 +248,15 @@ function renderOG() {
   $('#og-zip').disabled = !plan.length;
 
   $('#og-tbody').innerHTML = plan.length ? plan.map(({ d, name }) => `<tr class="${d.fornecedor ? '' : 'bg-amber-50'} align-top">
-    <td class="px-3 py-2 min-w-[11rem] text-xs text-slate-600 break-all">${esc(d.orig)}${d.demo ? ' <span class="text-[10px] bg-slate-200 rounded px-1">demo</span>' : ''}</td>
+    <td class="px-3 py-2 min-w-[11rem] text-xs text-slate-600 break-all">${esc(d.orig)}${d.demo ? ' <span class="text-[10px] bg-slate-200 rounded px-1">demo</span>' : ''}${d.detected ? ' <span class="mt-1 inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">Detectado automaticamente</span>' : ''}</td>
     <td class="px-3 py-2"><input type="date" data-og="${d.id}" data-f="data" value="${esc(d.data)}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
+    <td class="px-3 py-2"><input type="text" inputmode="numeric" data-og="${d.id}" data-f="cnpj" value="${esc(d.cnpj || '')}" placeholder="CNPJ" class="w-36 rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
     <td class="px-3 py-2"><select data-og="${d.id}" data-f="tipo" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">${TIPOS.map((tipo) => `<option ${tipo === d.tipo ? 'selected' : ''}>${tipo}</option>`).join('')}</select></td>
     <td class="px-3 py-2"><input type="text" data-og="${d.id}" data-f="fornecedor" value="${esc(d.fornecedor)}" placeholder="Fornecedor…" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
     <td class="px-3 py-2"><input type="text" inputmode="decimal" data-og="${d.id}" data-f="valor" value="${d.valor ? esc(n2(+d.valor)) : ''}" placeholder="0,00" class="w-24 rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
     <td class="px-3 py-2 min-w-[12rem] font-mono text-[11px] text-emerald-700 font-semibold break-all" data-newname="${d.id}">${esc(name)}</td>
     <td class="px-3 py-2"><button data-act="og-del" data-id="${d.id}" class="text-slate-400 hover:text-rose-600">×</button></td>
-  </tr>`).join('') : '<tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">Fila vazia. Arraste documentos ou carregue os exemplos.</td></tr>';
+  </tr>`).join('') : '<tr><td colspan="8" class="px-4 py-10 text-center text-slate-500">Fila vazia. Arraste documentos ou carregue os exemplos.</td></tr>';
 
   renderTree(plan);
 }
@@ -169,8 +271,8 @@ function refreshOGNames() {
 }
 
 function manifestRows(plan) {
-  const head = ['Nome Original', 'Novo Nome', 'Pasta Sugerida', 'Caminho Completo', 'Data', 'Tipo', 'Fornecedor', 'Valor', 'Tamanho (KB)'];
-  return [head, ...plan.map(({ d, name, folder, path }) => [d.orig, name, folder || '(raiz)', path, fmtISODate(d.data), d.tipo, d.fornecedor, d.valor ? n2(+d.valor) : '', d.size ? (d.size / 1024).toFixed(1).replace('.', ',') : ''])];
+  const head = ['Nome Original', 'Novo Nome', 'Pasta Sugerida', 'Caminho Completo', 'Data', 'CNPJ', 'Tipo', 'Fornecedor', 'Valor', 'Tamanho (KB)'];
+  return [head, ...plan.map(({ d, name, folder, path }) => [d.orig, name, folder || '(raiz)', path, fmtISODate(d.data), d.cnpj || '', d.tipo, d.fornecedor, d.valor ? n2(+d.valor) : '', d.size ? (d.size / 1024).toFixed(1).replace('.', ',') : ''])];
 }
 
 async function demoBlob(documentItem, newName) {
@@ -251,21 +353,34 @@ async function zipOG() {
   }
 }
 
-function handleOGFiles(files) {
+async function handleOGFiles(files) {
   if (!files.length) return;
-  const items = files.map((file) => {
+  const items = [];
+  const warnings = [];
+  for (const file of files) {
     const ext = (/\.([^.]+)$/.exec(file.name) || ['','bin'])[1].toLowerCase();
-    return {
+    const item = {
       id: OG.seq++,
       file,
       demo: false,
       orig: file.name,
       ext,
       size: file.size,
+      cnpj: '',
+      detected: false,
       ...guessMeta(file.name, file.lastModified)
     };
-  });
+    if (ext === 'pdf') {
+      try {
+        Object.assign(item, detectPdfMetadata(await extractPdfText(file)));
+      } catch (error) {
+        warnings.push(`${file.name}: ${error.message} Os campos permanecem editáveis.`);
+      }
+    }
+    items.push(item);
+  }
   OG.docs.push(...items);
+  showMsgs('#og-msgs', warnings, warnings.length ? 'err' : 'warn');
   renderOG();
   toast(`${files.length} arquivo(s) na fila.`, 'ok');
 }
@@ -298,6 +413,10 @@ function loadOGDemo() {
 
 function initOrganizadorModule() {
   bindDrop($('#og-drop'), $('#og-input'), handleOGFiles);
+  renderSavedRules('');
+  $('#og-save-rule').addEventListener('click', saveOGRule);
+  $('#og-load-rule').addEventListener('click', loadOGRule);
+  $('#og-delete-rule').addEventListener('click', deleteOGRule);
   $('#og-demo').addEventListener('click', loadOGDemo);
   $('#og-clear').addEventListener('click', () => { OG.docs = []; renderOG(); });
   $('#og-manifest').addEventListener('click', () => { downloadCSV(manifestRows(ogPlan()), `manifesto_de_para_${stamp()}.csv`); toast('Manifesto exportado.', 'ok'); });
@@ -325,4 +444,4 @@ function initOrganizadorModule() {
   renderOG();
 }
 
-export { initOrganizadorModule, OG, ogPlan, manifestRows, renderOG };
+export { initOrganizadorModule, OG, ogPlan, manifestRows, renderOG, detectPdfMetadata };

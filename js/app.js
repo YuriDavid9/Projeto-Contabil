@@ -2,15 +2,37 @@ import { $, $$ } from './utils.js';
 import { initXmlModule, NF, renderNF, showNFModal } from './xmlModule.js';
 import { initConciliadorModule, CB, renderCB } from './conciliadorModule.js';
 import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
+import { initContactModule } from './contactModule.js';
+import { initUtilitiesModule } from './utilitiesModule.js';
+
+const TAB_METADATA = {
+  xml: ['Extrator de XML', 'Extraia e consolide dados de NF-e e NFC-e localmente no navegador.'],
+  conciliador: ['Conciliador Bancário', 'Compare OFX e CSV com o razão contábil no navegador.'],
+  organizador: ['Organizador Fiscal', 'Padronize nomes e organize documentos fiscais localmente.'],
+  contato: ['Contato', 'Entre em contato com o desenvolvedor do AutoContábil Hub.'],
+  utilitarios: ['Utilitários', 'Valide documentos, converta extratos e estime encargos tributários.']
+};
+
+function updatePageMetadata(tabName) {
+  const [label, description] = TAB_METADATA[tabName];
+  const title = `AutoContábil Hub | ${label}`;
+  document.title = title;
+  $('#meta-description')?.setAttribute('content', description);
+  $('#og-title')?.setAttribute('content', title);
+  $('#og-description')?.setAttribute('content', description);
+  $('#twitter-title')?.setAttribute('content', title);
+  $('#twitter-description')?.setAttribute('content', description);
+}
 
 function openTab(name) {
-  const tabName = ['xml', 'conciliador', 'organizador'].includes(name) ? name : 'xml';
+  const tabName = ['xml', 'conciliador', 'organizador', 'contato', 'utilitarios'].includes(name) ? name : 'xml';
   $$('.tab-btn').forEach((button) => {
     const selected = button.dataset.tab === tabName;
     button.setAttribute('aria-selected', String(selected));
     button.tabIndex = selected ? 0 : -1;
   });
   $$('.tab-panel').forEach((panel) => panel.classList.toggle('hidden', panel.id !== `panel-${tabName}`));
+  updatePageMetadata(tabName);
   if (location.hash !== `#${tabName}`) history.replaceState(null, '', `#${tabName}`);
 }
 
@@ -102,4 +124,10 @@ document.addEventListener('click', (event) => {
 initXmlModule();
 initConciliadorModule();
 initOrganizadorModule();
+initContactModule();
+initUtilitiesModule();
 openTab(location.hash.slice(1) || 'xml');
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch((error) => console.warn('Service worker indisponível:', error.message)));
+}

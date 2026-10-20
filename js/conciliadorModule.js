@@ -1,12 +1,15 @@
-import { $, esc, brl, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, kpi, r2, stamp, downloadCSV, n2, norm, splitCSV } from './utils.js';
+import { $, esc, brl, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, kpi, r2, stamp, downloadCSV, n2, norm, splitCSV, loadSheetJS } from './utils.js';
 
-const CB = { bank: [], ledger: [], rows: [], filter: 'all', seq: 1 };
+const CB = { bank: [], ledger: [], rows: [], manualPairs: [], filter: 'all', seq: 1 };
 const STATUS = {
   ok: { label: 'Conciliado', cls: 'bg-emerald-100 text-emerald-800', order: 0 },
-  div: { label: 'Divergência de Valor', cls: 'bg-amber-100 text-amber-800', order: 1 },
-  pb: { label: 'Pendência Bancária', cls: 'bg-rose-100 text-rose-800', order: 2 },
-  pi: { label: 'Pendência Interna', cls: 'bg-violet-100 text-violet-800', order: 3 }
+  manual: { label: 'Conciliado manualmente', cls: 'bg-sky-100 text-sky-800', order: 1 },
+  div: { label: 'Divergência de Valor', cls: 'bg-amber-100 text-amber-800', order: 2 },
+  pb: { label: 'Pendência Bancária', cls: 'bg-rose-100 text-rose-800', order: 3 },
+  pi: { label: 'Pendência Interna', cls: 'bg-violet-100 text-violet-800', order: 4 }
 };
+const STORAGE_KEY = 'autocontabil-conciliador-v1';
+const REMEMBER_KEY = 'autocontabil-conciliador-remember';
 
 const STOP = new Set(['PIX', 'TED', 'DOC', 'PAGTO', 'PAGAMENTO', 'PGTO', 'RECEBIMENTO', 'RECEBIDO', 'RECEBTO', 'COMPRA', 'DEBITO', 'CREDITO', 'TRANSF', 'TRANSFERENCIA', 'FORNECEDOR', 'CLIENTE', 'BOLETO', 'LTDA', 'EIRELI', 'EPP', 'CNPJ', 'CPF', 'COM', 'PARA', 'DEB', 'CRED', 'REF', 'NFE', 'DEPOSITO', 'ENVIADO', 'ENVIADA', 'EFETUADO']);
 
@@ -108,8 +111,47 @@ async function loadTxFile(file, kind) {
   showMsgs('#cb-msgs', []);
   if (kind === 'bank') CB.bank = list; else CB.ledger = list;
   CB.rows = [];
+  if (kind === 'bank') showDuplicateWarnings();
+  saveCBData();
   renderCB();
   toast(`${list.length} lançamento(s) carregado(s).`, 'ok');
+}
+
+function findBankDuplicates() {
+  const groups = new Map();
+  CB.bank.forEach((item) => {
+    const key = `${item.date}|${item.cents}|${norm(item.desc).toUpperCase().replace(/\s+/g, ' ').trim()}`;
+    groups.set(key, [...(groups.get(key) || []), item]);
+  });
+  return [...groups.values()].filter((group) => group.length > 1);
+}
+
+function showDuplicateWarnings() {
+  const duplicates = findBankDuplicates();
+  showMsgs('#cb-msgs', duplicates.map((group) => `Possível duplicado no extrato: ${fmtISODate(group[0].date)} • ${group[0].desc} • ${brl(group[0].amount)} (${group.length} ocorrências).`));
+}
+
+function saveCBData() {
+  if (!$('#cb-remember')?.checked) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ bank: CB.bank, ledger: CB.ledger, manualPairs: CB.manualPairs }));
+  } catch {
+    toast('Não foi possível salvar os dados neste navegador.', 'err');
+  }
+}
+
+function restoreCBData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    CB.bank = Array.isArray(saved.bank) ? saved.bank : [];
+    CB.ledger = Array.isArray(saved.ledger) ? saved.ledger : [];
+    CB.manualPairs = Array.isArray(saved.manualPairs) ? saved.manualPairs : [];
+    CB.seq = Math.max(0, ...CB.bank.concat(CB.ledger).map((item) => +item.id || 0)) + 1;
+    return CB.bank.length + CB.ledger.length > 0;
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+    return false;
+  }
 }
 
 function suggestEntry(entry) {
@@ -202,7 +244,28 @@ function cbStats() {
   const divergenceValue = divergence.reduce((total, row) => total + Math.abs(row.diff), 0) / 100;
   const pendingBankValue = pendingBank.reduce((total, row) => total + row.diff, 0) / 100;
   const pendingInternalValue = pendingInternal.reduce((total, row) => total + row.l.cents, 0) / 100;
-  return { ok, divergence, pendingBank, pendingInternal, bankN: CB.bank.length, ledN: CB.ledger.length, pct: CB.bank.length ? (ok.length / CB.bank.length) * 100 : 0, audited, divergenceValue, pendingBankValue, pendingInternalValue, netBank: r2(bankTotal), netLedger: r2(ledgerTotal) };
+  const manual = byStatus('manual');
+  return { ok, manual, divergence, pendingBank, pendingInternal, bankN: CB.bank.length, ledN: CB.ledger.length, pct: CB.bank.length ? ((ok.length + manual.length) / CB.bank.length) * 100 : 0, audited: audited + manual.reduce((total, row) => total + Math.abs(row.b.cents), 0) / 100, divergenceValue, pendingBankValue, pendingInternalValue, netBank: r2(bankTotal), netLedger: r2(ledgerTotal) };
+}
+
+function updateManualControls() {
+  const bankSelect = $('#cb-manual-bank');
+  const ledgerSelect = $('#cb-manual-ledger');
+  const removeSelect = $('#cb-manual-remove');
+  const setOptions = (select, placeholder, rows) => {
+    const selected = select.value;
+    select.innerHTML = `<option value="">${placeholder}</option>${rows.map(({ value, label }) => `<option value="${esc(value)}">${esc(label)}</option>`).join('')}`;
+    if (rows.some((row) => String(row.value) === selected)) select.value = selected;
+  };
+  setOptions(bankSelect, 'Selecione uma pendência', CB.rows.filter((row) => row.status === 'pb').map((row) => ({ value: row.b.id, label: `${fmtISODate(row.b.date)} • ${row.b.desc} • ${brl(row.b.amount)}` })));
+  setOptions(ledgerSelect, 'Selecione uma pendência', CB.rows.filter((row) => row.status === 'pi').map((row) => ({ value: row.l.id, label: `${fmtISODate(row.l.date)} • ${row.l.desc} • ${brl(row.l.amount)}` })));
+  setOptions(removeSelect, 'Nenhum vínculo manual', CB.manualPairs.map((pair, index) => {
+    const bank = CB.bank.find((item) => item.id === pair.bankId);
+    const ledger = CB.ledger.find((item) => item.id === pair.ledgerId);
+    return { value: index, label: `${bank?.desc || 'Extrato'} ↔ ${ledger?.desc || 'Razão'}` };
+  }));
+  $('#cb-manual-link').disabled = !bankSelect.value || !ledgerSelect.value;
+  $('#cb-manual-undo').disabled = !removeSelect.value;
 }
 
 function renderCB() {
@@ -224,6 +287,8 @@ function renderCB() {
   const stats = cbStats();
   const hasData = CB.rows.length > 0;
   $('#cb-export').disabled = !hasData;
+  $('#cb-export-xlsx').disabled = !hasData;
+  updateManualControls();
 
   if (!hasData) {
     $('#cb-kpis').innerHTML = '';
@@ -240,10 +305,11 @@ function renderCB() {
     kpi('Pendências', `${stats.pendingBank.length + stats.pendingInternal.length}`, `Banco: ${stats.pendingBank.length} (${brl(stats.pendingBankValue)}) • Interna: ${stats.pendingInternal.length} (${brl(stats.pendingInternalValue)})`, 'rose')
   ].join('');
 
-  const total = stats.ok.length + stats.divergence.length + stats.pendingBank.length + stats.pendingInternal.length || 1;
+  const total = stats.ok.length + stats.manual.length + stats.divergence.length + stats.pendingBank.length + stats.pendingInternal.length || 1;
   const width = (count) => `${((count / total) * 100).toFixed(1)}%`;
   $('#cb-bar').innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-4"><div class="flex h-3 rounded-full overflow-hidden bg-slate-100">
     <div class="bg-emerald-500" style="width:${width(stats.ok.length)}"></div>
+    <div class="bg-sky-500" style="width:${width(stats.manual.length)}"></div>
     <div class="bg-amber-400" style="width:${width(stats.divergence.length)}"></div>
     <div class="bg-rose-500" style="width:${width(stats.pendingBank.length)}"></div>
     <div class="bg-violet-500" style="width:${width(stats.pendingInternal.length)}"></div>
@@ -277,8 +343,22 @@ function runCB() {
 
   const tol = Math.max(0, +$('#cb-tol').value || 0);
   const divDays = Math.max(1, +$('#cb-divdays').value || 10);
-  CB.rows = reconcile(CB.bank, CB.ledger, { tol, divDays });
+  const bankById = new Map(CB.bank.map((item) => [item.id, item]));
+  const ledgerById = new Map(CB.ledger.map((item) => [item.id, item]));
+  CB.manualPairs = CB.manualPairs.filter((pair) => bankById.has(pair.bankId) && ledgerById.has(pair.ledgerId));
+  const manuallyMatchedBank = new Set(CB.manualPairs.map((pair) => pair.bankId));
+  const manuallyMatchedLedger = new Set(CB.manualPairs.map((pair) => pair.ledgerId));
+  const manualRows = CB.manualPairs.map(({ bankId, ledgerId }) => {
+    const bank = bankById.get(bankId);
+    const ledger = ledgerById.get(ledgerId);
+    return { status: 'manual', b: bank, l: ledger, diff: bank.cents - ledger.cents, obs: 'Vínculo confirmado manualmente pelo usuário.' };
+  });
+  CB.rows = reconcile(CB.bank, CB.ledger, { tol, divDays })
+    .filter((row) => !manuallyMatchedBank.has(row.b?.id) && !manuallyMatchedLedger.has(row.l?.id))
+    .concat(manualRows);
+  CB.rows.sort((a, b) => STATUS[a.status].order - STATUS[b.status].order || ((a.b || a.l).date).localeCompare((b.b || b.l).date));
   CB.filter = 'all';
+  saveCBData();
   renderCB();
   toast('Conciliação concluída.', 'ok');
 }
@@ -292,8 +372,36 @@ function exportCB() {
   toast('Relatório baixado.', 'ok');
 }
 
+async function exportCBXLSX() {
+  const button = $('#cb-export-xlsx');
+  button.disabled = true;
+  try {
+    const XLSX = await loadSheetJS();
+    const head = ['Status', 'Data Extrato', 'Descrição Extrato', 'Valor Extrato', 'Data Razão', 'Descrição Razão', 'Valor Razão', 'Diferença (Extrato − Razão)', 'Observação'];
+    const rows = CB.rows.map((row) => [STATUS[row.status].label, row.b ? fmtISODate(row.b.date) : '', row.b ? row.b.desc : '', row.b ? row.b.amount : '', row.l ? fmtISODate(row.l.date) : '', row.l ? row.l.desc : '', row.l ? row.l.amount : '', row.status === 'ok' ? 0 : row.diff / 100, row.obs]);
+    const sheet = XLSX.utils.aoa_to_sheet([head, ...rows]);
+    const statusColors = { ok: 'DCFCE7', manual: 'DBEAFE', div: 'FEF3C7', pb: 'FFE4E6', pi: 'EDE9FE' };
+    head.forEach((_, column) => { sheet[XLSX.utils.encode_cell({ r: 0, c: column })].s = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E293B' } } }; });
+    CB.rows.forEach((row, index) => {
+      for (let column = 0; column < head.length; column++) {
+        const cell = sheet[XLSX.utils.encode_cell({ r: index + 1, c: column })];
+        if (cell) cell.s = { fill: { fgColor: { rgb: statusColors[row.status] } } };
+      }
+    });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, 'Conciliação');
+    XLSX.writeFile(workbook, `auditoria_conciliacao_${stamp()}.xlsx`);
+    toast('XLSX colorido por status exportado.', 'ok');
+  } catch (error) {
+    toast(error.message || 'Falha ao exportar XLSX.', 'err');
+  } finally {
+    button.disabled = !CB.rows.length;
+  }
+}
+
 function loadCBDemo() {
   CB.seq = 1;
+  CB.manualPairs = [];
   const create = (day, description, value) => mkTx(`2026-10-${day}`, description, value);
   CB.bank = [
     create('01', 'PIX RECEBIDO ALFA COMERCIO LTDA', 4500),
@@ -328,18 +436,65 @@ function loadCBDemo() {
   ];
 
   showMsgs('#cb-msgs', []);
+  showDuplicateWarnings();
+  saveCBData();
   runCB();
 }
 
 function initConciliadorModule() {
+  const remember = $('#cb-remember');
+  try {
+    remember.checked = localStorage.getItem(REMEMBER_KEY) === 'true';
+  } catch {
+    remember.checked = false;
+  }
+  if (remember.checked) restoreCBData();
+  $('#cb-clear-saved').addEventListener('click', () => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(REMEMBER_KEY);
+    remember.checked = false;
+    toast('Dados salvos apagados deste navegador.', 'ok');
+  });
+  remember.addEventListener('change', () => {
+    if (remember.checked) {
+      localStorage.setItem(REMEMBER_KEY, 'true');
+      saveCBData();
+      toast('Os próximos dados serão lembrados neste navegador.', 'ok');
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+      localStorage.removeItem(STORAGE_KEY);
+      toast('A opção foi desativada e os dados salvos foram apagados.', 'ok');
+    }
+  });
   bindDrop($('#cb-bank-drop'), $('#cb-bank-input'), (files) => files[0] && loadTxFile(files[0], 'bank'));
   bindDrop($('#cb-led-drop'), $('#cb-led-input'), (files) => files[0] && loadTxFile(files[0], 'ledger'));
 
   $('#cb-demo').addEventListener('click', loadCBDemo);
   $('#cb-run').addEventListener('click', runCB);
   $('#cb-export').addEventListener('click', exportCB);
-  $('#cb-bank-clear').addEventListener('click', () => { CB.bank = []; CB.rows = []; renderCB(); });
-  $('#cb-led-clear').addEventListener('click', () => { CB.ledger = []; CB.rows = []; renderCB(); });
+  $('#cb-export-xlsx').addEventListener('click', exportCBXLSX);
+  $('#cb-manual-bank').addEventListener('change', updateManualControls);
+  $('#cb-manual-ledger').addEventListener('change', updateManualControls);
+  $('#cb-manual-link').addEventListener('click', () => {
+    const bankId = +$('#cb-manual-bank').value;
+    const ledgerId = +$('#cb-manual-ledger').value;
+    if (!bankId || !ledgerId) return;
+    CB.manualPairs.push({ bankId, ledgerId });
+    saveCBData();
+    runCB();
+    toast('Lançamentos vinculados manualmente.', 'ok');
+  });
+  $('#cb-manual-remove').addEventListener('change', updateManualControls);
+  $('#cb-manual-undo').addEventListener('click', () => {
+    const index = +$('#cb-manual-remove').value;
+    if (!Number.isInteger(index) || !CB.manualPairs[index]) return;
+    CB.manualPairs.splice(index, 1);
+    saveCBData();
+    runCB();
+    toast('Vínculo manual desfeito.', 'ok');
+  });
+  $('#cb-bank-clear').addEventListener('click', () => { CB.bank = []; CB.manualPairs = []; CB.rows = []; saveCBData(); renderCB(); });
+  $('#cb-led-clear').addEventListener('click', () => { CB.ledger = []; CB.manualPairs = []; CB.rows = []; saveCBData(); renderCB(); });
 
   $('#cb-led-form').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -353,10 +508,15 @@ function initConciliadorModule() {
     $('#cb-f-desc').value = '';
     $('#cb-f-val').value = '';
     CB.rows = [];
+    saveCBData();
     renderCB();
   });
 
+  if (CB.bank.length || CB.ledger.length) {
+    if (CB.bank.length) showDuplicateWarnings();
+    runCB();
+  }
   renderCB();
 }
 
-export { initConciliadorModule, CB, reconcile, loadTxFile, renderCB };
+export { initConciliadorModule, CB, reconcile, loadTxFile, renderCB, parseOFX, parseTxCSV };

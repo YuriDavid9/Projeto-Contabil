@@ -7,6 +7,20 @@ export const r2 = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
 
 export const brl = (value) => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 export const n2 = (value) => Number(value || 0).toFixed(2).replace('.', ',');
+let sheetJSLoader;
+export function loadSheetJS() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (!sheetJSLoader) {
+    sheetJSLoader = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js';
+      script.onload = () => resolve(window.XLSX);
+      script.onerror = () => reject(new Error('Não foi possível carregar o exportador XLSX.'));
+      document.head.appendChild(script);
+    });
+  }
+  return sheetJSLoader;
+}
 export const stamp = () => {
   const d = new Date();
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
@@ -146,7 +160,8 @@ export function norm(value) {
 export function csvCell(value) {
   if (value === null || value === undefined) return '';
   let text = String(value);
-  if (/^[=+@\t\r]/.test(text) || (/-/.test(text) && !/^-?[\d.,]+$/.test(text))) text = `'${text}`;
+  const numeric = /^[+-]?(?:\d+|\d{1,3}(?:[.,]\d{3})+)(?:[.,]\d+)?$/.test(text);
+  if (/^[=+\-@\t\r]/.test(text) && !numeric) text = `'${text}`;
   return /[";\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -182,6 +197,33 @@ export function xmlEsc(value) {
 }
 
 export function splitCSV(text) {
+  let firstRecord = '';
+  let quoted = false;
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+    if (char === '"') {
+      if (quoted && text[index + 1] === '"') {
+        firstRecord += '""';
+        index++;
+        continue;
+      }
+      quoted = !quoted;
+    }
+    if (!quoted && (char === '\n' || char === '\r')) break;
+    firstRecord += char;
+  }
+  const delimiterCounts = [';', ',', '\t'].map((delimiter) => {
+    let count = 0;
+    let inQuotes = false;
+    for (let index = 0; index < firstRecord.length; index++) {
+      if (firstRecord[index] === '"') {
+        if (inQuotes && firstRecord[index + 1] === '"') index++;
+        else inQuotes = !inQuotes;
+      } else if (!inQuotes && firstRecord[index] === delimiter) count++;
+    }
+    return { delimiter, count };
+  });
+  const delimiter = delimiterCounts.sort((left, right) => right.count - left.count)[0].delimiter;
   const rows = [];
   let row = [];
   let current = '';
@@ -208,7 +250,7 @@ export function splitCSV(text) {
       continue;
     }
 
-    if (char === ';' || char === ',' || char === '\t') {
+    if (char === delimiter) {
       row.push(current);
       current = '';
       continue;

@@ -1,9 +1,9 @@
 import {
   $, $$, esc, brl, fmtDateTime, fmtDoc, fmtChave, parseMoney, parseDateAny, readFileText, toast, showMsgs,
-  bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, toCSV
+  bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, toCSV, loadSheetJS
 } from './utils.js';
 
-const NF = { notas: [], q: '', page: 1, size: 10 };
+const NF = { notas: [], q: '', page: 1, size: 10, model: '', start: '', end: '', cfop: '' };
 
 function calcDV(value) {
   let weight = 2;
@@ -60,6 +60,7 @@ function parseNFe(xmlText, fileName) {
   const inf = first(doc, 'infNFe');
   if (!inf) throw new Error('não é uma NF-e/NFC-e (tag infNFe ausente — pode ser evento, inutilização ou resumo)');
   const chave = ((inf.getAttribute('Id') || '').replace(/^NFe/i, '') || textOf(doc, 'chNFe')).replace(/\D/g, '');
+  const chaveValid = /^\d{44}$/.test(chave) && Number(chave[43]) === calcDV(chave.slice(0, 43));
   const ide = first(inf, 'ide');
   const emit = first(inf, 'emit');
   const dest = first(inf, 'dest');
@@ -103,6 +104,7 @@ function parseNFe(xmlText, fileName) {
     vIPI: numericOf(tot, 'vIPI'),
     protocolo: textOf(doc, 'nProt'),
     cStat: textOf(first(doc, 'infProt'), 'cStat'),
+    chaveValid,
     itens
   };
 }
@@ -116,9 +118,8 @@ function addNotas(entries) {
   for (const entry of entries) {
     try {
       const note = parseNFe(entry.text, entry.name);
-      if (note.chave.length !== 44) {
-        errors.push(`${entry.name}: chave de acesso com ${note.chave.length} dígitos (esperado 44) — nota importada com aviso.`);
-      }
+      if (!note.chaveValid) errors.push(`${entry.name}: chave de acesso inválida (44 dígitos e DV incorreto) — nota importada com aviso.`);
+      if (!['100', '150'].includes(note.cStat)) errors.push(`${entry.name}: situação fiscal cStat ${note.cStat || 'ausente'} diferente de 100/150 — confira a nota.`);
       const key = note.chave || `${entry.name}${note.nNF}`;
       if (seen.has(key)) {
         duplicates++;
@@ -140,17 +141,28 @@ function addNotas(entries) {
 }
 
 async function handleXmlFiles(files) {
-  const xmlFiles = files.filter((file) => /\.xml$/i.test(file.name) || file.type.includes('xml'));
-  if (!xmlFiles.length) {
-    toast('Selecione arquivos .xml', 'warn');
+  const entries = [];
+  try {
+    for (const file of files) {
+      if (/\.zip$/i.test(file.name)) {
+        if (typeof JSZip === 'undefined') throw new Error('JSZip não carregou; conecte-se à internet e tente novamente.');
+        const archive = await JSZip.loadAsync(file);
+        for (const [name, item] of Object.entries(archive.files)) {
+          if (!item.dir && /\.xml$/i.test(name)) entries.push({ name, text: await item.async('string') });
+        }
+      } else if (/\.xml$/i.test(file.name) || file.type.includes('xml')) {
+        entries.push({ name: file.name, text: await readFileText(file) });
+      }
+    }
+  } catch (error) {
+    showMsgs('#xml-msgs', [`Falha ao ler arquivos: ${error.message}`], 'err');
     return;
   }
 
-  const entries = [];
-  for (const file of xmlFiles) {
-    entries.push({ name: file.name, text: await readFileText(file) });
+  if (!entries.length) {
+    toast('Selecione arquivos .xml ou um .zip com XMLs.', 'warn');
+    return;
   }
-
   addNotas(entries);
 }
 
@@ -159,6 +171,11 @@ function nfFiltered() {
   const digitsQuery = query.replace(/\D/g, '');
 
   const list = NF.notas.filter((note) => {
+    if (NF.model && note.mod !== NF.model) return false;
+    const emissionDate = parseDateAny(note.emissao) || '';
+    if (NF.start && emissionDate < NF.start) return false;
+    if (NF.end && emissionDate > NF.end) return false;
+    if (NF.cfop && !note.itens.some((item) => item.cfop === NF.cfop)) return false;
     if (!query) return true;
     const searchable = [note.emit.nome, note.dest.nome, note.nNF, note.chave, note.arquivo].some((value) => String(value).toLowerCase().includes(query));
     const documentMatches = digitsQuery && [note.emit.doc, note.dest.doc, note.chave, note.nNF].some((value) => String(value).includes(digitsQuery));
@@ -169,6 +186,13 @@ function nfFiltered() {
 }
 
 function renderNF() {
+  const cfopSelect = $('#xml-filter-cfop');
+  if (cfopSelect) {
+    const cfops = [...new Set(NF.notas.flatMap((note) => note.itens.map((item) => item.cfop).filter(Boolean)))].sort();
+    cfopSelect.innerHTML = '<option value="">Todos</option>' + cfops.map((cfop) => `<option value="${esc(cfop)}">${esc(cfop)}</option>`).join('');
+    cfopSelect.value = cfops.includes(NF.cfop) ? NF.cfop : '';
+    if (!cfopSelect.value) NF.cfop = '';
+  }
   const sum = (key) => r2(NF.notas.reduce((total, note) => total + note[key], 0));
 
   $('#xml-kpis').innerHTML = [
@@ -179,6 +203,7 @@ function renderNF() {
   ].join('');
 
   $('#xml-export').disabled = !NF.notas.length;
+  $('#xml-xlsx').disabled = !NF.notas.length;
 
   const list = nfFiltered();
   const pages = Math.max(1, Math.ceil(list.length / NF.size));
@@ -187,8 +212,8 @@ function renderNF() {
   const slice = list.slice(start, NF.page * NF.size);
 
   $('#xml-tbody').innerHTML = slice.length ? slice.map((note) => `
-    <tr class="hover:bg-slate-50">
-      <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-1.5 py-0.5 ${note.mod === '65' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${esc(note.mod)}</span></td>
+    <tr class="hover:bg-slate-50 ${note.chaveValid && ['100', '150'].includes(note.cStat) ? '' : 'bg-amber-50'}">
+      <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-1.5 py-0.5 ${note.mod === '65' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${esc(note.mod)}</span>${!note.chaveValid ? '<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Chave de acesso inválida">Chave inválida</span>' : ''}${!['100', '150'].includes(note.cStat) ? `<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Confira a situação fiscal">cStat ${esc(note.cStat || 'ausente')}</span>` : ''}</td>
       <td class="px-3 py-2 font-semibold whitespace-nowrap">${esc(note.nNF)} <span class="text-slate-400 font-normal">/ ${esc(note.serie)}</span></td>
       <td class="px-3 py-2 whitespace-nowrap">${esc(fmtDateTime(note.emissao))}</td>
       <td class="px-3 py-2 min-w-[14rem]"><div class="font-medium">${esc(note.emit.nome)}</div><div class="text-xs text-slate-500">${esc(fmtDoc(note.emit.doc))}</div></td>
@@ -258,6 +283,55 @@ function exportNF() {
   toast('Planilha exportada.', 'ok');
 }
 
+function exportNFXLSX() {
+  const button = $('#xml-xlsx');
+  const previousLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Carregando exportador…';
+
+  loadSheetJS().then((XLSX) => {
+    const notes = nfFiltered();
+    const noteRows = [
+      ['Modelo', 'Número NF', 'Série', 'Emissão', 'Chave', 'Chave válida', 'cStat', 'Emitente', 'CNPJ/CPF emitente', 'Destinatário', 'CNPJ/CPF destinatário', 'vProd', 'vNF', 'ICMS', 'PIS', 'COFINS', 'Arquivo'],
+      ...notes.map((note) => [note.mod, note.nNF, note.serie, note.emissao, note.chave, note.chaveValid ? 'Sim' : 'Não', note.cStat, note.emit.nome, note.emit.doc, note.dest.nome, note.dest.doc, note.vProd, note.vNF, note.vICMS, note.vPIS, note.vCOFINS, note.arquivo])
+    ];
+    const itemRows = [
+      ['Modelo', 'Número NF', 'Série', 'Emissão', 'Chave', 'Emitente', 'NCM', 'CFOP', 'Código', 'Produto', 'Unidade', 'Quantidade', 'Valor unitário', 'Total do item'],
+      ...notes.flatMap((note) => note.itens.map((item) => [note.mod, note.nNF, note.serie, note.emissao, note.chave, note.emit.nome, item.ncm, item.cfop, item.cod, item.desc, item.un, item.q, item.vu, item.v]))
+    ];
+    const summaryRows = [['Grupo', 'Referência', 'Notas', 'Itens', 'Total de produtos', 'Total da NF por grupo (não rateado por CFOP)']];
+    const appendSummary = (label, getKeys, byCFOP = false) => {
+      const groups = new Map();
+      notes.forEach((note) => {
+        const keys = [...new Set(getKeys(note).filter(Boolean))];
+        keys.forEach((key) => {
+          const items = byCFOP ? note.itens.filter((item) => item.cfop === key) : note.itens;
+          const group = groups.get(key) || { notes: new Set(), items: 0, vProd: 0, vNF: 0 };
+          group.notes.add(note.chave || note.arquivo);
+          group.items += items.length;
+          group.vProd += byCFOP ? items.reduce((total, item) => total + item.v, 0) : note.vProd;
+          if (!byCFOP) group.vNF += note.vNF;
+          groups.set(key, group);
+        });
+      });
+      groups.forEach((group, key) => summaryRows.push([label, key, group.notes.size, group.items, r2(group.vProd), byCFOP ? '' : r2(group.vNF)]));
+    };
+    appendSummary('CFOP', (note) => note.itens.map((item) => item.cfop), true);
+    appendSummary('Emitente', (note) => [note.emit.nome]);
+    appendSummary('Mês', (note) => [(parseDateAny(note.emissao) || '').slice(0, 7)]);
+
+    const workbook = XLSX.utils.book_new();
+    [['Notas', noteRows], ['Itens', itemRows], ['Resumo', summaryRows]].forEach(([name, rows]) => {
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), name);
+    });
+    XLSX.writeFile(workbook, `consolidado_nfe_${stamp()}.xlsx`);
+    toast('XLSX com as abas Notas, Itens e Resumo exportado.', 'ok');
+  }).catch((error) => toast(error.message, 'err')).finally(() => {
+    button.disabled = !NF.notas.length;
+    button.textContent = previousLabel;
+  });
+}
+
 function initXmlModule() {
   bindDrop($('#xml-drop'), $('#xml-input'), handleXmlFiles);
   $('#xml-demo').addEventListener('click', () => {
@@ -265,9 +339,14 @@ function initXmlModule() {
   });
   $('#xml-clear').addEventListener('click', () => { NF.notas = []; showMsgs('#xml-msgs', []); renderNF(); });
   $('#xml-export').addEventListener('click', exportNF);
+  $('#xml-xlsx').addEventListener('click', exportNFXLSX);
   $('#xml-search').addEventListener('input', (event) => { NF.q = event.target.value; NF.page = 1; renderNF(); });
   $('#xml-size').addEventListener('change', (event) => { NF.size = +event.target.value; NF.page = 1; renderNF(); });
+  $('#xml-filter-model').addEventListener('change', (event) => { NF.model = event.target.value; NF.page = 1; renderNF(); });
+  $('#xml-filter-start').addEventListener('change', (event) => { NF.start = event.target.value; NF.page = 1; renderNF(); });
+  $('#xml-filter-end').addEventListener('change', (event) => { NF.end = event.target.value; NF.page = 1; renderNF(); });
+  $('#xml-filter-cfop').addEventListener('change', (event) => { NF.cfop = event.target.value; NF.page = 1; renderNF(); });
   renderNF();
 }
 
-export { initXmlModule, buildDemoXML, parseNFe, NF, renderNF, showNFModal };
+export { initXmlModule, buildDemoXML, parseNFe, calcDV, NF, renderNF, showNFModal };

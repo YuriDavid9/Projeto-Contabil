@@ -3,9 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AutoContábil Hub — Suíte Web de Produtividade Contábil, Fiscal e Financeira</title>
-  <meta name="description" content="Extrator de XML NF-e/NFC-e, conciliador bancário OFX/CSV e organizador fiscal de documentos. 100% no navegador: seus dados não saem do seu computador.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cpath d='M9 22V10h5.5a3.5 3.5 0 010 7H9m9 5l5-12 0 0' stroke='%23fff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <title>AutoContábil Hub | Extrator de XML</title>
+  <meta id="meta-description" name="description" content="Extraia e consolide dados de NF-e e NFC-e localmente no navegador.">
+  <link rel="canonical" href="https://SEU-USUARIO.github.io/Projeto-Contabil/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta id="og-title" property="og:title" content="AutoContábil Hub | Extrator de XML">
+  <meta id="og-description" property="og:description" content="Extraia e consolide dados de NF-e e NFC-e localmente no navegador.">
+  <meta property="og:url" content="https://SEU-USUARIO.github.io/Projeto-Contabil/">
+  <meta property="og:image" content="https://SEU-USUARIO.github.io/Projeto-Contabil/favicon.svg">
+  <meta name="twitter:card" content="summary">
+  <meta id="twitter-title" name="twitter:title" content="AutoContábil Hub | Extrator de XML">
+  <meta id="twitter-description" name="twitter:description" content="Extraia e consolide dados de NF-e e NFC-e localmente no navegador.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,6 +26,9 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <!-- Métricas opcionais (GoatCounter): preencha o domínio, remova os comentários e atualize privacidade.html.
+  <script data-goatcounter="https://SEU-CODIGO.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+  -->
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
@@ -30,6 +44,8 @@
         <button id="tab-xml" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="xml" aria-controls="panel-xml" aria-selected="true" tabindex="0"><span aria-hidden="true">📄</span><span class="text-center leading-tight">Extrator de XML</span></button>
         <button id="tab-conciliador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="conciliador" aria-controls="panel-conciliador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏦</span><span class="text-center leading-tight">Conciliador Bancário</span></button>
         <button id="tab-organizador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="organizador" aria-controls="panel-organizador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🗂️</span><span class="text-center leading-tight">Organizador Fiscal</span></button>
+        <button id="tab-contato" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="contato" aria-controls="panel-contato" aria-selected="false" tabindex="-1"><span aria-hidden="true">✉️</span><span class="text-center leading-tight">Contato</span></button>
+        <button id="tab-utilitarios" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="utilitarios" aria-controls="panel-utilitarios" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧰</span><span class="text-center leading-tight">Utilitários</span></button>
       </nav>
     </div>
   </header>
@@ -49,12 +65,13 @@
         <label id="xml-drop" for="xml-input" class="drop-zone lg:col-span-2 cursor-pointer border-2 border-dashed border-slate-300 hover:border-indigo-400 bg-white rounded-2xl p-8 text-center">
           <div class="text-4xl mb-2">📥</div>
           <p class="font-semibold text-slate-700">Arraste e solte os arquivos <span class="text-indigo-600">.xml</span> aqui</p>
-          <p class="text-xs text-slate-500 mt-1">ou clique para selecionar (múltiplos arquivos). A leitura é feita pelo DOMParser nativo do navegador.</p>
-          <input id="xml-input" type="file" accept=".xml,text/xml,application/xml" multiple class="hidden">
+          <p class="text-xs text-slate-500 mt-1">ou clique para selecionar XMLs ou um ZIP com vários XMLs. A leitura é feita no navegador.</p>
+          <input id="xml-input" type="file" accept=".xml,.zip,text/xml,application/xml,application/zip" multiple class="hidden">
         </label>
         <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-2 justify-center">
           <button id="xml-demo" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl py-2.5 px-4 text-sm transition">⚡ Carregar Lote de Demonstração</button>
-          <button id="xml-export" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-2.5 px-4 text-sm transition" disabled>📊 Exportar para Planilha (CSV/Excel)</button>
+          <button id="xml-export" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-2.5 px-4 text-sm transition" disabled>📄 Exportar CSV</button>
+          <button id="xml-xlsx" class="bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-2.5 px-4 text-sm transition" disabled>📊 Exportar XLSX (3 abas)</button>
           <button id="xml-clear" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl py-2 px-4 text-sm transition">Limpar lote</button>
         </div>
       </div>
@@ -73,6 +90,20 @@
             <option value="25">25 por página</option>
             <option value="50">50 por página</option>
           </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3 border-b border-slate-200 p-4 sm:grid-cols-4">
+          <label class="text-xs font-medium text-slate-600">Modelo
+            <select id="xml-filter-model" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Todos</option><option value="55">NF-e 55</option><option value="65">NFC-e 65</option></select>
+          </label>
+          <label class="text-xs font-medium text-slate-600">Emissão a partir de
+            <input id="xml-filter-start" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm">
+          </label>
+          <label class="text-xs font-medium text-slate-600">Emissão até
+            <input id="xml-filter-end" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm">
+          </label>
+          <label class="text-xs font-medium text-slate-600">CFOP
+            <select id="xml-filter-cfop" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Todos</option></select>
+          </label>
         </div>
         <div class="overflow-x-auto">
           <table class="tbl w-full text-sm">
@@ -139,6 +170,7 @@
             <button id="cb-demo" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-3 py-2 text-sm">Simulação</button>
             <button id="cb-run" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-3 py-2 text-sm">Executar Conciliação</button>
             <button id="cb-export" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Exportar CSV</button>
+            <button id="cb-export-xlsx" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Exportar XLSX</button>
           </div>
           <div class="overflow-x-auto mt-4">
             <table class="w-full text-xs">
@@ -146,6 +178,24 @@
               <tbody id="cb-led-tbody"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div class="mb-4 rounded-xl border border-slate-200 bg-white p-4">
+        <div class="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+          <label class="text-xs font-medium text-slate-600">Pendência bancária
+            <select id="cb-manual-bank" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Selecione uma pendência</option></select>
+          </label>
+          <label class="text-xs font-medium text-slate-600">Pendência interna
+            <select id="cb-manual-ledger" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Selecione uma pendência</option></select>
+          </label>
+          <button id="cb-manual-link" class="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40" disabled>Vincular manualmente</button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <label class="text-xs text-slate-600">Desfazer vínculo
+            <select id="cb-manual-remove" class="ml-1 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"><option value="">Nenhum vínculo manual</option></select>
+          </label>
+          <button id="cb-manual-undo" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 disabled:opacity-40" disabled>Desfazer</button>
         </div>
       </div>
 
@@ -160,6 +210,10 @@
           <div id="cb-kpis" class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
           <div id="cb-bar" class="mt-4"></div>
           <div id="cb-filters" class="mt-4 flex flex-wrap gap-2"></div>
+          <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-3">
+            <label class="flex items-start gap-2 text-xs text-slate-600"><input id="cb-remember" type="checkbox" class="mt-0.5 rounded border-slate-300 text-indigo-600"><span>Lembrar dados neste navegador. Nada sai do seu computador.</span></label>
+            <button id="cb-clear-saved" class="text-xs font-semibold text-rose-700 underline">Apagar dados salvos</button>
+          </div>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
@@ -221,6 +275,7 @@
             <button id="og-manifest" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Exportar manifesto</button>
             <button id="og-zip" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Gerar ZIP</button>
           </div>
+          <div id="og-msgs" class="mt-3 space-y-2" aria-live="polite"></div>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
@@ -239,6 +294,12 @@
               <option value="anomes-fornecedor">Pasta por ano/mês + fornecedor</option>
               <option value="none">Sem subpastas</option>
             </select>
+            <div class="border-t border-slate-200 pt-3">
+              <label for="og-rule-name" class="text-xs font-medium text-slate-600">Nome da regra</label>
+              <div class="mt-1 flex gap-2"><input id="og-rule-name" type="text" maxlength="60" class="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-2 text-sm" placeholder="Ex.: Fornecedores mensais"><button id="og-save-rule" class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Salvar</button></div>
+              <label for="og-saved-rules" class="mt-3 block text-xs font-medium text-slate-600">Regras salvas neste navegador</label>
+              <div class="mt-1 flex gap-2"><select id="og-saved-rules" class="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Nenhuma regra salva</option></select><button id="og-load-rule" class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">Carregar</button><button id="og-delete-rule" class="rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700">Apagar</button></div>
+            </div>
           </div>
         </div>
       </div>
@@ -256,6 +317,7 @@
                 <tr>
                   <th class="px-3 py-2.5">Original</th>
                   <th class="px-3 py-2.5">Data</th>
+                  <th class="px-3 py-2.5">CNPJ detectado</th>
                   <th class="px-3 py-2.5">Tipo</th>
                   <th class="px-3 py-2.5">Fornecedor</th>
                   <th class="px-3 py-2.5">Valor</th>
@@ -268,6 +330,50 @@
           </div>
         </div>
       </div>
+    </section>
+    <section id="panel-contato" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-contato" tabindex="-1">
+      <div class="mb-4">
+        <h2 id="contato" class="text-2xl font-extrabold text-slate-900">Contato</h2>
+        <p class="text-slate-500 text-sm">Envie uma mensagem para falar sobre o AutoContábil Hub.</p>
+      </div>
+      <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">O restante do site processa tudo no seu navegador. Apenas esta mensagem de contato é enviada, por um serviço de formulário, para o e-mail do desenvolvedor.</div>
+      <form id="contact-form" class="max-w-3xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block text-sm font-medium text-slate-700">Nome
+            <input id="contact-name" name="name" type="text" autocomplete="name" required maxlength="120" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+          </label>
+          <label class="block text-sm font-medium text-slate-700">E-mail
+            <input id="contact-email" name="email" type="email" autocomplete="email" required maxlength="254" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+          </label>
+        </div>
+        <label class="block text-sm font-medium text-slate-700">Assunto
+          <select id="contact-subject" name="subject" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+            <option value="">Selecione um assunto</option>
+            <option>Dúvida</option>
+            <option>Correção/bug</option>
+            <option>Sugestão/feedback</option>
+            <option>Contratar serviço</option>
+            <option>Outro</option>
+          </select>
+        </label>
+        <label class="block text-sm font-medium text-slate-700">Mensagem
+          <textarea id="contact-message" name="message" rows="6" required minlength="10" maxlength="5000" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"></textarea>
+        </label>
+        <label class="flex items-start gap-2 text-sm text-slate-700">
+          <input id="contact-consent" name="consent" type="checkbox" required class="mt-1 rounded border-slate-300 text-indigo-600">
+          <span>Concordo em enviar estes dados para contato, conforme a <a class="font-semibold text-indigo-700 underline" href="privacidade.html">Política de Privacidade</a>.</span>
+        </label>
+        <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+          <label for="contact-website">Deixe este campo vazio</label>
+          <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <div id="contact-status" class="empty:hidden" aria-live="polite" aria-atomic="true"></div>
+        <button id="contact-submit" type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Enviar mensagem</button>
+      </form>
+    </section>
+    <section id="panel-utilitarios" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-utilitarios" tabindex="-1">
+      <div class="mb-4"><h2 class="text-2xl font-extrabold text-slate-900">Utilitários</h2><p class="text-slate-500 text-sm">Validações e conversões executadas neste navegador.</p></div>
+      <div id="utilities-root"></div>
     </section>
   </main>
 
@@ -286,6 +392,11 @@
         <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20automa%C3%A7%C3%A3o%20cont%C3%A1bil.">💬 WhatsApp: (83) 98639-8472</a>
         <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
       </div>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="#contato">Contato</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="termos.html">Termos</a>
     </div>
     <div class="border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">Dados de demonstração são fictícios. Ferramenta de apoio: confira sempre os resultados antes de uso em obrigações fiscais.</div>
   </footer>
