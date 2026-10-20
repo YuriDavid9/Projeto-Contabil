@@ -1,4 +1,4 @@
-import { $, brl, readFileText, toast, showMsgs, downloadCSV, loadSheetJS, norm, n2 } from './utils.js';
+import { $, brl, readFileText, toast, showMsgs, downloadCSV, loadSheetJS, norm, n2, normalizeCNPJ } from './utils.js';
 import { parseOFX, parseTxCSV } from './conciliadorModule.js';
 import { calcDV } from './xmlModule.js';
 
@@ -28,10 +28,10 @@ function validCPF(value) {
 }
 
 function validCNPJ(value) {
-  const digits = String(value).replace(/\D/g, '');
-  if (!/^\d{14}$/.test(digits) || /^([0-9])\1{13}$/.test(digits)) return false;
+  const digits = normalizeCNPJ(value);
+  if (!/^[0-9A-Z]{12}\d{2}$/.test(digits) || /^([0-9A-Z])\1{13}$/.test(digits)) return false;
   const digit = (base, weights) => {
-    const sum = [...base].reduce((total, number, index) => total + Number(number) * weights[index], 0);
+    const sum = [...base].reduce((total, character, index) => total + (character.charCodeAt(0) - 48) * weights[index], 0);
     const remainder = sum % 11;
     return remainder < 2 ? 0 : 11 - remainder;
   };
@@ -41,8 +41,8 @@ function validCNPJ(value) {
 }
 
 function validAccessKey(value) {
-  const digits = String(value).replace(/\D/g, '');
-  return /^\d{44}$/.test(digits) && Number(digits[43]) === calcDV(digits.slice(0, 43));
+  const key = String(value).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+  return /^[0-9A-Z]{44}$/i.test(key) && Number(key[43]) === calcDV(key.slice(0, 43));
 }
 
 function txRows(transactions) {
@@ -73,7 +73,7 @@ function initUtilitiesModule() {
             <select id="util-doc-type" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="cnpj">CNPJ</option><option value="cpf">CPF</option><option value="chave">Chave de NF-e (44 dígitos)</option></select>
           </label>
           <label class="block text-sm font-medium text-slate-700">Número
-            <input id="util-doc-value" type="text" inputmode="numeric" autocomplete="off" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" required>
+            <input id="util-doc-value" type="text" inputmode="text" autocomplete="off" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" required>
           </label>
           <button class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">Validar</button>
         </form>
@@ -99,7 +99,7 @@ function initUtilitiesModule() {
       </section>
       <section class="rounded-2xl border border-slate-200 bg-white p-5">
         <h3 class="text-lg font-bold text-slate-900">Multa e juros de tributos federais</h3>
-        <p class="mt-1 text-sm text-slate-500">Multa de mora de 0,33% ao dia, limitada a 20%, mais a Selic acumulada informada.</p>
+        <p class="mt-1 text-sm text-slate-500">Estimativa: multa de mora de 0,33% ao dia, limitada a 20%, mais Selic acumulada e juros do mês do pagamento.</p>
         <form id="util-tax-form" class="mt-4 space-y-3">
           <label class="block text-sm font-medium text-slate-700">Valor principal (R$)
             <input id="util-tax-principal" type="number" min="0.01" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
@@ -111,8 +111,11 @@ function initUtilitiesModule() {
             <label class="block text-sm font-medium text-slate-700">Selic acumulada (%)
               <input id="util-tax-selic" type="number" min="0" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
             </label>
+            <label class="block text-sm font-medium text-slate-700">Juros do mês do pagamento (%)
+              <input id="util-tax-month-interest" type="number" min="0" step="0.01" value="1.00" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+            </label>
           </div>
-          <p class="text-xs text-amber-800">Informe a Selic acumulada até a data do pagamento e confira o percentual na fonte oficial da Receita Federal/Banco Central.</p>
+          <p class="text-xs text-amber-800">Informe a Selic acumulada do mês seguinte ao vencimento até o mês anterior ao pagamento. O mês do pagamento usa 1,00% por padrão. Confira os valores e a regra aplicável no Sicalc antes de pagar.</p>
           <button class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">Calcular</button>
         </form>
         <div id="util-tax-message" class="mt-3" aria-live="polite"></div>
@@ -175,15 +178,17 @@ function initUtilitiesModule() {
     const principal = Number($('#util-tax-principal').value);
     const days = Number($('#util-tax-days').value);
     const selic = Number($('#util-tax-selic').value);
-    if (!(principal > 0) || !Number.isInteger(days) || days < 0 || !Number.isFinite(selic) || selic < 0) {
-      setMessage('#util-tax-message', 'Informe principal positivo, dias inteiros não negativos e Selic acumulada válida.', 'err');
+    const paymentMonthInterest = Number($('#util-tax-month-interest').value);
+    if (!(principal > 0) || !Number.isInteger(days) || days < 0 || !Number.isFinite(selic) || selic < 0 || !Number.isFinite(paymentMonthInterest) || paymentMonthInterest < 0) {
+      setMessage('#util-tax-message', 'Informe principal positivo, dias inteiros não negativos, Selic acumulada e juros do mês válidos.', 'err');
       return;
     }
     const fineRate = Math.min(days * 0.0033, 0.2);
     const fine = principal * fineRate;
-    const interest = principal * (selic / 100);
+    const interestRate = selic + paymentMonthInterest;
+    const interest = principal * (interestRate / 100);
     const total = principal + fine + interest;
-    setMessage('#util-tax-message', `Principal: ${brl(principal)} • Multa (${(fineRate * 100).toFixed(2).replace('.', ',')}%): ${brl(fine)} • Juros Selic: ${brl(interest)} • Total estimado: ${brl(total)}`, 'ok');
+    setMessage('#util-tax-message', `Estimativa — principal: ${brl(principal)} • multa (${(fineRate * 100).toFixed(2).replace('.', ',')}%): ${brl(fine)} • juros (Selic ${selic.toFixed(2).replace('.', ',')}% + mês do pagamento ${paymentMonthInterest.toFixed(2).replace('.', ',')}%): ${brl(interest)} • total estimado: ${brl(total)}. Confira no Sicalc.`, 'ok');
   });
 }
 

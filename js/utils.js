@@ -37,14 +37,19 @@ export function fmtDateTime(value) {
   return `${match[3]}/${match[2]}/${match[1]}` + (match[4] ? ` ${match[4]}:${match[5]}` : '');
 }
 
+export function normalizeCNPJ(value) {
+  return String(value ?? '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+}
+
 export function fmtDoc(value) {
+  const cnpj = normalizeCNPJ(value);
+  if (/^[0-9A-Z]{14}$/.test(cnpj)) return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
   const digits = String(value || '').replace(/\D/g, '');
-  if (digits.length === 14) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
   if (digits.length === 11) return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   return value || '—';
 }
 
-export function fmtChave(value) { return String(value || '').replace(/(\d{4})(?=\d)/g, '$1 ').trim(); }
+export function fmtChave(value) { return String(value || '').toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/(.{4})(?=.)/g, '$1 ').trim(); }
 
 export function parseMoney(value) {
   if (typeof value === 'number') return value;

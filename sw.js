@@ -1,11 +1,15 @@
-const CACHE_NAME = 'autocontabil-shell-v2';
+const CACHE_NAME = 'autocontabil-shell-v5';
 const CORE_ASSETS = [
   './index.html',
   './styles.css',
   './favicon.svg',
+  './og-image.png',
   './manifest.webmanifest',
   './privacidade.html',
   './termos.html',
+  './validador-cnpj.html',
+  './extrator-xml-nfe.html',
+  './conciliador-bancario-ofx.html',
   './404.html',
   './js/app.js',
   './js/utils.js',
@@ -17,7 +21,15 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
+    for (const asset of CORE_ASSETS) {
+      try {
+        await cache.add(asset);
+      } catch {
+        // Skip missing optional files; the rest of the app can still install.
+      }
+    }
+  }).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
@@ -29,20 +41,29 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  event.respondWith(caches.match(request).then((cached) => {
-    if (cached) return cached;
-    return fetch(request).then((response) => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-      }
+  const pathname = url.pathname.toLowerCase();
+  const cacheFirst = /(?:favicon\.svg|manifest\.webmanifest)$/.test(pathname);
+  const networkFirst = request.mode === 'navigate' || /\.(?:js|css|html)$/.test(pathname);
+  if (!cacheFirst && !networkFirst) return;
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await caches.match(request);
+    if (cacheFirst && cached) return cached;
+
+    try {
+      const response = await fetch(request);
+      if (response.ok) await cache.put(request, response.clone());
       if (request.mode === 'navigate' && response.status === 404) {
-        return caches.match(new URL('./404.html', self.registration.scope).href).then((notFound) => notFound || response);
+        return (await caches.match(new URL('./404.html', self.registration.scope).href)) || response;
       }
       return response;
-    }).catch(() => {
-      if (request.mode === 'navigate') return caches.match(new URL('./index.html', self.registration.scope).href);
-      return caches.match(request);
-    });
-  }));
+    } catch {
+      if (cached) return cached;
+      if (request.mode === 'navigate') {
+        return (await caches.match(new URL('./index.html', self.registration.scope).href)) || Response.error();
+      }
+      return Response.error();
+    }
+  })());
 });

@@ -1,9 +1,10 @@
 import { $, esc, toast } from './utils.js';
 
+// Configure these values before enabling contact submissions in production.
 const CONTACT_ENDPOINT = 'COLOQUE_AQUI_O_ENDPOINT';
 const CONTACT_ACCESS_KEY = '';
-const WHATSAPP_URL = 'https://wa.me/5583986398472';
 const CONTACT_EMAIL = 'SEU_EMAIL@EXEMPLO.COM';
+const WHATSAPP_URL = 'https://wa.me/5583986398472';
 let lastAttemptAt = 0;
 
 function showContactMessage(message, kind = 'info', showAlternatives = false) {
@@ -29,12 +30,6 @@ function initContactModule() {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const now = Date.now();
-    const remaining = 30000 - (now - lastAttemptAt);
-    if (remaining > 0) {
-      showContactMessage(`Aguarde ${Math.ceil(remaining / 1000)} segundos antes de tentar novamente.`, 'err', true);
-      return;
-    }
     if (!form.reportValidity()) return;
 
     const data = new FormData(form);
@@ -46,11 +41,24 @@ function initContactModule() {
       return;
     }
 
-    lastAttemptAt = now;
     if (honeypot?.value) {
       showContactMessage('Mensagem recebida. Obrigado pelo contato.', 'ok');
       form.reset();
       toast('Mensagem recebida.', 'ok');
+      return;
+    }
+
+    const accessKeyRequired = CONTACT_ENDPOINT.includes('api.web3forms.com');
+    if (!CONTACT_ENDPOINT.startsWith('https://') || CONTACT_ENDPOINT.includes('COLOQUE_AQUI') || (accessKeyRequired && !CONTACT_ACCESS_KEY)) {
+      console.warn('Contact form is not configured. Set CONTACT_ENDPOINT and, for Web3Forms, CONTACT_ACCESS_KEY in js/contactModule.js.');
+      showContactMessage('O envio por formulário está indisponível no momento. Use o e-mail ou o WhatsApp abaixo.', 'err', true);
+      toast('Envio por formulário indisponível. Use um canal alternativo.', 'err');
+      return;
+    }
+
+    const remaining = 30000 - (Date.now() - lastAttemptAt);
+    if (remaining > 0) {
+      showContactMessage(`Aguarde ${Math.ceil(remaining / 1000)} segundos antes de tentar novamente.`, 'err', true);
       return;
     }
 
@@ -60,13 +68,11 @@ function initContactModule() {
     toast('Enviando mensagem…');
 
     try {
-      if (!CONTACT_ENDPOINT.startsWith('https://') || CONTACT_ENDPOINT.includes('COLOQUE_AQUI')) {
-        throw new Error('O formulário ainda não foi configurado. Defina o endpoint e a chave de acesso em js/contactModule.js.');
-      }
       const payload = Object.fromEntries(['name', 'email', 'subject', 'message'].map((key) => [key, String(data.get(key) || '').trim()]));
       payload.consent = data.get('consent') === 'on';
       payload.botcheck = '';
       if (CONTACT_ACCESS_KEY) payload.access_key = CONTACT_ACCESS_KEY;
+      lastAttemptAt = Date.now();
       const response = await fetch(CONTACT_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -78,7 +84,8 @@ function initContactModule() {
       toast('Mensagem enviada com sucesso.', 'ok');
       form.reset();
     } catch (error) {
-      showContactMessage(error.message || 'Não foi possível enviar a mensagem.', 'err', true);
+      console.warn('Contact form submission failed:', error);
+      showContactMessage('Não foi possível enviar a mensagem agora. Use o e-mail ou o WhatsApp abaixo.', 'err', true);
       toast('Falha ao enviar. Use uma das alternativas de contato.', 'err');
     } finally {
       const wait = Math.max(0, 30000 - (Date.now() - lastAttemptAt));

@@ -1,4 +1,4 @@
-import { $, $$, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV } from './utils.js';
+import { $, $$, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV, normalizeCNPJ } from './utils.js';
 
 const OG = { docs: [], seq: 1 };
 const RULES_KEY = 'autocontabil-organizador-rules-v1';
@@ -127,10 +127,14 @@ async function extractPdfText(file) {
 }
 
 function detectPdfMetadata(text) {
-  const cnpjMatch = text.match(/\b\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}\b/);
+  const cnpjPattern = /(?:^|[^0-9A-Z])([0-9A-Z]{2}\.?[0-9A-Z]{3}\.?[0-9A-Z]{3}\/?[0-9A-Z]{4}-?\d{2})(?![0-9A-Z])/i;
+  const cnpjMatch = cnpjPattern.exec(text);
+  const cnpjCandidate = cnpjMatch?.[1] || '';
+  const cnpjLabel = cnpjMatch ? /\bCNPJ\b/i.test(text.slice(Math.max(0, cnpjMatch.index - 32), cnpjMatch.index)) : false;
+  const hasDigitInBody = /\d/.test(cnpjCandidate.slice(0, -2));
   const dateMatch = text.match(/(?:emiss[aã]o|emitido\s+em|vencimento|vcto\.?)[^\d]{0,40}(\d{2}[/.\-]\d{2}[/.\-]\d{4}|\d{4}-\d{2}-\d{2})/i) || text.match(/\b(\d{2}[/.\-]\d{2}[/.\-]\d{4})\b/);
   const valueMatch = text.match(/(?:valor\s+total|total\s+(?:do\s+documento|a\s+pagar|geral)|valor\s+cobrado)[^\d]{0,40}(?:R\$\s*)?([\d.]+,\d{2}|\d+\.\d{2})/i);
-  const cnpj = cnpjMatch ? cnpjMatch[0].replace(/\D/g, '') : '';
+  const cnpj = cnpjMatch && (hasDigitInBody || cnpjLabel) ? normalizeCNPJ(cnpjCandidate) : '';
   const data = dateMatch ? parseDateAny(dateMatch[1]) || '' : '';
   const parsedValue = valueMatch ? parseMoney(valueMatch[1]) : NaN;
   const valor = Number.isFinite(parsedValue) ? String(Math.abs(parsedValue)) : '';

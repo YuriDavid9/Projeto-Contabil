@@ -1,6 +1,6 @@
 import {
   $, $$, esc, brl, fmtDateTime, fmtDoc, fmtChave, parseMoney, parseDateAny, readFileText, toast, showMsgs,
-  bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, toCSV, loadSheetJS
+  bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, toCSV, loadSheetJS, normalizeCNPJ
 } from './utils.js';
 
 const NF = { notas: [], q: '', page: 1, size: 10, model: '', start: '', end: '', cfop: '' };
@@ -9,7 +9,7 @@ function calcDV(value) {
   let weight = 2;
   let sum = 0;
   for (let index = value.length - 1; index >= 0; index--) {
-    sum += (+value[index]) * weight;
+    sum += (value.charCodeAt(index) - 48) * weight;
     weight = weight === 9 ? 2 : weight + 1;
   }
   const remainder = sum % 11;
@@ -59,8 +59,8 @@ function parseNFe(xmlText, fileName) {
   };
   const inf = first(doc, 'infNFe');
   if (!inf) throw new Error('não é uma NF-e/NFC-e (tag infNFe ausente — pode ser evento, inutilização ou resumo)');
-  const chave = ((inf.getAttribute('Id') || '').replace(/^NFe/i, '') || textOf(doc, 'chNFe')).replace(/\D/g, '');
-  const chaveValid = /^\d{44}$/.test(chave) && Number(chave[43]) === calcDV(chave.slice(0, 43));
+  const chave = ((inf.getAttribute('Id') || '').replace(/^NFe/i, '') || textOf(doc, 'chNFe')).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+  const chaveValid = /^[0-9A-Z]{44}$/i.test(chave) && Number(chave[43]) === calcDV(chave.slice(0, 43));
   const ide = first(inf, 'ide');
   const emit = first(inf, 'emit');
   const dest = first(inf, 'dest');
@@ -169,6 +169,7 @@ async function handleXmlFiles(files) {
 function nfFiltered() {
   const query = NF.q.trim().toLowerCase();
   const digitsQuery = query.replace(/\D/g, '');
+  const normalizedDocumentQuery = normalizeCNPJ(query);
 
   const list = NF.notas.filter((note) => {
     if (NF.model && note.mod !== NF.model) return false;
@@ -179,7 +180,8 @@ function nfFiltered() {
     if (!query) return true;
     const searchable = [note.emit.nome, note.dest.nome, note.nNF, note.chave, note.arquivo].some((value) => String(value).toLowerCase().includes(query));
     const documentMatches = digitsQuery && [note.emit.doc, note.dest.doc, note.chave, note.nNF].some((value) => String(value).includes(digitsQuery));
-    return searchable || documentMatches;
+    const cnpjMatches = normalizedDocumentQuery && [note.emit.doc, note.dest.doc].some((value) => normalizeCNPJ(value).includes(normalizedDocumentQuery));
+    return searchable || documentMatches || cnpjMatches;
   });
 
   return list.sort((a, b) => (b.emissao || '').localeCompare(a.emissao || ''));
@@ -268,9 +270,10 @@ function showNFModal(key) {
 }
 
 function exportNF() {
+  const filteredNotes = nfFiltered();
   const head = ['Modelo', 'Número NF', 'Série', 'Data/Hora Emissão', 'Chave de Acesso', 'Emitente - Razão Social', 'Emitente - CNPJ/CPF', 'Destinatário - Razão Social', 'Destinatário - CNPJ/CPF', 'Valor Produtos (vProd)', 'Valor Total NF (vNF)', 'ICMS (vICMS)', 'PIS (vPIS)', 'COFINS (vCOFINS)', 'Arquivo'];
-  const rows = nfFiltered().map((note) => [note.mod === '65' ? '65 - NFC-e' : '55 - NF-e', note.nNF, note.serie, fmtDateTime(note.emissao), note.chave, note.emit.nome, fmtDoc(note.emit.doc), note.dest.nome, fmtDoc(note.dest.doc), n2(note.vProd), n2(note.vNF), n2(note.vICMS), n2(note.vPIS), n2(note.vCOFINS), note.arquivo]);
-  const totals = NF.notas.reduce((accumulator, note) => ({
+  const rows = filteredNotes.map((note) => [note.mod === '65' ? '65 - NFC-e' : '55 - NF-e', note.nNF, note.serie, fmtDateTime(note.emissao), note.chave, note.emit.nome, fmtDoc(note.emit.doc), note.dest.nome, fmtDoc(note.dest.doc), n2(note.vProd), n2(note.vNF), n2(note.vICMS), n2(note.vPIS), n2(note.vCOFINS), note.arquivo]);
+  const totals = filteredNotes.reduce((accumulator, note) => ({
     vProd: accumulator.vProd + note.vProd,
     vNF: accumulator.vNF + note.vNF,
     vICMS: accumulator.vICMS + note.vICMS,
@@ -278,7 +281,7 @@ function exportNF() {
     vCOFINS: accumulator.vCOFINS + note.vCOFINS
   }), { vProd: 0, vNF: 0, vICMS: 0, vPIS: 0, vCOFINS: 0 });
 
-  if (!NF.q) rows.push([], ['TOTAL', NF.notas.length + ' notas', '', '', '', '', '', '', '', n2(totals.vProd), n2(totals.vNF), n2(totals.vICMS), n2(totals.vPIS), n2(totals.vCOFINS), '']);
+  rows.push([], ['TOTAL (filtrados)', `${filteredNotes.length} notas`, '', '', '', '', '', '', '', n2(totals.vProd), n2(totals.vNF), n2(totals.vICMS), n2(totals.vPIS), n2(totals.vCOFINS), '']);
   downloadCSV([head, ...rows], `consolidado_nfe_${stamp()}.csv`);
   toast('Planilha exportada.', 'ok');
 }

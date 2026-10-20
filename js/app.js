@@ -128,6 +128,15 @@ initContactModule();
 initUtilitiesModule();
 openTab(location.hash.slice(1) || 'xml');
 
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch((error) => console.warn('Service worker indisponível:', error.message)));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    if (location.protocol === 'https:') {
+      navigator.serviceWorker.register('./sw.js').catch((error) => console.warn('Service worker indisponível:', error.message));
+      return;
+    }
+    const scope = new URL('./', location.href).href;
+    navigator.serviceWorker.getRegistrations()
+      .then((registrations) => Promise.all(registrations.filter((registration) => registration.scope === scope).map((registration) => registration.unregister())))
+      .catch((error) => console.warn('Não foi possível remover o service worker local antigo:', error.message));
+  });
 }

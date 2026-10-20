@@ -42,7 +42,9 @@ O projeto é estático e não precisa de comando de build.
 
 1. No GitHub, abra **Settings → Pages**.
 2. Escolha **Deploy from a branch**, branch `main`, pasta `/(root)` e salve.
-3. Substitua `SEU-USUARIO` e a URL placeholder no canonical de `index.html`, em `sitemap.xml` e `robots.txt` pelo endereço publicado.
+3. As URLs públicas já apontam para `https://yuridavid9.github.io/Projeto-Contabil/`. Atualize canonical, sitemap e robots caso o usuário ou o nome do repositório mude.
+
+Páginas informativas disponíveis: `validador-cnpj.html`, `extrator-xml-nfe.html` e `conciliador-bancario-ofx.html`.
 
 Vercel e Netlify também funcionam com comando de build vazio e pasta de publicação `.`.
 
