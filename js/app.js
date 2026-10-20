@@ -5,7 +5,11 @@ import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
 
 function openTab(name) {
   const tabName = ['xml', 'conciliador', 'organizador'].includes(name) ? name : 'xml';
-  $$('.tab-btn').forEach((button) => button.setAttribute('aria-selected', String(button.dataset.tab === tabName)));
+  $$('.tab-btn').forEach((button) => {
+    const selected = button.dataset.tab === tabName;
+    button.setAttribute('aria-selected', String(selected));
+    button.tabIndex = selected ? 0 : -1;
+  });
   $$('.tab-panel').forEach((panel) => panel.classList.toggle('hidden', panel.id !== `panel-${tabName}`));
   if (location.hash !== `#${tabName}`) history.replaceState(null, '', `#${tabName}`);
 }
@@ -41,6 +45,23 @@ if (modalEl) modalEl.addEventListener('click', (event) => { if (event.target.id 
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') modal.close(); });
 
 $$('.tab-btn').forEach((button) => button.addEventListener('click', () => openTab(button.dataset.tab)));
+const tabList = $('[role="tablist"]');
+if (tabList) tabList.addEventListener('keydown', (event) => {
+  const tabs = $$('.tab-btn');
+  const currentIndex = tabs.indexOf(document.activeElement);
+  if (currentIndex < 0) return;
+
+  let nextIndex;
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+  else if (event.key === 'Home') nextIndex = 0;
+  else if (event.key === 'End') nextIndex = tabs.length - 1;
+  else return;
+
+  event.preventDefault();
+  tabs[nextIndex].focus();
+  openTab(tabs[nextIndex].dataset.tab);
+});
 window.addEventListener('hashchange', () => openTab(location.hash.slice(1)));
 
 document.addEventListener('click', (event) => {

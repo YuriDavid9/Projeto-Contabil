@@ -6,21 +6,20 @@ Suíte web de produtividade contábil, fiscal e financeira — **100% client-sid
 - **Módulo 2** – Conciliador Bancário (OFX/CSV × Razão) em 4 fases → relatório de auditoria em CSV.
 - **Módulo 3** – Organizador & Renomeador Fiscal → manifesto De/Para (CSV) + ZIP com nomes e pastas padronizados (JSZip).
 
-Arquivo único: `index.html` (Tailwind CSS e JSZip via CDN). Sem build, sem dependências locais.
+O projeto é modular: `index.html` carrega os estilos de `styles.css` e os módulos JavaScript de `js/`. Tailwind CSS, JSZip e a fonte Inter são carregados via CDN. Não há etapa de build nem dependências locais.
 
 ## Testar localmente
 
 ```bash
-# opção 1: abrir direto
-# dê dois cliques em index.html
-
-# opção 2: servidor local (recomendado)
+# Windows
+py -m http.server 8080
+# macOS/Linux
 python3 -m http.server 8080
-# ou: npx serve .
-# abra http://localhost:8080
 ```
 
-Clique em **Carregar Lote de Demonstração**, **Carregar Simulação de Conciliação** e **Carregar 6 Exemplos Caóticos** para ver cada módulo funcionando. Requer internet apenas para carregar Tailwind, JSZip e a fonte Inter pelos CDNs.
+Também é possível usar `npx serve .` ou a extensão Live Server do VS Code. Depois de iniciar o servidor, abra http://localhost:8080. O site não funciona ao abrir `index.html` diretamente, pois os módulos ES precisam ser carregados por HTTP. É necessária conexão com a internet para os recursos via CDN.
+
+Clique em **Carregar Lote de Demonstração**, **Simulação** e **Carregar exemplos** para testar os três módulos.
 
 ### Formatos aceitos
 - **OFX**: tags `STMTTRN`, `TRNAMT`, `DTPOSTED`, `MEMO`/`NAME`.
@@ -30,7 +29,7 @@ Clique em **Carregar Lote de Demonstração**, **Carregar Simulação de Concili
 
 ```bash
 git init
-git add index.html README.md
+git add .
 git commit -m "AutoContábil Hub: versão inicial"
 git branch -M main
 git remote add origin https://github.com/SEU-USUARIO/autocontabil-hub.git

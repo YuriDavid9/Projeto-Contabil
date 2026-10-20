@@ -18,28 +18,28 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
         <div>
           <h1 class="text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></h1>
-          <p class="text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</p>
+          <p class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</p>
         </div>
       </div>
-      <nav class="lg:ml-4 flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto" role="tablist" aria-label="Módulos">
-        <button class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition" role="tab" data-tab="xml" aria-selected="true">📄 Extrator de XML</button>
-        <button class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition" role="tab" data-tab="conciliador" aria-selected="false">🏦 Conciliador Bancário</button>
-        <button class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold transition" role="tab" data-tab="organizador" aria-selected="false">🗂️ Organizador Fiscal</button>
+      <nav class="grid grid-cols-3 gap-1 bg-slate-800 p-1 rounded-xl lg:ml-auto lg:flex lg:shrink-0" role="tablist" aria-label="Módulos">
+        <button id="tab-xml" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="xml" aria-controls="panel-xml" aria-selected="true" tabindex="0"><span aria-hidden="true">📄</span><span class="text-center leading-tight">Extrator de XML</span></button>
+        <button id="tab-conciliador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="conciliador" aria-controls="panel-conciliador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏦</span><span class="text-center leading-tight">Conciliador Bancário</span></button>
+        <button id="tab-organizador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="organizador" aria-controls="panel-organizador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🗂️</span><span class="text-center leading-tight">Organizador Fiscal</span></button>
       </nav>
-      <div class="lg:ml-auto flex items-center gap-2 bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 rounded-xl px-3 py-2 text-xs font-semibold">
-        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        <span>Processamento 100% Local (Client-Side) • Seus dados não saem do seu computador</span>
-      </div>
     </div>
   </header>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
-    <section id="panel-xml" class="tab-panel fade-in" role="tabpanel">
+    <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-2.5 text-sm mb-4">
+      <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span>Processamento 100% local (client-side): seus arquivos não saem do seu computador.</span>
+    </div>
+    <section id="panel-xml" class="tab-panel fade-in" role="tabpanel" aria-labelledby="tab-xml" tabindex="-1">
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900">Extrator &amp; Consolidador de XML</h2>
         <p class="text-slate-500 text-sm">NF-e (modelo 55) e NFC-e (modelo 65). Arraste vários XMLs e exporte a consolidação para Excel.</p>
@@ -98,7 +98,7 @@
       </div>
     </section>
 
-    <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel">
+    <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-conciliador" tabindex="-1">
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900">Conciliador Bancário</h2>
         <p class="text-slate-500 text-sm">Compare extrato bancário e razão contábil para identificar divergências, pendências e lançamentos duplicados.</p>
@@ -201,7 +201,7 @@
       </div>
     </section>
 
-    <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel">
+    <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-organizador" tabindex="-1">
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900">Organizador Fiscal</h2>
         <p class="text-slate-500 text-sm">Padronize nomes e pastas de arquivos com regras reutilizáveis, manifesto e ZIP final.</p>
@@ -282,12 +282,12 @@
         <p class="text-slate-400">Rotinas fiscais, integrações, planilhas inteligentes, BPO financeiro e contábil.</p>
       </div>
       <div>
-        <p class="font-semibold text-white mb-1">Yuri Monteiro</p>
+        <p class="font-semibold text-white mb-1">Yuri David</p>
         <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20automa%C3%A7%C3%A3o%20cont%C3%A1bil.">💬 WhatsApp: (83) 98639-8472</a>
-        <p class="text-slate-400 mt-2">Yuri Monteiro • João Pessoa - PB</p>
+        <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
       </div>
     </div>
-    <div class="border-t border-slate-800 text-center text-[11px] text-slate-500 py-3 px-4">Dados de demonstração são fictícios. Ferramenta de apoio: confira sempre os resultados antes de uso em obrigações fiscais.</div>
+    <div class="border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">Dados de demonstração são fictícios. Ferramenta de apoio: confira sempre os resultados antes de uso em obrigações fiscais.</div>
   </footer>
 
   <div id="modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" aria-hidden="true">
