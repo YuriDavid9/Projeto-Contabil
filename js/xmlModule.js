@@ -2,6 +2,8 @@ import {
   $, $$, esc, brl, fmtDateTime, fmtDoc, fmtChave, parseMoney, parseDateAny, readFileText, toast, showMsgs,
   bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, toCSV, loadSheetJS, normalizeCNPJ
 } from './utils.js';
+import { getModo } from './modo.js';
+import { LIMITE_MEI_ANUAL } from './config.js';
 
 const NF = { notas: [], q: '', page: 1, size: 10, model: '', start: '', end: '', cfop: '' };
 
@@ -197,7 +199,14 @@ function renderNF() {
   }
   const sum = (key) => r2(NF.notas.reduce((total, note) => total + note[key], 0));
 
-  $('#xml-kpis').innerHTML = [
+  renderYearSummary();
+
+  $('#xml-kpis').innerHTML = getModo() === 'guiado' ? [
+    kpi('Notas lidas', NF.notas.length, `${NF.notas.filter((note) => note.mod === '55').length} notas de venda (NF-e) • ${NF.notas.filter((note) => note.mod === '65').length} notas de consumidor (NFC-e)`, 'indigo'),
+    kpi('Valor total das notas', brl(sum('vNF')), `Produtos: ${brl(sum('vProd'))}`, 'emerald'),
+    kpi('ICMS (imposto estadual)', brl(sum('vICMS')), 'Valor informado nas notas carregadas', 'slate'),
+    kpi('PIS e COFINS (impostos federais)', brl(sum('vPIS') + sum('vCOFINS')), 'Valores informados nas notas carregadas', 'slate')
+  ].join('') : [
     kpi('Total de Notas', NF.notas.length, `${NF.notas.filter((note) => note.mod === '55').length} NF-e • ${NF.notas.filter((note) => note.mod === '65').length} NFC-e`, 'indigo'),
     kpi('Faturamento Total', brl(sum('vNF')), `Produtos: ${brl(sum('vProd'))}`, 'emerald'),
     kpi('Total ICMS', brl(sum('vICMS')), 'soma de vICMS', 'amber'),
@@ -215,7 +224,7 @@ function renderNF() {
 
   $('#xml-tbody').innerHTML = slice.length ? slice.map((note) => `
     <tr class="hover:bg-slate-50 ${note.chaveValid && ['100', '150'].includes(note.cStat) ? '' : 'bg-amber-50'}">
-      <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-1.5 py-0.5 ${note.mod === '65' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${esc(note.mod)}</span>${!note.chaveValid ? '<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Chave de acesso inválida">Chave inválida</span>' : ''}${!['100', '150'].includes(note.cStat) ? `<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Confira a situação fiscal">cStat ${esc(note.cStat || 'ausente')}</span>` : ''}</td>
+      <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-1.5 py-0.5 ${note.mod === '65' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${esc(note.mod)}</span>${!note.chaveValid ? '<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Chave de acesso inválida">Chave inválida</span>' : ''}${!['100', '150'].includes(note.cStat) ? `<span class="ml-1 text-[10px] font-semibold text-rose-700" title="${getModo() === 'guiado' ? 'Situação informada no arquivo' : 'Confira a situação fiscal'}">${getModo() === 'guiado' ? 'Situação' : 'cStat'} ${esc(note.cStat || 'ausente')}</span>` : ''}</td>
       <td class="px-3 py-2 font-semibold whitespace-nowrap">${esc(note.nNF)} <span class="text-slate-400 font-normal">/ ${esc(note.serie)}</span></td>
       <td class="px-3 py-2 whitespace-nowrap">${esc(fmtDateTime(note.emissao))}</td>
       <td class="px-3 py-2 min-w-[14rem]"><div class="font-medium">${esc(note.emit.nome)}</div><div class="text-xs text-slate-500">${esc(fmtDoc(note.emit.doc))}</div></td>
@@ -241,6 +250,38 @@ function renderNF() {
   $('#xml-pager').innerHTML = `<span>Mostrando ${from}–${to} de ${list.length}</span><div class="flex gap-1">${pageButton(NF.page - 1, '‹', NF.page <= 1)}${pageNumbers}${pageButton(NF.page + 1, '›', NF.page >= pages)}</div>`;
 }
 
+function renderYearSummary() {
+  const root = $('#xml-resumo-conteudo');
+  if (!root || getModo() !== 'guiado') return;
+  const cnpj = normalizeCNPJ($('#xml-cnpj-proprio')?.value || '');
+  const validas = NF.notas.filter((note) => !note.cStat || note.cStat === '100');
+  const desconsideradas = NF.notas.length - validas.length;
+  const groups = new Map();
+  validas.forEach((note) => {
+    const date = parseDateAny(note.emissao);
+    if (!date) return;
+    const year = date.slice(0, 4);
+    const month = date.slice(0, 7);
+    const group = groups.get(year) || { meses: new Map(), emitidas: 0, recebidas: 0, total: 0 };
+    group.total += note.vNF;
+    group.meses.set(month, (group.meses.get(month) || 0) + note.vNF);
+    if (cnpj && normalizeCNPJ(note.emit.doc) === cnpj) group.emitidas += note.vNF;
+    if (cnpj && normalizeCNPJ(note.dest.doc) === cnpj) group.recebidas += note.vNF;
+    groups.set(year, group);
+  });
+  if (!NF.notas.length) {
+    root.innerHTML = '<p class="text-sm text-slate-600">Carregue notas XML para ver os valores encontrados nos arquivos.</p>';
+    return;
+  }
+  const years = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([year, group]) => `
+    <section class="mt-4 rounded-xl border border-slate-200 p-4"><h4 class="font-bold">Seus números em ${esc(year)}</h4>
+      <p class="mt-2 text-sm">Total geral nas notas carregadas: <strong>${brl(group.total)}</strong></p>
+      ${cnpj ? `<div class="mt-2 grid sm:grid-cols-2 gap-2"><p class="rounded-lg bg-slate-50 p-3 text-sm">Total vendido nas notas carregadas: <strong>${brl(group.emitidas)}</strong></p><p class="rounded-lg bg-slate-50 p-3 text-sm">Limite anual de faturamento do MEI: <strong>${brl(LIMITE_MEI_ANUAL)}</strong>. Confira o valor vigente em gov.br/mei.</p></div><p class="mt-1 text-sm">Total de compras nas notas carregadas: <strong>${brl(group.recebidas)}</strong></p>` : '<p class="mt-1 text-xs text-slate-600">Sem CNPJ, não dá para separar notas emitidas de notas recebidas.</p>'}
+      <ul class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">${[...group.meses.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([month, value]) => `<li class="rounded-lg bg-slate-50 p-2">${esc(month)}: <strong>${brl(value)}</strong></li>`).join('')}</ul>
+    </section>`).join('');
+  root.innerHTML = `<h3 class="text-lg font-bold">Seus números nas notas carregadas</h3>${years}${desconsideradas ? `<p class="mt-2 text-xs text-slate-600">${desconsideradas} nota(s) foram desconsideradas por situação informada no arquivo.</p>` : ''}`;
+}
+
 function showNFModal(key) {
   const note = NF.notas.find((item) => (item.chave || item.arquivo) === key);
   if (!note) return;
@@ -250,18 +291,19 @@ function showNFModal(key) {
   if (!modal) return;
   window.modal.open(`${note.mod === '65' ? 'NFC-e' : 'NF-e'} nº ${note.nNF} • Série ${note.serie}`, `
     <dl class="grid sm:grid-cols-2 gap-3 mb-4">
-      ${detailRow('Chave de acesso', `<span class="font-mono text-xs">${esc(fmtChave(note.chave))}</span> <button data-act="copy" data-v="${esc(note.chave)}" class="text-indigo-600 text-xs font-semibold ml-1">copiar</button>`)}
+      ${detailRow(getModo() === 'guiado' ? 'Chave de acesso: 44 números que identificam esta nota' : 'Chave de acesso', `<span class="font-mono text-xs">${esc(fmtChave(note.chave))}</span> <button data-act="copy" data-v="${esc(note.chave)}" class="text-indigo-600 text-xs font-semibold ml-1">copiar</button>`)}
       ${detailRow('Emissão', esc(fmtDateTime(note.emissao)))}
-      ${detailRow('Emitente', `${esc(note.emit.nome)}<br><span class="text-xs text-slate-500">${esc(fmtDoc(note.emit.doc))}</span>`)}
-      ${detailRow('Destinatário', `${esc(note.dest.nome)}<br><span class="text-xs text-slate-500">${esc(fmtDoc(note.dest.doc))}</span>`)}
-      ${detailRow('Natureza da operação', esc(note.natOp || '—'))}
-      ${detailRow('Protocolo / Status', `${esc(note.protocolo || '—')} ${note.cStat ? '• cStat ' + esc(note.cStat) : ''}`)}
+      ${detailRow(getModo() === 'guiado' ? 'Emitente: quem emitiu a nota' : 'Emitente', `${esc(note.emit.nome)}<br><span class="text-xs text-slate-500">${esc(fmtDoc(note.emit.doc))}</span>`)}
+      ${detailRow(getModo() === 'guiado' ? 'Destinatário: quem recebeu a nota' : 'Destinatário', `${esc(note.dest.nome)}<br><span class="text-xs text-slate-500">${esc(fmtDoc(note.dest.doc))}</span>`)}
+      ${detailRow(getModo() === 'guiado' ? 'Descrição da operação' : 'Natureza da operação', esc(note.natOp || '—'))}
+      ${detailRow(getModo() === 'guiado' ? 'Situação informada no arquivo' : 'Protocolo / Status', `${esc(note.protocolo || '—')} ${note.cStat ? (getModo() === 'guiado' ? '• código da situação ' : '• cStat ') + esc(note.cStat) : ''}`)}
       ${detailRow('Arquivo', esc(note.arquivo))}
     </dl>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-      ${[['vProd', note.vProd], ['vFrete', note.vFrete], ['vDesc', note.vDesc], ['vNF', note.vNF], ['vBC ICMS', note.vBC], ['vICMS', note.vICMS], ['vPIS', note.vPIS], ['vCOFINS', note.vCOFINS]]
+      ${[[getModo() === 'guiado' ? 'Valor dos produtos' : 'vProd', note.vProd], [getModo() === 'guiado' ? 'Frete' : 'vFrete', note.vFrete], [getModo() === 'guiado' ? 'Desconto' : 'vDesc', note.vDesc], [getModo() === 'guiado' ? 'Valor total da nota' : 'vNF', note.vNF], [getModo() === 'guiado' ? 'Base do ICMS' : 'vBC ICMS', note.vBC], [getModo() === 'guiado' ? 'ICMS (imposto estadual)' : 'vICMS', note.vICMS], [getModo() === 'guiado' ? 'PIS (imposto federal)' : 'vPIS', note.vPIS], [getModo() === 'guiado' ? 'COFINS (imposto federal)' : 'vCOFINS', note.vCOFINS]]
         .map(([label, value]) => `<div class="bg-slate-50 rounded-xl p-2.5"><div class="text-[11px] text-slate-500">${label}</div><div class="font-bold">${brl(value)}</div></div>`).join('')}
     </div>
+    ${getModo() === 'guiado' ? `<div class="mb-4 rounded-xl bg-indigo-50 p-3"><h4 class="font-bold">Como ler esta nota</h4><p class="mt-1">NF-e é uma nota de venda de produtos. NFC-e é uma nota fiscal de consumidor. CFOP identifica o tipo de operação; NCM identifica a categoria do produto.</p><p class="mt-1">Os valores mostrados foram lidos do arquivo. O emitente é quem emitiu a nota e o destinatário é quem recebeu.</p></div>` : ''}
     <h4 class="font-bold mb-1">Itens (${note.itens.length})</h4>
     <div class="overflow-x-auto border border-slate-200 rounded-xl"><table class="w-full text-xs">
       <thead class="bg-slate-100 text-left text-slate-500"><tr><th class="p-2">#</th><th class="p-2">Descrição</th><th class="p-2">NCM</th><th class="p-2">CFOP</th><th class="p-2 text-right">Qtd</th><th class="p-2 text-right">Unit.</th><th class="p-2 text-right">Total</th></tr></thead>
@@ -349,6 +391,7 @@ function initXmlModule() {
   $('#xml-filter-start').addEventListener('change', (event) => { NF.start = event.target.value; NF.page = 1; renderNF(); });
   $('#xml-filter-end').addEventListener('change', (event) => { NF.end = event.target.value; NF.page = 1; renderNF(); });
   $('#xml-filter-cfop').addEventListener('change', (event) => { NF.cfop = event.target.value; NF.page = 1; renderNF(); });
+  $('#xml-cnpj-proprio')?.addEventListener('input', (event) => { const cnpj = normalizeCNPJ(event.target.value).slice(0, 14); event.target.value = cnpj ? fmtDoc(cnpj) : ''; renderYearSummary(); });
   renderNF();
 }
 
