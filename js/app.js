@@ -4,8 +4,10 @@ import { initConciliadorModule, CB, renderCB } from './conciliadorModule.js';
 import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
 import { initContactModule } from './contactModule.js';
 import { initUtilitiesModule } from './utilitiesModule.js';
+import { getModo, setModo, modoSalvo } from './modo.js';
 
 const TAB_METADATA = {
+  inicio: ['Início', 'Escolha uma tarefa para consultar documentos, comparar movimentos ou organizar arquivos.'],
   xml: ['Extrator de XML', 'Extraia e consolide dados de NF-e e NFC-e localmente no navegador.'],
   conciliador: ['Conciliador Bancário', 'Compare OFX e CSV com o razão contábil no navegador.'],
   organizador: ['Organizador Fiscal', 'Padronize nomes e organize documentos fiscais localmente.'],
@@ -25,15 +27,37 @@ function updatePageMetadata(tabName) {
 }
 
 function openTab(name) {
-  const tabName = ['xml', 'conciliador', 'organizador', 'contato', 'utilitarios'].includes(name) ? name : 'xml';
+  const allowed = getModo() === 'guiado' ? ['xml', 'conciliador', 'organizador'] : ['xml', 'conciliador', 'organizador', 'contato', 'utilitarios'];
+  const tabName = name === 'inicio' && getModo() === 'guiado' ? 'inicio' : (allowed.includes(name) ? name : 'xml');
   $$('.tab-btn').forEach((button) => {
     const selected = button.dataset.tab === tabName;
     button.setAttribute('aria-selected', String(selected));
     button.tabIndex = selected ? 0 : -1;
   });
-  $$('.tab-panel').forEach((panel) => panel.classList.toggle('hidden', panel.id !== `panel-${tabName}`));
+  $$('.tab-panel').forEach((panel) => {
+    const selected = panel.id === `panel-${tabName}`;
+    panel.hidden = !selected;
+    panel.classList.toggle('hidden', !selected);
+  });
   updatePageMetadata(tabName);
   if (location.hash !== `#${tabName}`) history.replaceState(null, '', `#${tabName}`);
+}
+
+function showModePrompt() {
+  const overlay = $('#modo-overlay');
+  overlay.hidden = false;
+  $('#modo-guiado').focus();
+}
+
+function chooseMode(value) {
+  setModo(value);
+  $('#modo-overlay').hidden = true;
+  $('#modo-toggle').textContent = `Modo: ${value === 'guiado' ? 'Guiado' : 'Completo'} ⇄ ${value === 'guiado' ? 'Completo' : 'Guiado'}`;
+  if (value === 'guiado') openTab('inicio');
+  else openTab(location.hash.slice(1) || 'xml');
+  renderNF();
+  renderCB();
+  renderOG();
 }
 
 const modal = {
@@ -66,10 +90,35 @@ const modalEl = $('#modal');
 if (modalEl) modalEl.addEventListener('click', (event) => { if (event.target.id === 'modal') modal.close(); });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') modal.close(); });
 
+$('#modo-guiado').addEventListener('click', () => chooseMode('guiado'));
+$('#modo-completo').addEventListener('click', () => chooseMode('completo'));
+$('#modo-fechar').addEventListener('click', () => chooseMode('guiado'));
+$('#modo-toggle').addEventListener('click', () => chooseMode(getModo() === 'guiado' ? 'completo' : 'guiado'));
+$('#modo-overlay').addEventListener('click', (event) => { if (event.target.id === 'modo-overlay') chooseMode('guiado'); });
+document.addEventListener('keydown', (event) => {
+  const overlay = $('#modo-overlay');
+  if (overlay.hidden) return;
+  if (event.key === 'Escape') chooseMode('guiado');
+  if (event.key === 'Tab') {
+    const choices = [$('#modo-guiado'), $('#modo-completo'), $('#modo-fechar')];
+    const first = choices[0];
+    const last = choices[choices.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+});
+document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => openTab(button.dataset.go)));
+
+const selectedMode = modoSalvo();
+if (selectedMode) {
+  setModo(selectedMode, false);
+  $('#modo-toggle').textContent = `Modo: ${selectedMode === 'guiado' ? 'Guiado' : 'Completo'} ⇄ ${selectedMode === 'guiado' ? 'Completo' : 'Guiado'}`;
+} else showModePrompt();
+
 $$('.tab-btn').forEach((button) => button.addEventListener('click', () => openTab(button.dataset.tab)));
 const tabList = $('[role="tablist"]');
 if (tabList) tabList.addEventListener('keydown', (event) => {
-  const tabs = $$('.tab-btn');
+  const tabs = $$('.tab-btn').filter((button) => getModo() === 'guiado' ? !button.classList.contains('so-completo') : !button.classList.contains('so-guiado'));
   const currentIndex = tabs.indexOf(document.activeElement);
   if (currentIndex < 0) return;
 
@@ -126,7 +175,7 @@ initConciliadorModule();
 initOrganizadorModule();
 initContactModule();
 initUtilitiesModule();
-openTab(location.hash.slice(1) || 'xml');
+openTab(selectedMode === 'completo' ? (location.hash.slice(1) || 'xml') : (location.hash.slice(1) || 'inicio'));
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

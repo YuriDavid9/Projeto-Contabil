@@ -46,7 +46,8 @@
   <script data-goatcounter="https://SEU-CODIGO.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   -->
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col" data-modo="guiado">
+  <div id="modo-overlay" class="modo-overlay" hidden><section class="modo-card" role="dialog" aria-modal="true" aria-labelledby="modo-title"><h2 id="modo-title" class="text-2xl font-extrabold mb-2">Como vocÃª quer usar?</h2><p class="text-sm text-slate-600 mb-5">Seus arquivos nÃ£o saem do seu computador.</p><div class="grid sm:grid-cols-2 gap-3"><button id="modo-guiado" class="modo-choice rounded-xl border border-slate-200 p-5 text-left hover:border-indigo-500"><span class="block font-bold">Guiado</span><span class="block mt-1 text-sm text-slate-600">Com explicaÃ§Ãµes e linguagem simples. Ideal para quem estÃ¡ comeÃ§ando.</span></button><button id="modo-completo" class="modo-choice rounded-xl border border-slate-200 p-5 text-left hover:border-indigo-500"><span class="block font-bold">Completo</span><span class="block mt-1 text-sm text-slate-600">VisÃ£o tÃ©cnica, para quem jÃ¡ conhece documentos fiscais.</span></button></div><button id="modo-fechar" class="mt-4 text-sm underline text-slate-600">Continuar no modo Guiado</button></section></div>
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
       <div class="flex items-center gap-3">
@@ -57,12 +58,14 @@
         </div>
       </div>
       <nav class="grid grid-cols-3 gap-1 bg-slate-800 p-1 rounded-xl lg:ml-auto lg:flex lg:shrink-0" role="tablist" aria-label="Módulos">
-        <button id="tab-xml" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="xml" aria-controls="panel-xml" aria-selected="true" tabindex="0"><span aria-hidden="true">📄</span><span class="text-center leading-tight">Extrator de XML</span></button>
+        <button id="tab-xml" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="xml" aria-controls="panel-xml" aria-selected="true" tabindex="0"><span aria-hidden="true">📄</span><span class="text-center leading-tight" data-t="xml">Extrator de XML</span></button>
         <button id="tab-conciliador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="conciliador" aria-controls="panel-conciliador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏦</span><span class="text-center leading-tight">Conciliador Bancário</span></button>
-        <button id="tab-organizador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="organizador" aria-controls="panel-organizador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🗂️</span><span class="text-center leading-tight">Organizador Fiscal</span></button>
-        <button id="tab-contato" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="contato" aria-controls="panel-contato" aria-selected="false" tabindex="-1"><span aria-hidden="true">✉️</span><span class="text-center leading-tight">Contato</span></button>
-        <button id="tab-utilitarios" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="utilitarios" aria-controls="panel-utilitarios" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧰</span><span class="text-center leading-tight">Utilitários</span></button>
+        <button id="tab-organizador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="organizador" aria-controls="panel-organizador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🗂️</span><span class="text-center leading-tight" data-t="organizador">Organizador Fiscal</span></button>
+        <button id="tab-contato" class="tab-btn so-completo min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="contato" aria-controls="panel-contato" aria-selected="false" tabindex="-1"><span aria-hidden="true">✉️</span><span class="text-center leading-tight">Contato</span></button>
+        <button id="tab-utilitarios" class="tab-btn so-completo min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="utilitarios" aria-controls="panel-utilitarios" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧰</span><span class="text-center leading-tight">Utilitários</span></button>
+        <button id="tab-inicio" class="tab-btn so-guiado min-w-0 px-2 py-2 rounded-lg text-xs font-semibold" role="tab" data-tab="inicio" aria-controls="panel-inicio" aria-selected="false" tabindex="-1">Início</button>
       </nav>
+      <button id="modo-toggle" class="self-end lg:self-auto rounded-lg border border-slate-600 px-3 py-2 text-xs font-semibold" type="button">Modo: Guiado ⇄ Completo</button>
     </div>
   </header>
 
@@ -71,9 +74,11 @@
       <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       <span>Processamento 100% local (client-side): seus arquivos não saem do seu computador.</span>
     </div>
+    <section id="panel-inicio" class="tab-panel fade-in so-guiado" role="tabpanel" aria-labelledby="tab-inicio" tabindex="-1" hidden><div class="mb-5"><h2 class="text-2xl font-extrabold text-slate-900">O que vocÃª quer fazer?</h2></div><div class="grid md:grid-cols-3 gap-4"><button class="start-card rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm hover:border-indigo-400" data-go="xml"><span class="block text-lg font-bold">Entender minhas notas fiscais</span><span class="mt-2 block text-sm text-slate-600">Veja as informaÃ§Ãµes que estÃ£o nos arquivos XML.</span></button><button class="start-card rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm hover:border-indigo-400" data-go="conciliador"><span class="block text-lg font-bold">Conferir se meu banco bate com minhas anotaÃ§Ãµes</span><span class="mt-2 block text-sm text-slate-600">Compare as movimentaÃ§Ãµes do extrato com sua planilha.</span></button><button class="start-card rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm hover:border-indigo-400" data-go="organizador"><span class="block text-lg font-bold">Organizar meus documentos para enviar ao contador</span><span class="mt-2 block text-sm text-slate-600">Padronize os nomes e separe os arquivos por mÃªs.</span></button></div></section>
     <section id="panel-xml" class="tab-panel fade-in" role="tabpanel" aria-labelledby="tab-xml" tabindex="-1">
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900">Extrator &amp; Consolidador de XML</h2>
+        <p class="so-guiado text-slate-600 text-sm mt-2">A nota fiscal eletrônica vem em um arquivo XML. Aqui você vê o que está dentro dele sem precisar abrir o código. Os arquivos XML originais devem ser guardados; esta tela só os lê.</p>
         <p class="text-slate-500 text-sm">NF-e (modelo 55) e NFC-e (modelo 65). Arraste vários XMLs e exporte a consolidação para Excel.</p>
       </div>
 
@@ -117,7 +122,7 @@
           <label class="text-xs font-medium text-slate-600">Emissão até
             <input id="xml-filter-end" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm">
           </label>
-          <label class="text-xs font-medium text-slate-600">CFOP
+          <label class="so-completo text-xs font-medium text-slate-600">CFOP
             <select id="xml-filter-cfop" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Todos</option></select>
           </label>
         </div>
@@ -128,13 +133,13 @@
                 <th class="px-3 py-2.5">Modelo</th>
                 <th class="px-3 py-2.5">NF/Série</th>
                 <th class="px-3 py-2.5">Emissão</th>
-                <th class="px-3 py-2.5">Emitente</th>
-                <th class="px-3 py-2.5">Destinatário</th>
-                <th class="px-3 py-2.5 text-right">vProd</th>
-                <th class="px-3 py-2.5 text-right">vNF</th>
-                <th class="px-3 py-2.5 text-right">vICMS</th>
-                <th class="px-3 py-2.5 text-right">vPIS</th>
-                <th class="px-3 py-2.5 text-right">vCOFINS</th>
+                <th class="px-3 py-2.5"><span class="so-completo">Emitente</span><span class="so-guiado">Quem emitiu</span></th>
+                <th class="px-3 py-2.5"><span class="so-completo">Destinatário</span><span class="so-guiado">Quem recebeu</span></th>
+                <th class="px-3 py-2.5 text-right so-completo">vProd</th><th class="px-3 py-2.5 text-right so-guiado">Valor dos produtos</th>
+                <th class="px-3 py-2.5 text-right so-completo">vNF</th><th class="px-3 py-2.5 text-right so-guiado">Valor total da nota</th>
+                <th class="px-3 py-2.5 text-right so-completo">vICMS</th><th class="px-3 py-2.5 text-right so-guiado">ICMS (imposto estadual)</th>
+                <th class="px-3 py-2.5 text-right so-completo">vPIS</th><th class="px-3 py-2.5 text-right so-guiado">PIS e COFINS (impostos federais)</th>
+                <th class="px-3 py-2.5 text-right so-completo">vCOFINS</th><th class="px-3 py-2.5 text-right so-guiado">&nbsp;</th>
                 <th class="px-3 py-2.5">Ação</th>
               </tr>
             </thead>
@@ -143,11 +148,13 @@
         </div>
         <div id="xml-pager" class="flex items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 text-xs text-slate-600"></div>
       </div>
+      <div id="xml-resumo-ano" class="so-guiado mt-4"><div class="rounded-xl border border-slate-200 bg-white p-4"><label for="xml-cnpj-proprio" class="block text-sm font-semibold">Qual é o seu CNPJ? <span class="font-normal text-slate-500">(opcional)</span></label><input id="xml-cnpj-proprio" type="text" inputmode="numeric" class="mt-2 w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2" placeholder="00.000.000/0000-00"><div id="xml-resumo-conteudo" class="mt-4"></div><p class="mt-3 text-xs text-slate-600">Considera só as notas que você carregou aqui. Pode não representar todo o seu faturamento.</p><p class="text-xs text-slate-600">Informativo. Confirme com seu contador.</p></div></div>
     </section>
 
     <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-conciliador" tabindex="-1">
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900">Conciliador Bancário</h2>
+        <p class="so-guiado text-slate-600 text-sm mt-2">Confira se o que você anotou bate com o banco. O extrato mostra as entradas e saídas da conta. Suas anotações podem estar em uma planilha CSV simples com data, descrição e valor.</p>
         <p class="text-slate-500 text-sm">Compare extrato bancário e razão contábil para identificar divergências, pendências e lançamentos duplicados.</p>
       </div>
 
@@ -174,15 +181,15 @@
 
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
           <div class="mb-3 flex items-center justify-between">
-            <h3 class="font-bold text-slate-800">Razão / Livro</h3>
+            <h3 class="font-bold text-slate-800"><span class="so-completo">Razão / Livro</span><span class="so-guiado">Suas anotações</span></h3>
             <span id="cb-led-count" class="text-xs rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-600">0</span>
           </div>
           <label id="cb-led-drop" for="cb-led-input" class="drop-zone block cursor-pointer border-2 border-dashed border-slate-300 bg-slate-50 hover:border-indigo-400 rounded-xl p-4 text-center text-xs text-slate-600">
-            Arraste ou clique para importar CSV do razão
+            Arraste ou clique para importar <span class="so-completo">CSV do razão</span><span class="so-guiado">uma planilha CSV com suas anotações</span>
             <input id="cb-led-input" type="file" accept=".csv,text/csv" class="hidden">
           </label>
           <div class="mt-3 flex items-center gap-2 flex-wrap">
-            <button id="cb-led-clear" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl px-3 py-2 text-sm">Limpar razão</button>
+            <button id="cb-led-clear" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl px-3 py-2 text-sm"><span class="so-completo">Limpar razão</span><span class="so-guiado">Limpar anotações</span></button>
             <button id="cb-demo" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-3 py-2 text-sm">Simulação</button>
             <button id="cb-run" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-3 py-2 text-sm">Executar Conciliação</button>
             <button id="cb-export" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Exportar CSV</button>
@@ -199,10 +206,10 @@
 
       <div class="mb-4 rounded-xl border border-slate-200 bg-white p-4">
         <div class="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
-          <label class="text-xs font-medium text-slate-600">Pendência bancária
+          <label class="text-xs font-medium text-slate-600"><span class="so-completo">Pendência bancária</span><span class="so-guiado">Movimento do banco</span>
             <select id="cb-manual-bank" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Selecione uma pendência</option></select>
           </label>
-          <label class="text-xs font-medium text-slate-600">Pendência interna
+          <label class="text-xs font-medium text-slate-600"><span class="so-completo">Pendência interna</span><span class="so-guiado">Sua anotação</span>
             <select id="cb-manual-ledger" class="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"><option value="">Selecione uma pendência</option></select>
           </label>
           <button id="cb-manual-link" class="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40" disabled>Vincular manualmente</button>
@@ -220,8 +227,8 @@
       <div class="grid lg:grid-cols-[1.5fr_1fr] gap-4 mb-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
           <div class="flex flex-wrap items-center gap-3 mb-3">
-            <label class="text-xs text-slate-600">Tolerância (dias): <input id="cb-tol" type="number" min="0" value="0" class="ml-1 w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm"></label>
-            <label class="text-xs text-slate-600">Divergência (dias): <input id="cb-divdays" type="number" min="1" value="10" class="ml-1 w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm"></label>
+            <label class="text-xs text-slate-600"><span class="so-completo">Tolerância (dias)</span><span class="so-guiado">Diferença de dias aceita</span>: <input id="cb-tol" type="number" min="0" value="0" class="ml-1 w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm"></label>
+            <label class="text-xs text-slate-600"><span class="so-completo">Divergência (dias)</span><span class="so-guiado" title="Procura valores parecidos dentro deste período">Até quantos dias procurar valores parecidos</span>: <input id="cb-divdays" type="number" min="1" value="10" class="ml-1 w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm"></label>
           </div>
           <div id="cb-kpis" class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
           <div id="cb-bar" class="mt-4"></div>
@@ -233,7 +240,7 @@
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
-          <h3 class="font-bold text-slate-800 mb-3">Lançamento manual no razão</h3>
+          <h3 class="font-bold text-slate-800 mb-3"><span class="so-completo">Lançamento manual no razão</span><span class="so-guiado">Adicionar uma anotação</span></h3>
           <form id="cb-led-form" class="space-y-3">
             <div class="grid grid-cols-2 gap-2">
               <input id="cb-f-date" type="date" class="rounded-xl border border-slate-300 px-3 py-2 text-sm" required>
@@ -255,12 +262,12 @@
             <thead class="bg-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th class="px-3 py-2.5">Status</th>
-                <th class="px-3 py-2.5">Data extrato</th>
-                <th class="px-3 py-2.5">Descrição extrato</th>
-                <th class="px-3 py-2.5 text-right">Valor extrato</th>
-                <th class="px-3 py-2.5">Data razão</th>
-                <th class="px-3 py-2.5">Descrição razão</th>
-                <th class="px-3 py-2.5 text-right">Valor razão</th>
+                <th class="px-3 py-2.5">Data <span class="so-completo">extrato</span><span class="so-guiado">banco</span></th>
+                <th class="px-3 py-2.5">Descrição <span class="so-completo">extrato</span><span class="so-guiado">banco</span></th>
+                <th class="px-3 py-2.5 text-right">Valor <span class="so-completo">extrato</span><span class="so-guiado">banco</span></th>
+                <th class="px-3 py-2.5">Data <span class="so-completo">razão</span><span class="so-guiado">anotação</span></th>
+                <th class="px-3 py-2.5">Descrição <span class="so-completo">razão</span><span class="so-guiado">anotação</span></th>
+                <th class="px-3 py-2.5 text-right">Valor <span class="so-completo">razão</span><span class="so-guiado">anotação</span></th>
                 <th class="px-3 py-2.5 text-right">Diferença</th>
                 <th class="px-3 py-2.5">Observação</th>
               </tr>
@@ -274,6 +281,8 @@
     <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-organizador" tabindex="-1">
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900">Organizador Fiscal</h2>
+        <p class="so-guiado text-slate-600 text-sm mt-2">Este módulo padroniza os nomes dos arquivos e separa cópias por mês. Assim, seu contador recebe tudo com nome padronizado e separado por mês.</p>
+        <p class="so-guiado mt-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm text-indigo-900">Seus arquivos originais não são alterados. O ZIP contém cópias com os novos nomes.</p>
         <p class="text-slate-500 text-sm">Padronize nomes e pastas de arquivos com regras reutilizáveis, manifesto e ZIP final.</p>
       </div>
 
@@ -288,9 +297,11 @@
           <div class="flex flex-wrap gap-2 mt-4">
             <button id="og-demo" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-3 py-2 text-sm">Carregar exemplos</button>
             <button id="og-clear" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl px-3 py-2 text-sm">Limpar fila</button>
-            <button id="og-manifest" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Exportar manifesto</button>
-            <button id="og-zip" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled>Gerar ZIP</button>
+            <button id="og-manifest" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled><span class="so-completo">Exportar manifesto</span><span class="so-guiado">Baixar lista de arquivos (De/Para)</span></button>
+            <button id="og-zip" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl px-3 py-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed" disabled><span class="so-completo">Gerar ZIP</span><span class="so-guiado">Baixar pasta organizada (ZIP)</span></button>
           </div>
+          <div id="og-missing" class="mt-3" aria-live="polite"></div>
+          <p id="og-next-step" class="so-guiado mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 font-semibold text-emerald-900" hidden>Próximo passo: envie este arquivo ao seu contador.</p>
           <div id="og-msgs" class="mt-3 space-y-2" aria-live="polite"></div>
         </div>
 
@@ -322,7 +333,7 @@
 
       <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-4">
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
-          <h3 class="font-bold text-slate-800 mb-2">Árvore de pastas sugerida</h3>
+          <h3 class="font-bold text-slate-800 mb-2"><span class="so-completo">Árvore de pastas sugerida</span><span class="so-guiado">Como as pastas vão ficar</span></h3>
           <div id="og-tree" class="tree text-sm text-slate-700 max-h-[28rem] overflow-auto"></div>
         </div>
 
@@ -334,10 +345,10 @@
                   <th class="px-3 py-2.5">Original</th>
                   <th class="px-3 py-2.5">Data</th>
                   <th class="px-3 py-2.5">CNPJ detectado</th>
-                  <th class="px-3 py-2.5">Tipo</th>
-                  <th class="px-3 py-2.5">Fornecedor</th>
+                  <th class="px-3 py-2.5">Tipo <span class="so-guiado normal-case font-normal" title="PIX: comprovante de transferência. NF-e: nota fiscal eletrônica. Boleto: cobrança para pagamento. Recibo: confirmação de recebimento. Guia: documento de arrecadação. Extrato: movimentações da conta. Contrato: acordo escrito. Comprovante: registro de pagamento ou transferência.">O que é isso?</span></th>
+                  <th class="px-3 py-2.5"><span class="so-completo">Fornecedor</span><span class="so-guiado">Quem emitiu / para quem você pagou</span></th>
                   <th class="px-3 py-2.5">Valor</th>
-                  <th class="px-3 py-2.5">Novo nome</th>
+                  <th class="px-3 py-2.5"><span class="so-completo">Novo nome</span><span class="so-guiado">Como o arquivo vai se chamar</span></th>
                   <th class="px-3 py-2.5"></th>
                 </tr>
               </thead>
@@ -347,7 +358,7 @@
         </div>
       </div>
     </section>
-    <section id="panel-contato" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-contato" tabindex="-1">
+    <section id="panel-contato" class="tab-panel so-completo fade-in hidden" role="tabpanel" aria-labelledby="tab-contato" tabindex="-1">
       <div class="mb-4">
         <h2 id="contato" class="text-2xl font-extrabold text-slate-900">Contato</h2>
         <p class="text-slate-500 text-sm">Envie uma mensagem para falar sobre o AutoContábil Hub.</p>
@@ -387,7 +398,7 @@
         <button id="contact-submit" type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Enviar mensagem</button>
       </form>
     </section>
-    <section id="panel-utilitarios" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-utilitarios" tabindex="-1">
+    <section id="panel-utilitarios" class="tab-panel so-completo fade-in hidden" role="tabpanel" aria-labelledby="tab-utilitarios" tabindex="-1">
       <div class="mb-4"><h2 class="text-2xl font-extrabold text-slate-900">Utilitários</h2><p class="text-slate-500 text-sm">Validações e conversões executadas neste navegador.</p></div>
       <div id="utilities-root"></div>
     </section>
@@ -414,7 +425,8 @@
       <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="termos.html">Termos</a>
     </div>
-    <div class="border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">Dados de demonstração são fictícios. Ferramenta de apoio: confira sempre os resultados antes de uso em obrigações fiscais.</div>
+    <div class="so-guiado border-t border-slate-800 text-center text-[11px] text-slate-300 py-3">ConteÃºdo informativo. NÃ£o substitui a orientaÃ§Ã£o do seu contador.</div>
+    <div class="so-completo border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">Dados de demonstração são fictícios. Ferramenta de apoio: confira sempre os resultados antes de uso em obrigações fiscais.</div>
   </footer>
 
   <div id="modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" aria-hidden="true">

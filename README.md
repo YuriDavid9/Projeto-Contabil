@@ -9,6 +9,7 @@ Aplicação web modular para apoiar tarefas contábeis, fiscais e financeiras. X
 - `js/conciliadorModule.js` concilia OFX/CSV, permite vínculo manual, aviso de duplicados e armazenamento local opt-in.
 - `js/organizadorModule.js` organiza arquivos, extrai texto de PDFs quando possível e salva regras no navegador.
 - `js/contactModule.js` controla o formulário de contato; `js/utilitiesModule.js` fornece validadores, conversores, mesclagem e cálculo estimado.
+- `js/app.js` coordena a navegação; `js/modo.js` e `js/glossario.js` controlam as apresentações Guiado e Completo; `js/config.js` concentra o limite anual exibido no resumo informativo do MEI.
 - `privacidade.html`, `termos.html`, `404.html`, `manifest.webmanifest` e `sw.js` são as páginas institucionais e recursos de publicação/PWA.
 
 Não há build nem dependências locais. Tailwind CSS, JSZip e Inter vêm de CDN; SheetJS e PDF.js são carregados sob demanda quando os recursos são usados. A primeira carga desses recursos precisa de internet. `.vscode/` é reservado às configurações do editor.
