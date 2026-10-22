@@ -1,4 +1,5 @@
 import { $, $$, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV, normalizeCNPJ } from './utils.js';
+import { getModo } from './modo.js';
 
 const OG = { docs: [], seq: 1 };
 const RULES_KEY = 'autocontabil-organizador-rules-v1';
@@ -248,6 +249,9 @@ function ogPlan() {
 
 function renderOG() {
   const plan = ogPlan();
+  const incompletos = OG.docs.filter((documentItem) => !documentItem.fornecedor).length;
+  const missing = $('#og-missing');
+  if (missing) missing.innerHTML = incompletos ? `<p class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">${incompletos} arquivo(s) estão sem fornecedor. Preencha o campo para o nome ficar completo.</p>` : '';
   $('#og-manifest').disabled = !plan.length;
   $('#og-zip').disabled = !plan.length;
 
@@ -255,8 +259,8 @@ function renderOG() {
     <td class="px-3 py-2 min-w-[11rem] text-xs text-slate-600 break-all">${esc(d.orig)}${d.demo ? ' <span class="text-[10px] bg-slate-200 rounded px-1">demo</span>' : ''}${d.detected ? ' <span class="mt-1 inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">Detectado automaticamente</span>' : ''}</td>
     <td class="px-3 py-2"><input type="date" data-og="${d.id}" data-f="data" value="${esc(d.data)}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
     <td class="px-3 py-2"><input type="text" inputmode="numeric" data-og="${d.id}" data-f="cnpj" value="${esc(d.cnpj || '')}" placeholder="CNPJ" class="w-36 rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
-    <td class="px-3 py-2"><select data-og="${d.id}" data-f="tipo" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">${TIPOS.map((tipo) => `<option ${tipo === d.tipo ? 'selected' : ''}>${tipo}</option>`).join('')}</select></td>
-    <td class="px-3 py-2"><input type="text" data-og="${d.id}" data-f="fornecedor" value="${esc(d.fornecedor)}" placeholder="Fornecedor…" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
+    <td class="px-3 py-2"><select data-og="${d.id}" data-f="tipo" title="${getModo() === 'guiado' ? 'PIX: comprovante de transferência. NF-e: nota fiscal eletrônica. Boleto: cobrança. Recibo: confirmação de recebimento. Guia: documento de arrecadação. Extrato: movimentações da conta. Contrato: acordo escrito. Comprovante: registro de pagamento ou transferência.' : 'Tipo de documento'}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs">${TIPOS.map((tipo) => `<option ${tipo === d.tipo ? 'selected' : ''}>${esc(tipo)}</option>`).join('')}</select></td>
+    <td class="px-3 py-2"><input type="text" data-og="${d.id}" data-f="fornecedor" value="${esc(d.fornecedor)}" placeholder="${getModo() === 'guiado' ? 'Quem emitiu / recebeu o pagamento' : 'Fornecedor…'}" class="w-full rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
     <td class="px-3 py-2"><input type="text" inputmode="decimal" data-og="${d.id}" data-f="valor" value="${d.valor ? esc(n2(+d.valor)) : ''}" placeholder="0,00" class="w-24 rounded-lg border border-slate-300 px-2 py-1 text-xs"></td>
     <td class="px-3 py-2 min-w-[12rem] font-mono text-[11px] text-emerald-700 font-semibold break-all" data-newname="${d.id}">${esc(name)}</td>
     <td class="px-3 py-2"><button data-act="og-del" data-id="${d.id}" class="text-slate-400 hover:text-rose-600">×</button></td>
@@ -349,6 +353,8 @@ async function zipOG() {
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
     toast('ZIP gerado com manifesto De/Para.', 'ok');
+    const next = $('#og-next-step');
+    if (next) next.hidden = false;
   } catch (error) {
     toast('Falha ao gerar ZIP: ' + error.message, 'err');
   } finally {
@@ -446,6 +452,7 @@ function initOrganizadorModule() {
     refreshOGNames();
   });
   renderOG();
+  document.addEventListener('modo:alterado', () => renderOG());
 }
 
 export { initOrganizadorModule, OG, ogPlan, manifestRows, renderOG, detectPdfMetadata };
