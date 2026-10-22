@@ -8,3 +8,4 @@
 
 - Estrutura conferida: `index.html` e `styles.css` na raiz, módulos ES em `js/` e apenas `settings.json` em `.vscode/`. Caminhos relativos permanecem corretos; nenhum movimento foi necessário nesta etapa.
 - O README descreve a estrutura modular e usa `python3 -m http.server 8080` como método local.
+- Etapas de implementação 1 a 5 do modo Guiado foram concluídas e commitadas. A conferência estática HTTP dos arquivos centrais passou; a validação interativa das abas, exemplos e igualdade das exportações no modo Completo ainda depende de um navegador disponível.
