@@ -1,13 +1,19 @@
 import { $, esc, brl, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, kpi, r2, stamp, downloadCSV, n2, norm, splitCSV, loadSheetJS } from './utils.js';
+import { getModo } from './modo.js';
 
 const CB = { bank: [], ledger: [], rows: [], manualPairs: [], filter: 'all', seq: 1 };
 const STATUS = {
-  ok: { label: 'Conciliado', cls: 'bg-emerald-100 text-emerald-800', order: 0 },
-  manual: { label: 'Conciliado manualmente', cls: 'bg-sky-100 text-sky-800', order: 1 },
-  div: { label: 'Divergência de Valor', cls: 'bg-amber-100 text-amber-800', order: 2 },
-  pb: { label: 'Pendência Bancária', cls: 'bg-rose-100 text-rose-800', order: 3 },
-  pi: { label: 'Pendência Interna', cls: 'bg-violet-100 text-violet-800', order: 4 }
+  ok: { label: 'Conciliado', labelGuiado: 'Bate certinho', cls: 'bg-emerald-100 text-emerald-800', order: 0 },
+  manual: { label: 'Conciliado manualmente', labelGuiado: 'Bateu após vínculo manual', cls: 'bg-sky-100 text-sky-800', order: 1 },
+  div: { label: 'Divergência de Valor', labelGuiado: 'Valor diferente', cls: 'bg-amber-100 text-amber-800', order: 2 },
+  pb: { label: 'Pendência Bancária', labelGuiado: 'Está no banco e não nas suas anotações', cls: 'bg-rose-100 text-rose-800', order: 3 },
+  pi: { label: 'Pendência Interna', labelGuiado: 'Está nas suas anotações e não apareceu no banco', cls: 'bg-violet-100 text-violet-800', order: 4 }
 };
+const statusLabel = (status) => STATUS[status][getModo() === 'guiado' ? 'labelGuiado' : 'label'];
+function guidedObservation(text) {
+  if (getModo() !== 'guiado') return text;
+  return text.replace(/D\s*[–-]\s*/g, 'Saída no banco: ').replace(/C\s*[–-]\s*/g, 'Entrada no banco: ').replace(/D\b/g, 'saída').replace(/C\b/g, 'entrada');
+}
 const STORAGE_KEY = 'autocontabil-conciliador-v1';
 const REMEMBER_KEY = 'autocontabil-conciliador-remember';
 
@@ -257,12 +263,13 @@ function updateManualControls() {
     select.innerHTML = `<option value="">${placeholder}</option>${rows.map(({ value, label }) => `<option value="${esc(value)}">${esc(label)}</option>`).join('')}`;
     if (rows.some((row) => String(row.value) === selected)) select.value = selected;
   };
-  setOptions(bankSelect, 'Selecione uma pendência', CB.rows.filter((row) => row.status === 'pb').map((row) => ({ value: row.b.id, label: `${fmtISODate(row.b.date)} • ${row.b.desc} • ${brl(row.b.amount)}` })));
-  setOptions(ledgerSelect, 'Selecione uma pendência', CB.rows.filter((row) => row.status === 'pi').map((row) => ({ value: row.l.id, label: `${fmtISODate(row.l.date)} • ${row.l.desc} • ${brl(row.l.amount)}` })));
+  const placeholder = getModo() === 'guiado' ? 'Selecione um movimento' : 'Selecione uma pendência';
+  setOptions(bankSelect, placeholder, CB.rows.filter((row) => row.status === 'pb').map((row) => ({ value: row.b.id, label: `${fmtISODate(row.b.date)} • ${row.b.desc} • ${brl(row.b.amount)}` })));
+  setOptions(ledgerSelect, placeholder, CB.rows.filter((row) => row.status === 'pi').map((row) => ({ value: row.l.id, label: `${fmtISODate(row.l.date)} • ${row.l.desc} • ${brl(row.l.amount)}` })));
   setOptions(removeSelect, 'Nenhum vínculo manual', CB.manualPairs.map((pair, index) => {
     const bank = CB.bank.find((item) => item.id === pair.bankId);
     const ledger = CB.ledger.find((item) => item.id === pair.ledgerId);
-    return { value: index, label: `${bank?.desc || 'Extrato'} ↔ ${ledger?.desc || 'Razão'}` };
+    return { value: index, label: `${bank?.desc || 'Extrato'} ↔ ${ledger?.desc || (getModo() === 'guiado' ? 'Sua anotação' : 'Razão')}` };
   }));
   $('#cb-manual-link').disabled = !bankSelect.value || !ledgerSelect.value;
   $('#cb-manual-undo').disabled = !removeSelect.value;
@@ -294,11 +301,16 @@ function renderCB() {
     $('#cb-kpis').innerHTML = '';
     $('#cb-bar').innerHTML = '';
     $('#cb-filters').innerHTML = '';
-    $('#cb-tbody').innerHTML = '<tr><td colspan="9" class="px-4 py-10 text-center text-slate-500">Carregue o extrato e o razão (ou use a simulação) e clique em “Executar Conciliação”.</td></tr>';
+    $('#cb-tbody').innerHTML = `<tr><td colspan="9" class="px-4 py-10 text-center text-slate-500">${getModo() === 'guiado' ? 'Carregue seu extrato bancário e suas anotações (ou use a simulação) para comparar os movimentos.' : 'Carregue o extrato e o razão (ou use a simulação) e clique em “Executar Conciliação”.'}</td></tr>`;
     return;
   }
 
-  $('#cb-kpis').innerHTML = [
+  $('#cb-kpis').innerHTML = getModo() === 'guiado' ? [
+    kpi('Movimentos que bateram', `${stats.ok.length} de ${stats.bankN}`, 'movimentos do banco', 'indigo'),
+    kpi('Valores diferentes', stats.divergence.length, 'comparação entre banco e anotações', 'slate'),
+    kpi('No banco, sem anotação', stats.pendingBank.length, brl(stats.pendingBankValue), 'slate'),
+    kpi('Nas anotações, sem banco', stats.pendingInternal.length, brl(stats.pendingInternalValue), 'slate')
+  ].join('') : [
     kpi('% Conciliado', `${stats.pct.toFixed(1).replace('.', ',')}%`, `${stats.ok.length} de ${stats.bankN} lançamentos do extrato`, stats.pct >= 80 ? 'emerald' : 'amber'),
     kpi('Valor Auditado', brl(stats.audited), 'volume conciliado (|entradas|+|saídas|)', 'indigo'),
     kpi('Divergências', `${stats.divergence.length} • ${brl(stats.divergenceValue)}`, 'soma das diferenças a ajustar', 'amber'),
@@ -307,7 +319,7 @@ function renderCB() {
 
   const total = stats.ok.length + stats.manual.length + stats.divergence.length + stats.pendingBank.length + stats.pendingInternal.length || 1;
   const width = (count) => `${((count / total) * 100).toFixed(1)}%`;
-  $('#cb-bar').innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-4"><div class="flex h-3 rounded-full overflow-hidden bg-slate-100">
+  $('#cb-bar').innerHTML = getModo() === 'guiado' ? `<div class="bg-white rounded-2xl border border-slate-200 p-4"><p class="text-sm font-semibold">${stats.ok.length + stats.manual.length} de ${stats.bankN} movimentos do banco bateram com suas anotações.</p></div>` : `<div class="bg-white rounded-2xl border border-slate-200 p-4"><div class="flex h-3 rounded-full overflow-hidden bg-slate-100">
     <div class="bg-emerald-500" style="width:${width(stats.ok.length)}"></div>
     <div class="bg-sky-500" style="width:${width(stats.manual.length)}"></div>
     <div class="bg-amber-400" style="width:${width(stats.divergence.length)}"></div>
@@ -317,13 +329,13 @@ function renderCB() {
   <p class="text-xs text-slate-600 mt-2">Saldo líquido do extrato: <b>${brl(stats.netBank)}</b> • do razão: <b>${brl(stats.netLedger)}</b> • diferença: <b>${brl(r2(stats.netBank - stats.netLedger))}</b> (explicada por divergências e pendências abaixo).</p></div>`;
 
   const chip = (key, label, count) => `<button data-act="cb-filter" data-k="${key}" class="px-3 py-1.5 rounded-full text-xs font-semibold border ${CB.filter === key ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-300 hover:bg-slate-100'}">${label} (${count})</button>`;
-  $('#cb-filters').innerHTML = [chip('all', 'Todos', CB.rows.length), ...Object.entries(STATUS).map(([key, value]) => chip(key, value.label, CB.rows.filter((row) => row.status === key).length))].join('');
+  $('#cb-filters').innerHTML = [chip('all', 'Todos', CB.rows.length), ...Object.entries(STATUS).map(([key]) => chip(key, statusLabel(key), CB.rows.filter((row) => row.status === key).length))].join('');
 
   const visibleRows = CB.rows.filter((row) => CB.filter === 'all' || row.status === CB.filter);
   const valueCell = (entry) => entry ? `<td class="px-3 py-2 text-right whitespace-nowrap font-semibold ${entry.cents < 0 ? 'text-rose-600' : 'text-emerald-700'}">${brl(entry.amount)}</td>` : '<td class="px-3 py-2 text-right text-slate-300">—</td>';
 
   $('#cb-tbody').innerHTML = visibleRows.map((row) => `<tr class="hover:bg-slate-50 align-top">
-    <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-2 py-0.5 whitespace-nowrap ${STATUS[row.status].cls}">${STATUS[row.status].label}</span></td>
+    <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-2 py-0.5 whitespace-nowrap ${STATUS[row.status].cls}">${esc(statusLabel(row.status))}</span></td>
     <td class="px-3 py-2 whitespace-nowrap">${row.b ? fmtISODate(row.b.date) : '—'}</td>
     <td class="px-3 py-2 min-w-[11rem]">${row.b ? esc(row.b.desc) : '<span class="text-slate-300">—</span>'}</td>
     ${valueCell(row.b)}
@@ -331,13 +343,13 @@ function renderCB() {
     <td class="px-3 py-2 min-w-[11rem]">${row.l ? esc(row.l.desc) : '<span class="text-slate-300">—</span>'}</td>
     ${valueCell(row.l)}
     <td class="px-3 py-2 text-right whitespace-nowrap ${row.diff ? 'font-bold text-amber-700' : 'text-slate-400'}">${row.status === 'ok' ? '—' : brl(row.diff / 100)}</td>
-    <td class="px-3 py-2 text-xs text-slate-600 min-w-[16rem]">${esc(row.obs)}</td>
+    <td class="px-3 py-2 text-xs text-slate-600 min-w-[16rem]">${esc(guidedObservation(row.obs))}</td>
   </tr>`).join('');
 }
 
 function runCB() {
   if (!CB.bank.length && !CB.ledger.length) {
-    toast('Carregue extrato e razão primeiro.', 'warn');
+    toast(getModo() === 'guiado' ? 'Carregue o extrato do banco e suas anotações primeiro.' : 'Carregue extrato e razão primeiro.', 'warn');
     return;
   }
 
