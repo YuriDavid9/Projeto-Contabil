@@ -18,10 +18,10 @@ Não há build nem dependências locais. Tailwind CSS, JSZip e Inter vêm de CDN
 Na raiz do repositório, inicie um servidor HTTP:
 
 ```powershell
-py -m http.server 8080
+python3 -m http.server 8080
 ```
 
-Em macOS/Linux, use `python3 -m http.server 8080`. Também funcionam `npx serve .` e a extensão Live Server do VS Code. Abra http://localhost:8080. Não abra `index.html` por `file://`: os módulos ES precisam de HTTP.
+Abra http://localhost:8080. Os módulos ES precisam de HTTP.
 
 Teste as abas **Extrator de XML**, **Conciliador Bancário**, **Organizador Fiscal**, **Contato** e **Utilitários**. Os botões de demonstração do XML, **Simulação** e **Carregar exemplos** preenchem tabelas sem enviar documentos.
 
@@ -59,3 +59,4 @@ O workflow `.github/workflows/static-smoke.yml` instala Playwright apenas no run
 ## Contato
 
 Yuri David • WhatsApp: (83) 98639-8472 • João Pessoa - PB
+
