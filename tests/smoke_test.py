@@ -4,9 +4,38 @@ from threading import Thread
 import os
 import re
 
-from playwright.sync_api import sync_playwright
-
 ROOT = Path(__file__).resolve().parents[1]
+TEXT_EXTENSIONS = {".html", ".js", ".css", ".md", ".json", ".webmanifest"}
+MOJIBAKE_MARKERS = "".join(map(chr, (0x00C3, 0x00C2, 0x00E2)))
+MOJIBAKE_EXTRA = "".join(map(chr, (
+    0x0152, 0x0153, 0x0160, 0x0161, 0x0178, 0x017D, 0x017E, 0x0192,
+    0x02C6, 0x02DC, 0x2013, 0x2014, 0x2018, 0x2019, 0x201A, 0x201C,
+    0x201D, 0x201E, 0x2020, 0x2021, 0x2022, 0x2026, 0x2030, 0x2039,
+    0x203A, 0x20AC, 0x2122,
+)))
+MOJIBAKE_RE = re.compile(
+    r"[" + MOJIBAKE_MARKERS + r"][\u0080-\u00BF" + MOJIBAKE_EXTRA + r"]"
+)
+
+
+def check_project_text_encoding(project_root=ROOT):
+    issues = []
+    for path in sorted(project_root.rglob("*")):
+        relative = path.relative_to(project_root)
+        if not path.is_file() or {".git", "node_modules"}.intersection(relative.parts):
+            continue
+        if path.suffix.lower() not in TEXT_EXTENSIONS:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError as error:
+            issues.append(f"{relative}: invalid UTF-8 ({error})")
+            continue
+        for line_number, line in enumerate(text.splitlines(), 1):
+            if MOJIBAKE_RE.search(line):
+                issues.append(f"{relative}:{line_number}: {line.strip()}")
+    if issues:
+        raise AssertionError("Mojibake or invalid UTF-8 found:\n" + "\n".join(issues))
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -15,6 +44,9 @@ class QuietHandler(SimpleHTTPRequestHandler):
 
 
 def main():
+    check_project_text_encoding()
+    from playwright.sync_api import sync_playwright
+
     os.chdir(ROOT)
     server = ThreadingHTTPServer(("127.0.0.1", 8765), QuietHandler)
     thread = Thread(target=server.serve_forever, daemon=True)
@@ -29,22 +61,39 @@ def main():
             page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
             page.goto("http://127.0.0.1:8765/", wait_until="domcontentloaded")
 
-            assert page.get_by_role("tab").count() == 5
+            assert page.get_by_role("dialog", name="Como você quer usar?").is_visible()
+            assert page.get_by_text("Seus arquivos não saem do seu computador.").is_visible()
+            page.locator("#modo-guiado").click()
+            assert page.locator("#panel-inicio").is_visible()
+            assert page.get_by_text("O que você quer fazer?").is_visible()
+            assert page.get_by_text("Veja as informações que estão nos arquivos XML.").is_visible()
+            assert page.get_by_text("Conferir se meu banco bate com minhas anotações").is_visible()
+            assert page.get_by_text("Compare as movimentações do extrato com sua planilha.").is_visible()
+            assert page.get_by_text("Padronize os nomes e separe os arquivos por mês.").is_visible()
+            assert page.get_by_text("Conteúdo informativo. Não substitui a orientação do seu contador.").is_visible()
+            assert page.get_by_role("tab").count() == 4
+            page.reload(wait_until="domcontentloaded")
+            assert not page.locator("#modo-overlay").is_visible()
+            assert page.locator("body").get_attribute("data-modo") == "guiado"
+            page.locator('#panel-inicio [data-go="xml"]').click()
             page.get_by_role("button", name=re.compile("Carregar Lote de Demonstração")).click()
             assert page.locator("#xml-tbody tr").count() == 5
 
-            page.get_by_role("tab", name=re.compile("Conciliador Bancário")).click()
+            page.locator("#tab-conciliador").click()
             page.get_by_role("button", name="Simulação").click()
             assert page.locator("#cb-bank-tbody tr").count() == 13
             assert page.locator("#cb-led-tbody tr").count() == 13
 
-            page.get_by_role("tab", name=re.compile("Organizador Fiscal")).click()
+            page.locator("#tab-organizador").click()
             page.get_by_role("button", name="Carregar exemplos").click()
             assert page.locator("#og-tbody tr").count() == 6
 
-            page.get_by_role("tab", name=re.compile("Contato")).click()
+            page.locator("#modo-toggle").click()
+            assert page.locator("body").get_attribute("data-modo") == "completo"
+            assert page.get_by_role("tab").count() == 5
+            page.locator("#tab-contato").click()
             assert page.locator("#contact-form").is_visible()
-            page.get_by_role("tab", name=re.compile("Utilitários")).click()
+            page.locator("#tab-utilitarios").click()
             assert page.locator("#utilities-root section").count() == 4
             assert page.title() == "AutoContábil Hub | Utilitários"
             assert not errors, "Browser errors: " + " | ".join(errors)
