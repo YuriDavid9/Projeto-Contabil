@@ -10,6 +10,7 @@ Aplicação web modular para apoiar tarefas contábeis, fiscais e financeiras. X
 - `js/organizadorModule.js` organiza arquivos, extrai texto de PDFs quando possível e salva regras no navegador.
 - `js/contactModule.js` controla o formulário de contato; `js/utilitiesModule.js` fornece validadores, conversores, mesclagem e cálculo estimado.
 - `js/app.js` coordena a navegação; `js/modo.js` e `js/glossario.js` controlam as apresentações Guiado e Completo; `js/config.js` concentra o limite anual exibido no resumo informativo do MEI.
+- O modo Guiado explica os documentos, mantém uma ajuda acessível e apresenta dados de demonstração como exemplos fictícios. O modo Completo preserva suas ferramentas técnicas.
 - `privacidade.html`, `termos.html`, `404.html`, `manifest.webmanifest` e `sw.js` são as páginas institucionais e recursos de publicação/PWA.
 
 Não há build nem dependências locais. Tailwind CSS, JSZip e Inter vêm de CDN; SheetJS e PDF.js são carregados sob demanda quando os recursos são usados. A primeira carga desses recursos precisa de internet. `.vscode/` é reservado às configurações do editor.

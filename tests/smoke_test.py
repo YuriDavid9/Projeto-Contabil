@@ -66,26 +66,27 @@ def main():
             page.locator("#modo-guiado").click()
             assert page.locator("#panel-inicio").is_visible()
             assert page.get_by_text("O que você quer fazer?").is_visible()
-            assert page.get_by_text("Veja as informações que estão nos arquivos XML.").is_visible()
-            assert page.get_by_text("Conferir se meu banco bate com minhas anotações").is_visible()
-            assert page.get_by_text("Compare as movimentações do extrato com sua planilha.").is_visible()
-            assert page.get_by_text("Padronize os nomes e separe os arquivos por mês.").is_visible()
+            assert page.get_by_text("Aqui você não precisa saber nada de contabilidade. Escolha o que quer fazer e eu explico cada passo.").is_visible()
+            assert page.get_by_text("Tenho notas fiscais e quero entender o que tem nelas").is_visible()
+            assert page.get_by_text("Quero conferir se o que o banco mostra bate com o que anotei").is_visible()
+            assert page.get_by_text("Quero arrumar meus documentos para mandar ao contador").is_visible()
             assert page.get_by_text("Conteúdo informativo. Não substitui a orientação do seu contador.").is_visible()
             assert page.get_by_role("tab").count() == 4
             page.reload(wait_until="domcontentloaded")
             assert not page.locator("#modo-overlay").is_visible()
             assert page.locator("body").get_attribute("data-modo") == "guiado"
             page.locator('#panel-inicio [data-go="xml"]').click()
-            page.get_by_role("button", name=re.compile("Carregar Lote de Demonstração")).click()
+            page.locator("#xml-demo").click()
+            assert page.get_by_text("Estes dados são de exemplo, inventados para você ver como funciona.").is_visible()
             assert page.locator("#xml-tbody tr").count() == 5
 
             page.locator("#tab-conciliador").click()
-            page.get_by_role("button", name="Simulação").click()
+            page.locator("#cb-demo").click()
             assert page.locator("#cb-bank-tbody tr").count() == 13
             assert page.locator("#cb-led-tbody tr").count() == 13
 
             page.locator("#tab-organizador").click()
-            page.get_by_role("button", name="Carregar exemplos").click()
+            page.locator("#og-demo").click()
             assert page.locator("#og-tbody tr").count() == 6
 
             page.locator("#modo-toggle").click()

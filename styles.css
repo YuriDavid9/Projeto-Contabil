@@ -26,3 +26,26 @@ body[data-modo] .so-completo[hidden] { display: none !important; }
 .modo-choice:focus-visible { outline: 3px solid #6366f1; outline-offset: 3px; }
 body[data-modo] .tab-panel.hidden,
 body[data-modo] .tab-panel[hidden] { display: none !important; }
+
+body[data-modo="guiado"] { font-size: 18px; line-height: 1.55; }
+body[data-modo="guiado"] :is(button, input, select, textarea) { min-height: 48px; font-size: 1rem; }
+body[data-modo="guiado"] .so-completo { display: none !important; }
+body[data-modo="guiado"] .guiado-ajuda { margin: 1rem 0; border: 1px solid #cbd5e1; border-radius: .75rem; background: #fff; }
+.guiado-ajuda summary { cursor: pointer; padding: .8rem 1rem; font-weight: 700; color: #1e293b; }
+.guiado-ajuda-conteudo { padding: 0 1rem 1rem; }
+.guiado-ajuda-conteudo h3 { margin-top: .8rem; font-weight: 700; }
+.guiado-ajuda-conteudo p { margin-top: .15rem; color: #334155; }
+.guiado-detalhes { margin-top: 1rem; overflow: hidden; border: 1px solid #cbd5e1; border-radius: .75rem; background: #fff; }
+.guiado-detalhes > summary { cursor: pointer; padding: .85rem 1rem; color: #1e3a8a; font-weight: 700; }
+.guiado-ajuda-global { position: fixed; z-index: 45; right: 1rem; bottom: 1rem; min-width: 5rem; border-radius: 999px; padding: .5rem 1rem; background: #1e3a8a; color: white; font-weight: 700; box-shadow: 0 4px 12px #0f172a44; }
+.guiado-glossario { width: min(94vw, 42rem); max-height: 85vh; overflow: auto; border: 0; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 12px 40px #0f172a55; }
+.guiado-glossario::backdrop { background: #0f172a99; }
+.guiado-glossario h2 { font-size: 1.4rem; font-weight: 800; }
+.guiado-glossario dl { margin-top: 1rem; }
+.guiado-glossario dt { margin-top: .8rem; font-weight: 700; }
+.guiado-glossario dd { color: #334155; }
+.aviso-exemplo { margin: 0 0 1rem; border: 1px solid #cbd5e1; border-radius: .75rem; background: #f8fafc; padding: .8rem 1rem; color: #1e293b; }
+@media (max-width: 640px) {
+  body[data-modo="guiado"] main { padding-left: .75rem; padding-right: .75rem; }
+  body[data-modo="guiado"] .start-card { min-height: 7rem; padding: 1rem; }
+}

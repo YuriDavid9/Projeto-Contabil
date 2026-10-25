@@ -1,10 +1,12 @@
-import { $, $$ } from './utils.js';
+import { $, $$, esc } from './utils.js';
 import { initXmlModule, NF, renderNF, showNFModal } from './xmlModule.js';
 import { initConciliadorModule, CB, renderCB } from './conciliadorModule.js';
 import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
 import { initContactModule } from './contactModule.js';
 import { initUtilitiesModule } from './utilitiesModule.js';
 import { getModo, setModo, modoSalvo } from './modo.js';
+import { ajuda } from './ajuda.js';
+import { AJUDA_GUIADO, TERMOS_GUIADOS } from './glossario.js';
 
 const TAB_METADATA = {
   inicio: ['Início', 'Escolha uma tarefa para consultar documentos, comparar movimentos ou organizar arquivos.'],
@@ -175,6 +177,53 @@ initConciliadorModule();
 initOrganizadorModule();
 initContactModule();
 initUtilitiesModule();
+const contextualHelp = { 'panel-xml': AJUDA_GUIADO.notas, 'panel-conciliador': AJUDA_GUIADO.banco, 'panel-organizador': AJUDA_GUIADO.documentos };
+Object.entries(contextualHelp).forEach(([id, content]) => {
+  const panel = document.getElementById(id);
+  const title = panel?.querySelector('h2');
+  if (title && !panel.querySelector('[data-ajuda]')) title.insertAdjacentHTML('afterend', ajuda(content, id));
+});
+const technicalTables = ['xml-tbody', 'cb-bank-tbody', 'cb-led-tbody', 'cb-tbody', 'og-tbody'];
+function setGuidedTableDetails(modo = getModo()) {
+  technicalTables.forEach((tbodyId) => {
+    const tbody = document.getElementById(tbodyId);
+    const table = tbody?.closest('table');
+    if (!table) return;
+    const wrapper = table.closest('.overflow-x-auto');
+    if (!wrapper) return;
+    const existing = wrapper.parentElement?.classList.contains('guiado-detalhes') ? wrapper.parentElement : null;
+    if (modo === 'guiado' && !existing) {
+      const details = document.createElement('details');
+      details.className = 'guiado-detalhes';
+      details.innerHTML = '<summary>Ver detalhes</summary>';
+      wrapper.before(details);
+      details.append(wrapper);
+    } else if (modo === 'completo' && existing) {
+      existing.before(wrapper);
+      existing.remove();
+    }
+  });
+}
+setGuidedTableDetails();
+document.addEventListener('modo:alterado', (event) => setGuidedTableDetails(event.detail.modo));
+const glossary = $('#glossario-dialog');
+if (glossary) glossary.querySelector('dl').innerHTML = TERMOS_GUIADOS.map(([term, explanation]) => `<dt>${esc(term)}</dt><dd>${esc(explanation)}</dd>`).join('');
+$('#ajuda-global')?.addEventListener('click', () => glossary?.showModal());
+$('#glossario-fechar')?.addEventListener('click', () => glossary?.close());
+glossary?.addEventListener('click', (event) => { if (event.target === glossary) glossary.close(); });
+document.querySelectorAll('#xml-demo, #cb-demo, #og-demo').forEach((button) => {
+  button.addEventListener('click', () => {
+    const panel = button.closest('.tab-panel');
+    let note = panel?.querySelector('.aviso-exemplo');
+    if (!note) {
+      note = document.createElement('p');
+      note.className = 'aviso-exemplo';
+      note.textContent = 'Estes dados são de exemplo, inventados para você ver como funciona.';
+      button.closest('.mb-4, .bg-white')?.prepend(note);
+    }
+    if (note) note.hidden = false;
+  });
+});
 openTab(selectedMode === 'completo' ? (location.hash.slice(1) || 'xml') : (location.hash.slice(1) || 'inicio'));
 
 if ('serviceWorker' in navigator) {

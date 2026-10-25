@@ -1,4 +1,4 @@
-const CACHE_NAME = 'autocontabil-shell-v6';
+const CACHE_NAME = 'autocontabil-shell-v7';
 const CORE_ASSETS = [
   './index.html',
   './styles.css',
@@ -14,6 +14,8 @@ const CORE_ASSETS = [
   './js/app.js',
   './js/modo.js',
   './js/glossario.js',
+  './js/ajuda.js',
+  './js/passos.js',
   './js/config.js',
   './js/utils.js',
   './js/xmlModule.js',
