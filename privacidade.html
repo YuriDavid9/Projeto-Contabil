@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Política de Privacidade | AutoContábil Hub</title>
-  <meta name="description" content="Informações sobre dados tratados pelo AutoContábil Hub e direitos dos titulares previstos na LGPD.">
+  <meta name="description" content="Informações sobre dados tratados pelo AutoContábil Hub e pelo Portal de Notícias, e direitos dos titulares previstos na LGPD.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,47 +13,52 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800">
-  <div class="border-b border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-950">Modelo inicial; revise com um profissional jurídico antes de usar comercialmente.</div>
+  <div class="border-b border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-950">Modelo inicial — revisar com um profissional jurídico antes de divulgar amplamente.</div>
   <header class="bg-slate-900 text-white">
-    <div class="mx-auto flex max-w-4xl items-center px-4 py-5">
-      <a class="font-semibold text-white hover:text-emerald-300" href="index.html">← Voltar ao AutoContábil Hub</a>
+    <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-5 text-sm">
+      <a class="font-semibold text-white hover:text-emerald-300" href="index.html">← Voltar às Ferramentas</a>
+      <a class="font-semibold text-slate-300 hover:text-white" href="noticias.html">Ir para o Portal de Notícias →</a>
     </div>
   </header>
   <main class="mx-auto max-w-4xl px-4 py-10">
     <h1 class="text-3xl font-extrabold text-slate-900">Política de Privacidade</h1>
-    <p class="mt-2 text-sm text-slate-500">Versão inicial para revisão jurídica. Atualizada em 20 de outubro de 2026.</p>
+    <p class="mt-2 text-sm text-slate-500">Versão inicial para revisão jurídica. Atualizada em 26 de outubro de 2026.</p>
     <div class="mt-8 space-y-7 rounded-2xl border border-slate-200 bg-white p-6 leading-7 shadow-sm">
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Dados que não coletamos</h2>
-        <p class="mt-2">Os arquivos escolhidos para o extrator, conciliador e organizador são processados localmente no seu navegador. O AutoContábil Hub não os envia nem os armazena em seus servidores. Os arquivos podem ser enviados para serviços de CDN pelo próprio navegador apenas para carregar bibliotecas e fontes.</p>
+        <h2 class="text-xl font-bold text-slate-900">1. Ferramentas Fiscais (Processamento 100% Local)</h2>
+        <p class="mt-2">Os arquivos escolhidos para o Extrator de XML, Conciliador Bancário e Organizador Fiscal são processados exclusivamente no seu computador (navegador). O AutoContábil Hub não envia nem armazena esses documentos em servidores externos. As páginas das ferramentas não carregam scripts de banco de dados.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Dados de contato</h2>
-        <p class="mt-2">Se você preencher e enviar o formulário de contato, serão tratados o nome, e-mail, assunto, mensagem e o registro de consentimento. Esses dados serão enviados a um serviço terceirizado de formulário configurado pelo desenvolvedor e encaminhados ao e-mail de contato. O endpoint e a chave do provedor precisam ser configurados antes da ativação do envio.</p>
+        <h2 class="text-xl font-bold text-slate-900">2. Portal de Notícias (Conta e Comentários)</h2>
+        <p class="mt-2">Ao criar uma conta para interagir no Portal de Notícias (<code>noticias.html</code>, <code>noticia.html</code> e <code>entrar.html</code>), coletamos e armazenamos:</p>
+        <ul class="mt-2 list-disc pl-6 space-y-1 text-slate-700">
+          <li><strong>E-mail e senha criptografada:</strong> usados exclusivamente para autenticação, confirmação de cadastro e recuperação de acesso (o seu e-mail permanece privado e nunca é exibido publicamente).</li>
+          <li><strong>Nome de exibição:</strong> mostrado publicamente junto aos comentários que você publicar.</li>
+          <li><strong>Comentários publicados e data/hora de envio:</strong> exibidos publicamente nas respectivas notícias.</li>
+        </ul>
+        <p class="mt-2">Esses dados são armazenados no serviço de banco de dados em nuvem <strong>Supabase</strong> (PostgreSQL com regras de segurança Row Level Security), com finalidade exclusiva de permitir a identificação de autores de comentários e a moderação da comunidade.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Finalidade e métricas</h2>
-        <p class="mt-2">Os dados do formulário são usados somente para responder à solicitação e dar continuidade ao contato iniciado. Atualmente, não há ferramenta de métricas ou analytics ativada. Caso métricas anônimas sejam adicionadas no futuro, esta política deverá ser atualizada para identificar o provedor, os dados medidos e as opções disponíveis.</p>
+        <h2 class="text-xl font-bold text-slate-900">3. Dados de Contato</h2>
+        <p class="mt-2">Se você preencher e enviar o formulário da aba Contato, serão tratados o nome, e-mail, assunto, mensagem e o registro de consentimento, com a finalidade exclusiva de responder à sua solicitação.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Armazenamento local</h2>
-        <p class="mt-2">Se você ativar a opção “Lembrar dados neste navegador” no conciliador, os dados do extrato e do razão escolhidos ficam no armazenamento local do navegador. As regras de nomeação salvas no Organizador também ficam somente neste navegador. A opção do conciliador pode ser desligada ou apagada pelo botão “Apagar dados salvos”; regras do organizador podem ser removidas individualmente na própria aba. Limpar os dados do navegador também os remove.</p>
+        <h2 class="text-xl font-bold text-slate-900">4. Armazenamento Local no Navegador</h2>
+        <p class="mt-2">Se você ativar a opção “Lembrar dados neste navegador” no conciliador ou salvar regras no organizador, essas preferências ficam salvas apenas no armazenamento local (<code>localStorage</code>) do seu próprio navegador. Quando você faz login no Portal de Notícias, o token de sessão do Supabase também é mantido localmente no navegador até que você clique em “Sair”.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Serviços de terceiros</h2>
-        <p class="mt-2">O navegador baixa bibliotecas e fontes de CDNs; os arquivos que você seleciona não são enviados a esses serviços nem aos nossos servidores. Tailwind CSS, JSZip e Inter são carregados por CDN; SheetJS e PDF.js são carregados sob demanda. Os provedores de CDN podem receber dados técnicos da requisição, como endereço IP e informações do navegador. O service worker mantém em cache apenas arquivos locais do aplicativo. O envio do formulário depende do provedor configurado e dos termos e da política de privacidade desse serviço.</p>
+        <h2 class="text-xl font-bold text-slate-900">5. Serviços de Terceiros e CDNs</h2>
+        <p class="mt-2">O navegador baixa bibliotecas visuais e de segurança via CDNs públicas (Tailwind CSS, Google Fonts, JSZip, SheetJS, PDF.js, Supabase JS, Marked e DOMPurify). Esses provedores podem receber dados técnicos padrão de conexão (como endereço IP e navegador utilizado).</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Seus direitos</h2>
-        <p class="mt-2">Nos termos da LGPD, você pode solicitar confirmação do tratamento, acesso, correção, anonimização, bloqueio ou eliminação de dados, informações sobre compartilhamento e revogação do consentimento, quando aplicável. Para exercer esses direitos, use a aba <a class="font-semibold text-indigo-700 underline" href="index.html#contato">Contato</a>. Enquanto o provedor de formulário não estiver configurado, utilize o canal de contato alternativo apresentado no site.</p>
+        <h2 class="text-xl font-bold text-slate-900">6. Exclusão de Conta e Direitos do Titular (LGPD)</h2>
+        <p class="mt-2">Nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode apagar seus próprios comentários diretamente na página da notícia e pode solicitar a qualquer momento o acesso, a correção ou a <strong>exclusão completa da sua conta e de todos os seus dados</strong> no Portal de Notícias.</p>
+        <p class="mt-2">Para solicitar a exclusão da conta ou exercer qualquer direito previsto na LGPD, entre em contato diretamente com o controlador pelos canais abaixo.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">Retenção e contato</h2>
-        <p class="mt-2">As mensagens são retidas pelo tempo necessário para responder e cumprir obrigações aplicáveis, de acordo com as configurações do serviço terceirizado. Solicitações sobre privacidade podem ser enviadas pela aba Contato do AutoContábil Hub.</p>
-      </section>
-      <section>
-        <h2 class="text-xl font-bold text-slate-900">Controlador</h2>
-        <p class="mt-2">Controlador dos dados enviados pelo formulário: Yuri David. Para falar sobre privacidade ou exercer seus direitos, use a aba <a class="font-semibold text-indigo-700 underline" href="index.html#contato">Contato</a> ou o <a class="font-semibold text-indigo-700 underline" href="https://wa.me/5583986398472">WhatsApp</a> informado no site.</p>
+        <h2 class="text-xl font-bold text-slate-900">7. Controlador e Contato</h2>
+        <p class="mt-2">Responsável pelo projeto e controlador dos dados do portal: <strong>Yuri David (Yuri Monteiro)</strong> • João Pessoa - PB.<br>
+        Contato para solicitações de privacidade e exclusão de conta: aba <a class="font-semibold text-indigo-700 underline" href="index.html#contato">Contato</a> ou <a class="font-semibold text-indigo-700 underline" href="https://wa.me/5583986398472" target="_blank" rel="noopener noreferrer">WhatsApp (83) 98639-8472</a>.</p>
       </section>
     </div>
   </main>
