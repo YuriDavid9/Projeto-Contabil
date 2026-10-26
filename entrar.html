@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar ou Criar Conta | AutoContábil Hub — Notícias</title>
+  <meta name="description" content="Acesse sua conta ou cadastre-se gratuitamente para comentar nas notícias do AutoContábil Hub.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <div id="portal-header"></div>
+
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-10">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div class="mb-6 text-center">
+        <h1 class="text-2xl font-extrabold text-slate-900">Conta do Portal</h1>
+        <p class="text-sm text-slate-600 mt-1">Entre ou crie sua conta gratuita para participar dos comentários.</p>
+      </div>
+
+      <!-- Abas Entrar / Criar conta -->
+      <div id="auth-tabs" class="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl mb-6" role="tablist">
+        <button id="tab-btn-login" type="button" role="tab" aria-selected="true" class="py-2 px-3 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm transition">Entrar</button>
+        <button id="tab-btn-signup" type="button" role="tab" aria-selected="false" class="py-2 px-3 rounded-lg text-sm font-bold text-slate-600 hover:text-slate-900 transition">Criar conta</button>
+      </div>
+
+      <!-- Caixa de avisos / erros -->
+      <div id="auth-feedback" class="hidden mb-5 rounded-xl border px-4 py-3 text-sm font-medium" role="alert"></div>
+
+      <!-- Formulário: Entrar -->
+      <form id="form-login" class="space-y-4">
+        <div>
+          <label for="login-email" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1">E-mail</label>
+          <input id="login-email" type="email" required autocomplete="email" placeholder="seu@email.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="login-password" class="block text-xs font-semibold uppercase tracking-wide text-slate-600">Senha</label>
+            <button id="btn-forgot-open" type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 underline">Esqueci minha senha</button>
+          </div>
+          <input id="login-password" type="password" required autocomplete="current-password" minlength="8" placeholder="Mínimo de 8 caracteres" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <button id="btn-login-submit" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl py-2.5 px-4 text-sm transition">Entrar na conta</button>
+      </form>
+
+      <!-- Formulário: Criar conta -->
+      <form id="form-signup" class="space-y-4 hidden">
+        <div>
+          <label for="signup-name" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1">Nome de exibição (público nos comentários)</label>
+          <input id="signup-name" type="text" required minlength="2" maxlength="50" autocomplete="name" placeholder="Ex.: Maria Silva" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+          <p class="text-[11px] text-slate-500 mt-1">Seu e-mail nunca será exibido publicamente.</p>
+        </div>
+        <div>
+          <label for="signup-email" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1">E-mail</label>
+          <input id="signup-email" type="email" required autocomplete="email" placeholder="seu@email.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <div>
+          <label for="signup-password" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1">Senha (mínimo 8 caracteres)</label>
+          <input id="signup-password" type="password" required minlength="8" autocomplete="new-password" placeholder="Crie uma senha segura" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <button id="btn-signup-submit" type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl py-2.5 px-4 text-sm transition">Criar minha conta</button>
+      </form>
+
+      <!-- Formulário: Esqueci minha senha -->
+      <form id="form-forgot" class="space-y-4 hidden">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Recuperar senha</h2>
+          <p class="text-xs text-slate-600 mt-0.5">Enviaremos um link para o seu e-mail para você definir uma nova senha.</p>
+        </div>
+        <div>
+          <label for="forgot-email" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1">Seu e-mail de cadastro</label>
+          <input id="forgot-email" type="email" required autocomplete="email" placeholder="seu@email.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <button id="btn-forgot-submit" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl py-2.5 px-4 text-sm transition">Enviar link de recuperação</button>
+        <button id="btn-forgot-cancel" type="button" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl py-2 px-4 text-sm transition">Voltar para o login</button>
+      </form>
+
+      <!-- Formulário: Definir nova senha (quando vem do link de recuperação) -->
+      <form id="form-new-password" class="space-y-4 hidden">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Definir nova senha</h2>
+          <p class="text-xs text-slate-600 mt-0.5">Digite sua nova senha abaixo (mínimo de 8 caracteres).</p>
+        </div>
+        <div>
+          <label for="new-password-input" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1">Nova senha</label>
+          <input id="new-password-input" type="password" required minlength="8" autocomplete="new-password" placeholder="Mínimo de 8 caracteres" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <button id="btn-new-password-submit" type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl py-2.5 px-4 text-sm transition">Salvar nova senha</button>
+      </form>
+    </div>
+
+    <p class="text-center text-xs text-slate-500 mt-4">
+      As ferramentas fiscais do Hub continuam rodando 100% no seu computador sem precisar de conta.
+    </p>
+  </main>
+
+  <div id="portal-footer"></div>
+
+  <script type="module">
+    import { initPortalLayout } from './js/portal/layout.js';
+    import { signIn, signUp, resetPassword, updatePassword } from './js/portal/auth.js';
+    import { supabase } from './js/portal/supabase.js';
+
+    const feedback = document.getElementById('auth-feedback');
+    const tabsBox = document.getElementById('auth-tabs');
+    const tabLogin = document.getElementById('tab-btn-login');
+    const tabSignup = document.getElementById('tab-btn-signup');
+    const formLogin = document.getElementById('form-login');
+    const formSignup = document.getElementById('form-signup');
+    const formForgot = document.getElementById('form-forgot');
+    const formNewPassword = document.getElementById('form-new-password');
+
+    function showFeedback(message, kind = 'err') {
+      feedback.textContent = message;
+      feedback.className = 'mb-5 rounded-xl border px-4 py-3 text-sm font-medium ' + (
+        kind === 'ok'
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+          : 'bg-rose-50 border-rose-200 text-rose-800'
+      );
+      feedback.classList.remove('hidden');
+    }
+
+    function clearFeedback() {
+      feedback.classList.add('hidden');
+      feedback.textContent = '';
+    }
+
+    function switchMode(mode) {
+      clearFeedback();
+      formLogin.classList.add('hidden');
+      formSignup.classList.add('hidden');
+      formForgot.classList.add('hidden');
+      formNewPassword.classList.add('hidden');
+
+      if (mode === 'login') {
+        tabsBox.classList.remove('hidden');
+        formLogin.classList.remove('hidden');
+        tabLogin.className = 'py-2 px-3 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm transition';
+        tabSignup.className = 'py-2 px-3 rounded-lg text-sm font-bold text-slate-600 hover:text-slate-900 transition';
+        tabLogin.setAttribute('aria-selected', 'true');
+        tabSignup.setAttribute('aria-selected', 'false');
+      } else if (mode === 'signup') {
+        tabsBox.classList.remove('hidden');
+        formSignup.classList.remove('hidden');
+        tabSignup.className = 'py-2 px-3 rounded-lg text-sm font-bold bg-white text-slate-900 shadow-sm transition';
+        tabLogin.className = 'py-2 px-3 rounded-lg text-sm font-bold text-slate-600 hover:text-slate-900 transition';
+        tabSignup.setAttribute('aria-selected', 'true');
+        tabLogin.setAttribute('aria-selected', 'false');
+      } else if (mode === 'forgot') {
+        tabsBox.classList.add('hidden');
+        formForgot.classList.remove('hidden');
+      } else if (mode === 'new-password') {
+        tabsBox.classList.add('hidden');
+        formNewPassword.classList.remove('hidden');
+      }
+    }
+
+    tabLogin.addEventListener('click', () => switchMode('login'));
+    tabSignup.addEventListener('click', () => switchMode('signup'));
+    document.getElementById('btn-forgot-open').addEventListener('click', () => switchMode('forgot'));
+    document.getElementById('btn-forgot-cancel').addEventListener('click', () => switchMode('login'));
+
+    const params = new URLSearchParams(window.location.search);
+    const nextUrl = params.get('next') || 'noticias.html';
+
+    if (params.get('modo') === 'nova-senha' || window.location.hash.includes('type=recovery')) {
+      switchMode('new-password');
+    }
+
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        switchMode('new-password');
+      }
+    });
+
+    const { user } = await initPortalLayout('entrar');
+    if (user && params.get('modo') !== 'nova-senha' && !window.location.hash.includes('type=recovery')) {
+      showFeedback('Você já está conectado! Redirecionando para o portal...', 'ok');
+      setTimeout(() => {
+        window.location.href = nextUrl.startsWith('http') ? 'noticias.html' : nextUrl;
+      }, 900);
+    }
+
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearFeedback();
+      const btn = document.getElementById('btn-login-submit');
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+      try {
+        await signIn({
+          email: document.getElementById('login-email').value,
+          password: document.getElementById('login-password').value
+        });
+        showFeedback('Login realizado com sucesso! Redirecionando...', 'ok');
+        setTimeout(() => {
+          window.location.href = nextUrl.startsWith('http') ? 'noticias.html' : nextUrl;
+        }, 600);
+      } catch (err) {
+        showFeedback(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar na conta';
+      }
+    });
+
+    formSignup.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearFeedback();
+      const btn = document.getElementById('btn-signup-submit');
+      btn.disabled = true;
+      btn.textContent = 'Criando conta...';
+      try {
+        const res = await signUp({
+          displayName: document.getElementById('signup-name').value,
+          email: document.getElementById('signup-email').value,
+          password: document.getElementById('signup-password').value
+        });
+        formSignup.reset();
+        if (res?.session) {
+          showFeedback('Conta criada e conectada com sucesso! Redirecionando...', 'ok');
+          setTimeout(() => { window.location.href = 'noticias.html'; }, 800);
+        } else {
+          showFeedback('Conta criada! Enviamos um link de confirmação para o seu e-mail. Clique nele para ativar sua conta antes de entrar.', 'ok');
+        }
+      } catch (err) {
+        showFeedback(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Criar minha conta';
+      }
+    });
+
+    formForgot.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearFeedback();
+      const btn = document.getElementById('btn-forgot-submit');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      try {
+        await resetPassword(document.getElementById('forgot-email').value);
+        showFeedback('Se o e-mail estiver cadastrado, você receberá em instantes um link para redefinir sua senha.', 'ok');
+      } catch (err) {
+        showFeedback(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar link de recuperação';
+      }
+    });
+
+    formNewPassword.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearFeedback();
+      const btn = document.getElementById('btn-new-password-submit');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      try {
+        await updatePassword(document.getElementById('new-password-input').value);
+        showFeedback('Senha atualizada com sucesso! Redirecionando para as notícias...', 'ok');
+        setTimeout(() => { window.location.href = 'noticias.html'; }, 1000);
+      } catch (err) {
+        showFeedback(err.message, 'err');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Salvar nova senha';
+      }
+    });
+  </script>
+</body>
+</html>

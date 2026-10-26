@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notícias | AutoContábil Hub — Notícias</title>
+  <meta name="description" content="Portal de notícias para contadores — AutoContábil Hub.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <div id="portal-header"></div>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 text-center">
+      <h1 class="text-2xl font-extrabold text-slate-900">Portal de Notícias</h1>
+      <p class="text-slate-600 text-sm mt-2">Autenticação configurada! Na Fase 3 esta página exibirá a listagem completa de notícias com filtro e busca.</p>
+    </div>
+  </main>
+
+  <div id="portal-footer"></div>
+
+  <script type="module">
+    import { initPortalLayout } from './js/portal/layout.js';
+    await initPortalLayout('noticias');
+  </script>
+</body>
+</html>
