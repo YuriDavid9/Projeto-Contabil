@@ -14,26 +14,662 @@
     tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
   </script>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .prose-portal h1, .prose-portal h2, .prose-portal h3 { font-weight: 800; color: #0f172a; margin-top: 1.25rem; margin-bottom: 0.5rem; line-height: 1.3; }
+    .prose-portal h2 { font-size: 1.2rem; }
+    .prose-portal h3 { font-size: 1.05rem; }
+    .prose-portal p { margin-bottom: 0.85rem; line-height: 1.7; color: #334155; }
+    .prose-portal ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.85rem; color: #334155; }
+    .prose-portal ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.85rem; color: #334155; }
+    .prose-portal blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; color: #475569; font-style: italic; margin: 0.85rem 0; background: #f8fafc; padding-top: 0.4rem; padding-bottom: 0.4rem; border-radius: 0 0.5rem 0.5rem 0; }
+    .prose-portal a { color: #4f46e5; text-decoration: underline; font-weight: 600; }
+    .prose-portal code { background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.875em; }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
   <div id="portal-header"></div>
 
-  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
-    <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-sm">
-      <h1 class="text-2xl font-extrabold text-slate-900">⚙️ Painel do Administrador</h1>
-      <p class="text-sm text-slate-600 mt-2">O editor de notícias e painel de moderação serão ativados na <strong>Fase 4</strong> (logo após testarmos a área pública da Fase 3).</p>
-      <a href="noticias.html" class="mt-5 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-4 py-2 text-xs transition">Ir para a lista de notícias</a>
+  <main id="admin-main" class="hidden flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">⚙️ Painel do Administrador</h1>
+        <p class="text-sm text-slate-600 mt-0.5">Gerencie notícias, rascunhos e modere os comentários do portal.</p>
+      </div>
+      <div class="flex items-center gap-2 bg-white border border-slate-200 p-1 rounded-xl self-start sm:self-auto shadow-sm" role="tablist">
+        <button id="tab-btn-posts" type="button" role="tab" aria-selected="true" class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-indigo-600 text-white transition">📰 Notícias</button>
+        <button id="tab-btn-editor" type="button" role="tab" aria-selected="false" class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition">✏️ Nova / Editar</button>
+        <button id="tab-btn-comments" type="button" role="tab" aria-selected="false" class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition">💬 Moderação</button>
+      </div>
     </div>
+
+    <!-- ABA 1: Lista de Notícias -->
+    <section id="panel-admin-posts" class="space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 class="text-lg font-extrabold text-slate-900">Todas as Notícias</h2>
+          <button id="btn-new-post" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-4 py-2 text-xs sm:text-sm transition self-start sm:self-auto">+ Escrever nova notícia</button>
+        </div>
+
+        <div id="admin-posts-loading" class="text-sm text-slate-500 py-6 text-center">Carregando notícias...</div>
+        <div id="admin-posts-empty" class="hidden text-sm text-slate-500 py-6 text-center bg-slate-50 rounded-xl border border-slate-100">Nenhuma notícia cadastrada ainda.</div>
+        <div id="admin-posts-list" class="divide-y divide-slate-200"></div>
+      </div>
+    </section>
+
+    <!-- ABA 2: Editor de Notícias -->
+    <section id="panel-admin-editor" class="hidden space-y-4">
+      <!-- Lembrete fixo obrigatório -->
+      <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl px-4 py-3 text-xs sm:text-sm flex items-start gap-2.5 shadow-sm">
+        <span class="text-base leading-none mt-0.5" aria-hidden="true">💡</span>
+        <div>
+          <strong>Lembrete editorial:</strong> Escreva com suas próprias palavras e cite a fonte oficial. Não copie textos de terceiros.
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <h2 id="editor-heading" class="text-lg font-extrabold text-slate-900">Nova Notícia</h2>
+          <button id="btn-editor-cancel" type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-800 underline">Voltar para a lista</button>
+        </div>
+
+        <div id="editor-feedback" class="hidden mb-5 rounded-xl border px-4 py-3 text-sm font-medium" role="alert"></div>
+
+        <form id="editor-form" class="space-y-4">
+          <input id="post-id" type="hidden">
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="post-title" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Título da notícia (5 a 160 caracteres) *</label>
+              <input id="post-title" type="text" required minlength="5" maxlength="160" placeholder="Ex.: Prazo de entrega da obrigação..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label for="post-slug" class="block text-xs font-bold uppercase tracking-wide text-slate-600">Slug / Endereço da URL *</label>
+                <span id="slug-status" class="text-[11px] font-semibold text-slate-500"></span>
+              </div>
+              <input id="post-slug" type="text" required pattern="^[a-z0-9]+(-[a-z0-9]+)*$" placeholder="ex-prazo-de-entrega" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono focus:border-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="post-category" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Categoria *</label>
+              <select id="post-category" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm bg-white focus:border-indigo-500 focus:outline-none">
+                <option value="">Selecione uma categoria...</option>
+              </select>
+            </div>
+            <div>
+              <label for="post-cover-url" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">URL da imagem de capa (opcional)</label>
+              <input id="post-cover-url" type="url" placeholder="https://exemplo.com/imagem.jpg" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="post-source-name" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Nome da Fonte Oficial (opcional)</label>
+              <input id="post-source-name" type="text" maxlength="100" placeholder="Ex.: Receita Federal / DOU" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label for="post-source-url" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Link da Fonte Oficial (opcional)</label>
+              <input id="post-source-url" type="url" placeholder="https://www.gov.br/receitafederal/..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="post-summary" class="block text-xs font-bold uppercase tracking-wide text-slate-600">Resumo curto (aparece na listagem e no Google) *</label>
+              <span id="summary-counter" class="text-[11px] text-slate-500">0 / 300</span>
+            </div>
+            <textarea id="post-summary" rows="2" required maxlength="300" placeholder="Explique em 1 ou 2 frases o assunto principal da notícia..." class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+          </div>
+
+          <!-- Editor Markdown + Pré-visualização ao vivo -->
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+              <label for="post-content" class="block text-xs font-bold uppercase tracking-wide text-slate-600">Conteúdo da Notícia (Markdown) *</label>
+              <div class="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                <button type="button" data-md="bold" class="px-2 py-1 rounded text-xs font-bold text-slate-700 hover:bg-white transition" title="Negrito"><strong>B</strong></button>
+                <button type="button" data-md="h2" class="px-2 py-1 rounded text-xs font-bold text-slate-700 hover:bg-white transition" title="Subtítulo">Título H2</button>
+                <button type="button" data-md="list" class="px-2 py-1 rounded text-xs font-semibold text-slate-700 hover:bg-white transition" title="Lista de tópicos">• Lista</button>
+                <button type="button" data-md="link" class="px-2 py-1 rounded text-xs font-semibold text-slate-700 hover:bg-white transition" title="Inserir link">🔗 Link</button>
+                <button type="button" data-md="quote" class="px-2 py-1 rounded text-xs font-semibold text-slate-700 hover:bg-white transition" title="Citação">❝ Citação</button>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-4">
+              <div>
+                <textarea id="post-content" rows="12" required placeholder="Escreva o texto aqui... Use os botões acima para formatar." class="w-full h-80 rounded-xl border border-slate-300 p-3.5 text-sm font-mono focus:border-indigo-500 focus:outline-none"></textarea>
+              </div>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 h-80 overflow-y-auto">
+                <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2 border-b border-slate-200 pb-1">Pré-visualização ao vivo</div>
+                <div id="post-preview" class="prose-portal text-sm">
+                  <p class="text-slate-400 italic">Digite no campo ao lado para ver como a notícia ficará publicada...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button id="btn-save-draft" type="button" class="bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-bold rounded-xl px-5 py-2.5 text-xs sm:text-sm transition">💾 Salvar rascunho</button>
+            <button id="btn-publish" type="button" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl px-5 py-2.5 text-xs sm:text-sm transition">🚀 Publicar notícia</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ABA 3: Moderação de Comentários -->
+    <section id="panel-admin-comments" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Comentários Recentes</h2>
+            <p class="text-xs text-slate-500">Últimos 50 comentários enviados no portal. Você pode ocultar ou apagar qualquer comentário.</p>
+          </div>
+          <button id="btn-refresh-comments" type="button" class="rounded-lg border border-slate-300 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold transition">↻ Atualizar</button>
+        </div>
+
+        <div id="admin-comments-loading" class="text-sm text-slate-500 py-6 text-center">Carregando comentários...</div>
+        <div id="admin-comments-empty" class="hidden text-sm text-slate-500 py-6 text-center bg-slate-50 rounded-xl border border-slate-100">Nenhum comentário registrado até o momento.</div>
+        <div id="admin-comments-list" class="space-y-3"></div>
+      </div>
+    </section>
   </main>
 
   <div id="portal-footer"></div>
 
   <script type="module">
+    import { esc, fmtDateTime } from './js/utils.js';
     import { initPortalLayout } from './js/portal/layout.js';
-    const { isAdmin } = await initPortalLayout('admin');
-    if (!isAdmin) {
-      window.location.href = 'entrar.html';
+    import { listCategories, renderSafeMarkdown } from './js/portal/posts.js';
+    import { deleteComment, toggleHideComment } from './js/portal/comments.js';
+    import {
+      slugify,
+      listAllPostsAdmin,
+      checkSlugExists,
+      savePostAdmin,
+      togglePostStatusAdmin,
+      deletePostAdmin,
+      listRecentCommentsAdmin
+    } from './js/portal/admin.js';
+
+    const { user, isAdmin } = await initPortalLayout('admin');
+    if (!user || !isAdmin) {
+      window.location.href = 'entrar.html?next=admin.html';
+      throw new Error('Redirecionando para login...');
     }
+
+    document.getElementById('admin-main').classList.remove('hidden');
+
+    // Navegação entre abas
+    const tabPosts = document.getElementById('tab-btn-posts');
+    const tabEditor = document.getElementById('tab-btn-editor');
+    const tabComments = document.getElementById('tab-btn-comments');
+    const panelPosts = document.getElementById('panel-admin-posts');
+    const panelEditor = document.getElementById('panel-admin-editor');
+    const panelComments = document.getElementById('panel-admin-comments');
+
+    // Controle de alterações não salvas no editor
+    let isDirty = false;
+    let slugManuallyEdited = false;
+    let allPostsCache = [];
+
+    window.addEventListener('beforeunload', (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    function switchAdminTab(tab) {
+      if (tab !== 'editor' && isDirty) {
+        const leave = confirm('Você tem alterações não salvas no editor. Deseja realmente sair sem salvar?');
+        if (!leave) return;
+        isDirty = false;
+      }
+
+      const activeCls = 'px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-indigo-600 text-white transition';
+      const inactiveCls = 'px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-900 transition';
+
+      panelPosts.classList.toggle('hidden', tab !== 'posts');
+      panelEditor.classList.toggle('hidden', tab !== 'editor');
+      panelComments.classList.toggle('hidden', tab !== 'comments');
+
+      tabPosts.className = tab === 'posts' ? activeCls : inactiveCls;
+      tabEditor.className = tab === 'editor' ? activeCls : inactiveCls;
+      tabComments.className = tab === 'comments' ? activeCls : inactiveCls;
+
+      if (tab === 'posts') loadAdminPosts();
+      if (tab === 'comments') loadAdminComments();
+    }
+
+    tabPosts.addEventListener('click', () => switchAdminTab('posts'));
+    tabEditor.addEventListener('click', () => switchAdminTab('editor'));
+    tabComments.addEventListener('click', () => switchAdminTab('comments'));
+
+    // Carregar categorias no select do editor
+    const categorySelect = document.getElementById('post-category');
+    try {
+      const categories = await listCategories();
+      categories.forEach((cat) => {
+        const opt = document.createElement('option');
+        opt.value = String(cat.id);
+        opt.textContent = cat.name;
+        categorySelect.appendChild(opt);
+      });
+    } catch {
+      // ignora erro silencioso
+    }
+
+    // Elementos do Editor
+    const editorHeading = document.getElementById('editor-heading');
+    const editorFeedback = document.getElementById('editor-feedback');
+    const editorForm = document.getElementById('editor-form');
+    const inputId = document.getElementById('post-id');
+    const inputTitle = document.getElementById('post-title');
+    const inputSlug = document.getElementById('post-slug');
+    const slugStatus = document.getElementById('slug-status');
+    const inputCover = document.getElementById('post-cover-url');
+    const inputSourceName = document.getElementById('post-source-name');
+    const inputSourceUrl = document.getElementById('post-source-url');
+    const inputSummary = document.getElementById('post-summary');
+    const summaryCounter = document.getElementById('summary-counter');
+    const inputContent = document.getElementById('post-content');
+    const previewBox = document.getElementById('post-preview');
+    const btnSaveDraft = document.getElementById('btn-save-draft');
+    const btnPublish = document.getElementById('btn-publish');
+
+    function showEditorFeedback(msg, kind = 'err') {
+      editorFeedback.textContent = msg;
+      editorFeedback.className = 'mb-5 rounded-xl border px-4 py-3 text-sm font-medium ' + (
+        kind === 'ok'
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+          : 'bg-rose-50 border-rose-200 text-rose-800'
+      );
+      editorFeedback.classList.remove('hidden');
+    }
+
+    function clearEditorFeedback() {
+      editorFeedback.classList.add('hidden');
+      editorFeedback.textContent = '';
+    }
+
+    async function updatePreview() {
+      const md = inputContent.value.trim();
+      if (!md) {
+        previewBox.innerHTML = '<p class="text-slate-400 italic">Digite no campo ao lado para ver como a notícia ficará publicada...</p>';
+        return;
+      }
+      previewBox.innerHTML = await renderSafeMarkdown(md);
+    }
+
+    let slugTimer = null;
+    async function verifySlugAvailability() {
+      const slug = inputSlug.value.trim();
+      if (!slug) {
+        slugStatus.textContent = '';
+        return;
+      }
+      if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
+        slugStatus.textContent = 'Formato inválido';
+        slugStatus.className = 'text-[11px] font-semibold text-rose-600';
+        return;
+      }
+      const exists = await checkSlugExists(slug, inputId.value || null);
+      if (exists) {
+        slugStatus.textContent = '⚠️ Já em uso';
+        slugStatus.className = 'text-[11px] font-semibold text-rose-600';
+      } else {
+        slugStatus.textContent = '✓ Disponível';
+        slugStatus.className = 'text-[11px] font-semibold text-emerald-600';
+      }
+    }
+
+    inputTitle.addEventListener('input', () => {
+      isDirty = true;
+      if (!slugManuallyEdited) {
+        inputSlug.value = slugify(inputTitle.value);
+        clearTimeout(slugTimer);
+        slugTimer = setTimeout(verifySlugAvailability, 350);
+      }
+    });
+
+    inputSlug.addEventListener('input', () => {
+      isDirty = true;
+      slugManuallyEdited = Boolean(inputSlug.value.trim());
+      clearTimeout(slugTimer);
+      slugTimer = setTimeout(verifySlugAvailability, 350);
+    });
+
+    inputSummary.addEventListener('input', () => {
+      isDirty = true;
+      summaryCounter.textContent = `${inputSummary.value.length} / 300`;
+    });
+
+    inputContent.addEventListener('input', () => {
+      isDirty = true;
+      updatePreview();
+    });
+
+    [categorySelect, inputCover, inputSourceName, inputSourceUrl].forEach((el) => {
+      el.addEventListener('input', () => { isDirty = true; });
+    });
+
+    // Barra de ferramentas Markdown
+    document.querySelectorAll('[data-md]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const type = btn.getAttribute('data-md');
+        const start = inputContent.selectionStart || 0;
+        const end = inputContent.selectionEnd || 0;
+        const selected = inputContent.value.slice(start, end);
+        let replacement = '';
+
+        if (type === 'bold') {
+          replacement = `**${selected || 'texto em negrito'}**`;
+        } else if (type === 'h2') {
+          replacement = `\n## ${selected || 'Subtítulo da seção'}\n`;
+        } else if (type === 'list') {
+          replacement = `\n- ${selected || 'Primeiro item da lista'}\n- Segundo item\n`;
+        } else if (type === 'link') {
+          const url = prompt('Digite o endereço (URL) do link:', 'https://');
+          if (!url) return;
+          replacement = `[${selected || 'texto do link'}](${url})`;
+        } else if (type === 'quote') {
+          replacement = `\n> ${selected || 'Trecho ou citação importante'}\n`;
+        }
+
+        inputContent.setRangeText(replacement, start, end, 'end');
+        inputContent.focus();
+        isDirty = true;
+        updatePreview();
+      });
+    });
+
+    function openEditorForNew() {
+      if (isDirty && !confirm('Descartar alterações atuais e iniciar uma nova notícia?')) return;
+      clearEditorFeedback();
+      editorForm.reset();
+      inputId.value = '';
+      slugManuallyEdited = false;
+      slugStatus.textContent = '';
+      summaryCounter.textContent = '0 / 300';
+      editorHeading.textContent = 'Nova Notícia';
+      isDirty = false;
+      updatePreview();
+      switchAdminTab('editor');
+    }
+
+    function openEditorForPost(post) {
+      if (isDirty && !confirm('Descartar alterações atuais e carregar outra notícia?')) return;
+      clearEditorFeedback();
+      inputId.value = post.id;
+      inputTitle.value = post.title || '';
+      inputSlug.value = post.slug || '';
+      slugManuallyEdited = true;
+      categorySelect.value = post.category_id ? String(post.category_id) : '';
+      inputCover.value = post.cover_url || '';
+      inputSourceName.value = post.source_name || '';
+      inputSourceUrl.value = post.source_url || '';
+      inputSummary.value = post.summary || '';
+      summaryCounter.textContent = `${inputSummary.value.length} / 300`;
+      inputContent.value = post.content_md || '';
+      editorHeading.textContent = `Editando: ${post.title}`;
+      isDirty = false;
+      verifySlugAvailability();
+      updatePreview();
+      switchAdminTab('editor');
+    }
+
+    document.getElementById('btn-new-post').addEventListener('click', openEditorForNew);
+    document.getElementById('btn-editor-cancel').addEventListener('click', () => switchAdminTab('posts'));
+
+    async function handleSave(targetStatus) {
+      clearEditorFeedback();
+      if (!editorForm.reportValidity()) return;
+
+      btnSaveDraft.disabled = true;
+      btnPublish.disabled = true;
+
+      try {
+        const saved = await savePostAdmin({
+          id: inputId.value || null,
+          slug: inputSlug.value,
+          title: inputTitle.value,
+          summary: inputSummary.value,
+          content_md: inputContent.value,
+          category_id: categorySelect.value,
+          source_name: inputSourceName.value,
+          source_url: inputSourceUrl.value,
+          cover_url: inputCover.value,
+          status: targetStatus,
+          author_id: user.id
+        });
+        inputId.value = saved.id;
+        slugManuallyEdited = true;
+        isDirty = false;
+        editorHeading.textContent = `Editando: ${saved.title}`;
+        showEditorFeedback(
+          targetStatus === 'published'
+            ? 'Notícia publicada com sucesso! Ela já está visível no portal.'
+            : 'Rascunho salvo com sucesso!',
+          'ok'
+        );
+      } catch (err) {
+        showEditorFeedback(err.message, 'err');
+      } finally {
+        btnSaveDraft.disabled = false;
+        btnPublish.disabled = false;
+      }
+    }
+
+    btnSaveDraft.addEventListener('click', () => handleSave('draft'));
+    btnPublish.addEventListener('click', () => handleSave('published'));
+    editorForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleSave('published');
+    });
+
+    // Listagem de Notícias (Aba 1)
+    async function loadAdminPosts() {
+      const loadingEl = document.getElementById('admin-posts-loading');
+      const emptyEl = document.getElementById('admin-posts-empty');
+      const listEl = document.getElementById('admin-posts-list');
+
+      loadingEl.classList.remove('hidden');
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = '';
+
+      try {
+        allPostsCache = await listAllPostsAdmin();
+        loadingEl.classList.add('hidden');
+
+        if (!allPostsCache.length) {
+          emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        allPostsCache.forEach((post) => {
+          const isPub = post.status === 'published';
+          const row = document.createElement('div');
+          row.className = 'py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+
+          const info = document.createElement('div');
+          info.className = 'min-w-0 flex-1';
+          const badgeHtml = isPub
+            ? '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px] uppercase">Publicada</span>'
+            : '<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[11px] uppercase">Rascunho</span>';
+
+          const catName = post.category?.name || 'Sem categoria';
+          const dateLabel = fmtDateTime(post.published_at || post.created_at);
+
+          info.innerHTML = `
+            <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-1">
+              ${badgeHtml}
+              <span class="font-semibold text-indigo-700">${esc(catName)}</span>
+              <span>•</span>
+              <span>${esc(dateLabel)}</span>
+              <span>•</span>
+              <code class="text-[11px] bg-slate-100 px-1.5 py-0.5 rounded">${esc(post.slug)}</code>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900 truncate">${esc(post.title)}</h3>
+            <p class="text-xs text-slate-600 line-clamp-1 mt-0.5">${esc(post.summary)}</p>
+          `;
+
+          const actions = document.createElement('div');
+          actions.className = 'flex flex-wrap items-center gap-2 shrink-0 text-xs';
+
+          if (isPub) {
+            const viewLink = document.createElement('a');
+            viewLink.href = `noticia.html?slug=${encodeURIComponent(post.slug)}`;
+            viewLink.target = '_blank';
+            viewLink.className = 'rounded-lg border border-slate-300 hover:bg-slate-100 px-2.5 py-1.5 font-semibold text-slate-700 transition';
+            viewLink.textContent = 'Ver ↗';
+            actions.appendChild(viewLink);
+          }
+
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.className = 'rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 font-bold transition';
+          editBtn.textContent = 'Editar';
+          editBtn.addEventListener('click', () => openEditorForPost(post));
+          actions.appendChild(editBtn);
+
+          const toggleBtn = document.createElement('button');
+          toggleBtn.type = 'button';
+          toggleBtn.className = isPub
+            ? 'rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 font-bold transition'
+            : 'rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-3 py-1.5 font-bold transition';
+          toggleBtn.textContent = isPub ? 'Despublicar' : 'Publicar';
+          toggleBtn.addEventListener('click', async () => {
+            toggleBtn.disabled = true;
+            try {
+              await togglePostStatusAdmin(post.id, isPub ? 'draft' : 'published');
+              await loadAdminPosts();
+            } catch (err) {
+              alert(err.message);
+              toggleBtn.disabled = false;
+            }
+          });
+          actions.appendChild(toggleBtn);
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 font-bold transition';
+          delBtn.textContent = 'Excluir';
+          delBtn.addEventListener('click', async () => {
+            if (!confirm(`Tem certeza que deseja excluir permanentemente a notícia "${post.title}"?`)) return;
+            delBtn.disabled = true;
+            try {
+              await deletePostAdmin(post.id);
+              await loadAdminPosts();
+            } catch (err) {
+              alert(err.message);
+              delBtn.disabled = false;
+            }
+          });
+          actions.appendChild(delBtn);
+
+          row.appendChild(info);
+          row.appendChild(actions);
+          listEl.appendChild(row);
+        });
+      } catch (err) {
+        loadingEl.textContent = err.message || 'Erro ao carregar notícias.';
+      }
+    }
+
+    // Moderação de Comentários (Aba 3)
+    async function loadAdminComments() {
+      const loadingEl = document.getElementById('admin-comments-loading');
+      const emptyEl = document.getElementById('admin-comments-empty');
+      const listEl = document.getElementById('admin-comments-list');
+
+      loadingEl.classList.remove('hidden');
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = '';
+
+      try {
+        const comments = await listRecentCommentsAdmin(50);
+        loadingEl.classList.add('hidden');
+
+        if (!comments.length) {
+          emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        comments.forEach((c) => {
+          const card = document.createElement('div');
+          card.className = `rounded-xl border p-4 text-sm ${c.hidden ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+
+          const top = document.createElement('div');
+          top.className = 'flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 mb-2';
+
+          const meta = document.createElement('div');
+          meta.className = 'flex flex-wrap items-center gap-1.5';
+          const postTitle = c.post?.title || 'Notícia';
+          const postSlug = c.post?.slug || '';
+          const postLink = postSlug ? `<a href="noticia.html?slug=${encodeURIComponent(postSlug)}" target="_blank" class="text-indigo-600 hover:underline font-semibold">${esc(postTitle)}</a>` : esc(postTitle);
+
+          meta.innerHTML = `
+            <strong class="text-slate-800">${esc(c.author?.display_name || 'Contador')}</strong>
+            <span>•</span>
+            <span>${esc(fmtDateTime(c.created_at))}</span>
+            <span>•</span>
+            <span>Em: ${postLink}</span>
+            ${c.hidden ? '<span class="bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase ml-1">Oculto</span>' : ''}
+          `;
+
+          const actions = document.createElement('div');
+          actions.className = 'flex items-center gap-3 text-xs';
+
+          const hideBtn = document.createElement('button');
+          hideBtn.type = 'button';
+          hideBtn.className = 'text-amber-700 hover:text-amber-900 font-bold underline';
+          hideBtn.textContent = c.hidden ? 'Mostrar' : 'Ocultar';
+          hideBtn.addEventListener('click', async () => {
+            try {
+              await toggleHideComment(c.id, !c.hidden);
+              await loadAdminComments();
+            } catch (err) {
+              alert(err.message);
+            }
+          });
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'text-rose-600 hover:text-rose-800 font-bold underline';
+          delBtn.textContent = 'Apagar';
+          delBtn.addEventListener('click', async () => {
+            if (!confirm('Deseja realmente apagar este comentário?')) return;
+            try {
+              await deleteComment(c.id);
+              await loadAdminComments();
+            } catch (err) {
+              alert(err.message);
+            }
+          });
+
+          actions.appendChild(hideBtn);
+          actions.appendChild(delBtn);
+
+          top.appendChild(meta);
+          top.appendChild(actions);
+
+          const bodyP = document.createElement('p');
+          bodyP.className = 'text-slate-700 whitespace-pre-line break-words';
+          bodyP.textContent = c.body;
+
+          card.appendChild(top);
+          card.appendChild(bodyP);
+          listEl.appendChild(card);
+        });
+      } catch (err) {
+        loadingEl.textContent = err.message || 'Erro ao carregar comentários.';
+      }
+    }
+
+    document.getElementById('btn-refresh-comments').addEventListener('click', loadAdminComments);
+
+    await loadAdminPosts();
   </script>
 </body>
 </html>
