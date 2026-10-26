@@ -89,3 +89,4 @@ export async function initPortalLayout(activePage = 'noticias') {
 
   return { user, profile, isAdmin };
 }
+

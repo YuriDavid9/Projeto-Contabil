@@ -129,9 +129,9 @@ create policy comments_select on public.comments for select
          select 1 from public.posts p where p.id = post_id and p.status = 'published'))
   );
 create policy comments_insert on public.comments for insert
+  to authenticated
   with check (
     auth.uid() = user_id
-    and exists (select 1 from public.posts p where p.id = post_id and p.status = 'published')
   );
 create policy comments_delete on public.comments for delete
   using (auth.uid() = user_id or public.is_admin());

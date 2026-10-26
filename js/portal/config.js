@@ -3,3 +3,4 @@
 
 export const SUPABASE_URL = 'https://trnkzwserimzkftbwuge.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_OBTigHbU_iSuBREfGj5AjA_-rn8z-_J';
+

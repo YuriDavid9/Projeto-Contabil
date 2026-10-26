@@ -20,3 +20,4 @@ Este documento reúne as regras inegociáveis do projeto **AutoContábil Hub** q
 - O projeto utiliza HTML estático + Tailwind CSS via CDN + JavaScript em módulos ES (`type="module"`).
 - Não introduza bundlers (Webpack, Vite) ou frameworks sem necessidade explícita.
 - Para testar localmente no Windows/PowerShell, use `python3 -m http.server 5500 --bind 127.0.0.1` (a porta `8080` pode conflitar com processos locais como o cliente Steam).
+

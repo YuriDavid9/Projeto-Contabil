@@ -92,3 +92,4 @@ export async function updatePassword(newPassword) {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) throw new Error(translateAuthError(error));
 }
+

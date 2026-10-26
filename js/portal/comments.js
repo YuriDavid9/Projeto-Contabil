@@ -66,3 +66,4 @@ export async function toggleHideComment(commentId, hidden) {
     .eq('id', commentId);
   if (error) throw new Error(translateCommentError(error));
 }
+
