@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Notícias | AutoContábil Hub — Notícias</title>
-  <meta name="description" content="Portal de notícias para contadores — AutoContábil Hub.">
+  <title>Notícias Contábeis e Fiscais | AutoContábil Hub — Notícias</title>
+  <meta name="description" content="Acompanhe atualizações sobre legislação fiscal, reforma tributária, Sistema Domínio e rotinas contábeis no AutoContábil Hub.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/noticias.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub — Notícias">
+  <meta property="og:title" content="Notícias Contábeis e Fiscais | AutoContábil Hub — Notícias">
+  <meta property="og:description" content="Acompanhe atualizações sobre legislação fiscal, reforma tributária, Sistema Domínio e rotinas contábeis.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/noticias.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,17 +26,187 @@
   <div id="portal-header"></div>
 
   <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
-    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 text-center">
-      <h1 class="text-2xl font-extrabold text-slate-900">Portal de Notícias</h1>
-      <p class="text-slate-600 text-sm mt-2">Autenticação configurada! Na Fase 3 esta página exibirá a listagem completa de notícias com filtro e busca.</p>
+    <div class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Portal de Notícias</h1>
+      <p class="text-sm text-slate-600 mt-1">Atualizações fiscais, sistemas contábeis, prazos e novidades do AutoContábil Hub.</p>
+    </div>
+
+    <!-- Barra de busca e filtro por categoria -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-6 shadow-sm">
+      <form id="filter-form" class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <span class="absolute left-3.5 top-2.5 text-slate-400" aria-hidden="true">🔎</span>
+          <input id="search-input" type="search" placeholder="Buscar por título ou resumo..." class="w-full pl-10 pr-3 py-2 rounded-xl border border-slate-300 text-sm focus:border-indigo-500 focus:outline-none">
+        </div>
+        <select id="category-select" aria-label="Filtrar por categoria" class="rounded-xl border border-slate-300 text-sm py-2 px-3 bg-white focus:border-indigo-500 focus:outline-none">
+          <option value="">Todas as categorias</option>
+        </select>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-4 py-2 text-sm transition">Filtrar</button>
+      </form>
+    </div>
+
+    <!-- Estados: Carregando, Erro, Vazio e Lista -->
+    <div id="posts-loading" class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+      Carregando notícias...
+    </div>
+
+    <div id="posts-error" class="hidden bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-6 text-center text-sm font-medium"></div>
+
+    <div id="posts-empty" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center">
+      <p class="text-base font-bold text-slate-800">Nenhuma notícia encontrada</p>
+      <p class="text-xs text-slate-500 mt-1">Tente limpar os filtros de busca ou escolher outra categoria.</p>
+      <button id="btn-clear-filters" type="button" class="mt-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl px-4 py-2 text-xs transition">Limpar filtros</button>
+    </div>
+
+    <div id="posts-list" class="space-y-4 hidden"></div>
+
+    <!-- Paginação -->
+    <div id="posts-pagination" class="hidden mt-6 flex items-center justify-between bg-white rounded-2xl border border-slate-200 px-4 py-3 text-xs sm:text-sm">
+      <button id="btn-prev-page" type="button" class="rounded-lg border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 font-semibold transition">← Anterior</button>
+      <span id="page-info" class="text-slate-600 font-medium"></span>
+      <button id="btn-next-page" type="button" class="rounded-lg border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 font-semibold transition">Próxima →</button>
     </div>
   </main>
 
   <div id="portal-footer"></div>
 
   <script type="module">
+    import { esc, fmtISODate } from './js/utils.js';
     import { initPortalLayout } from './js/portal/layout.js';
+    import { listCategories, listPublishedPosts, PAGE_SIZE } from './js/portal/posts.js';
+
     await initPortalLayout('noticias');
+
+    const searchInput = document.getElementById('search-input');
+    const categorySelect = document.getElementById('category-select');
+    const filterForm = document.getElementById('filter-form');
+    const loadingEl = document.getElementById('posts-loading');
+    const errorEl = document.getElementById('posts-error');
+    const emptyEl = document.getElementById('posts-empty');
+    const listEl = document.getElementById('posts-list');
+    const paginationEl = document.getElementById('posts-pagination');
+    const prevBtn = document.getElementById('btn-prev-page');
+    const nextBtn = document.getElementById('btn-next-page');
+    const pageInfo = document.getElementById('page-info');
+    const clearFiltersBtn = document.getElementById('btn-clear-filters');
+
+    let currentPage = 1;
+
+    try {
+      const categories = await listCategories();
+      categories.forEach((cat) => {
+        const opt = document.createElement('option');
+        opt.value = String(cat.id);
+        opt.textContent = cat.name;
+        categorySelect.appendChild(opt);
+      });
+    } catch {
+      // Se falhar ao carregar categorias, mantém "Todas as categorias"
+    }
+
+    async function loadPosts() {
+      loadingEl.classList.remove('hidden');
+      errorEl.classList.add('hidden');
+      emptyEl.classList.add('hidden');
+      listEl.classList.add('hidden');
+      paginationEl.classList.add('hidden');
+
+      try {
+        const { posts, total, page, pageSize } = await listPublishedPosts({
+          categoryId: categorySelect.value || null,
+          search: searchInput.value || '',
+          page: currentPage,
+          pageSize: PAGE_SIZE
+        });
+
+        loadingEl.classList.add('hidden');
+
+        if (!posts.length) {
+          emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        listEl.innerHTML = posts.map((post) => {
+          const catName = post.category?.name || 'Geral';
+          const authorName = post.author?.display_name || 'Equipe AutoContábil';
+          const pubDate = fmtISODate(post.published_at || post.created_at);
+          const url = `noticia.html?slug=${encodeURIComponent(post.slug)}`;
+          const coverHtml = post.cover_url
+            ? `<img src="${esc(post.cover_url)}" alt="" loading="lazy" class="w-full sm:w-44 h-40 sm:h-32 object-cover rounded-xl border border-slate-100 shrink-0">`
+            : '';
+
+          return `
+            <article class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row gap-4 sm:items-center">
+              ${coverHtml}
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-2">
+                  <span class="bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-md">${esc(catName)}</span>
+                  <span>•</span>
+                  <time datetime="${esc(post.published_at || post.created_at)}">${esc(pubDate)}</time>
+                  <span>•</span>
+                  <span>Por <strong class="text-slate-700">${esc(authorName)}</strong></span>
+                </div>
+                <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
+                  <a href="${url}" class="hover:text-indigo-600 transition">${esc(post.title)}</a>
+                </h2>
+                <p class="text-sm text-slate-600 mt-1.5 line-clamp-2">${esc(post.summary)}</p>
+                <div class="mt-3">
+                  <a href="${url}" class="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800">Ler notícia completa →</a>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        listEl.classList.remove('hidden');
+
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        if (totalPages > 1) {
+          pageInfo.textContent = `Página ${page} de ${totalPages} (${total} notícias)`;
+          prevBtn.disabled = page <= 1;
+          nextBtn.disabled = page >= totalPages;
+          paginationEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        loadingEl.classList.add('hidden');
+        errorEl.textContent = err.message || 'Erro ao carregar notícias.';
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    filterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      currentPage = 1;
+      loadPosts();
+    });
+
+    categorySelect.addEventListener('change', () => {
+      currentPage = 1;
+      loadPosts();
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      categorySelect.value = '';
+      currentPage = 1;
+      loadPosts();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        loadPosts();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentPage++;
+      loadPosts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    await loadPosts();
   </script>
 </body>
 </html>

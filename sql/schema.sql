@@ -139,3 +139,11 @@ create policy comments_admin_hide on public.comments for update
   using (public.is_admin()) with check (public.is_admin());
 revoke update on public.comments from anon, authenticated;
 grant update (hidden) on public.comments to authenticated;  -- e a policy acima limita a admin
+
+-- Permissões de acesso às tabelas (respeitando sempre as policies do RLS acima)
+grant usage on schema public to anon, authenticated;
+grant select on public.profiles, public.categories, public.posts, public.comments to anon, authenticated;
+grant insert, delete on public.comments to authenticated;
+grant insert, update, delete on public.posts to authenticated;
+grant insert, update, delete on public.categories to authenticated;
+grant usage, select on all sequences in schema public to authenticated;

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notícia | AutoContábil Hub — Notícias</title>
+  <meta id="meta-description" name="description" content="Leia a notícia completa e participe dos comentários no AutoContábil Hub.">
+  <link id="canonical-link" rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/noticias.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="AutoContábil Hub — Notícias">
+  <meta id="og-title" property="og:title" content="Notícia | AutoContábil Hub — Notícias">
+  <meta id="og-description" property="og:description" content="Leia a notícia completa e participe dos comentários no AutoContábil Hub.">
+  <meta id="og-url" property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/noticias.html">
+  <meta id="og-image" property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .prose-portal h1, .prose-portal h2, .prose-portal h3 { font-weight: 800; color: #0f172a; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+    .prose-portal h2 { font-size: 1.25rem; }
+    .prose-portal h3 { font-size: 1.1rem; }
+    .prose-portal p { margin-bottom: 1rem; line-height: 1.75; color: #334155; }
+    .prose-portal ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #334155; }
+    .prose-portal ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; color: #334155; }
+    .prose-portal blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; color: #475569; font-style: italic; margin: 1rem 0; background: #f8fafc; padding-top: 0.5rem; padding-bottom: 0.5rem; border-radius: 0 0.5rem 0.5rem 0; }
+    .prose-portal a { color: #4f46e5; text-decoration: underline; font-weight: 600; }
+    .prose-portal code { background: #f1f5f9; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.875em; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <div id="portal-header"></div>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-8">
+    <div class="mb-5">
+      <a href="noticias.html" class="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800">← Voltar para todas as notícias</a>
+    </div>
+
+    <!-- Estado: Carregando -->
+    <div id="post-loading" class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+      Carregando notícia...
+    </div>
+
+    <!-- Estado: Não encontrada / Erro -->
+    <div id="post-not-found" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center">
+      <div class="text-4xl mb-2">📭</div>
+      <h1 class="text-xl font-extrabold text-slate-900">Notícia não encontrada</h1>
+      <p class="text-sm text-slate-600 mt-1">Esta notícia pode ter sido removida, estar em rascunho ou o endereço está incorreto.</p>
+      <a href="noticias.html" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-4 py-2 text-xs transition">Ir para a lista de notícias</a>
+    </div>
+
+    <!-- Conteúdo da Notícia -->
+    <article id="post-article" class="hidden bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3">
+        <span id="post-category" class="bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-md"></span>
+        <span>•</span>
+        <time id="post-date"></time>
+        <span>•</span>
+        <span>Por <strong id="post-author" class="text-slate-700"></strong></span>
+      </div>
+
+      <h1 id="post-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight"></h1>
+      <p id="post-summary" class="text-base text-slate-600 mt-3 font-medium border-b border-slate-100 pb-4"></p>
+
+      <img id="post-cover" src="" alt="" class="hidden w-full max-h-96 object-cover rounded-xl border border-slate-100 my-5">
+
+      <div id="post-body" class="prose-portal text-base mt-5"></div>
+
+      <div id="post-source-box" class="hidden mt-6 pt-4 border-t border-slate-200 text-xs text-slate-600 flex items-center gap-1.5">
+        <span class="font-bold text-slate-700">Fonte oficial:</span>
+        <span id="post-source-content"></span>
+      </div>
+
+      <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-500">
+        <strong>Nota informativa:</strong> Este resumo tem caráter educativo e informativo. Confira sempre a íntegra na fonte oficial e valide com o contador responsável antes de tomar decisões fiscais.
+      </div>
+    </article>
+
+    <!-- Seção de Comentários -->
+    <section id="comments-section" class="hidden mt-8 bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-extrabold text-slate-900">Comentários <span id="comments-count" class="text-sm font-semibold text-slate-500">(0)</span></h2>
+      </div>
+
+      <!-- Aviso para visitante deslogado -->
+      <div id="comment-guest-box" class="hidden mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p class="text-sm text-slate-700 font-medium">Entre na sua conta para participar da discussão e deixar um comentário.</p>
+        <a id="comment-login-link" href="entrar.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-4 py-2 text-xs text-center shrink-0 transition">Entrar para comentar</a>
+      </div>
+
+      <!-- Formulário para usuário logado -->
+      <form id="comment-form" class="hidden mb-6 space-y-3">
+        <div>
+          <label for="comment-body" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Escreva seu comentário</label>
+          <textarea id="comment-body" rows="3" minlength="2" maxlength="1000" required placeholder="Compartilhe sua dúvida ou experiência com respeito..." class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+            <span>Texto puro (HTML não é executado).</span>
+            <span id="comment-counter">0 / 1000</span>
+          </div>
+        </div>
+        <div id="comment-feedback" class="hidden rounded-xl border px-3.5 py-2.5 text-xs font-medium"></div>
+        <button id="btn-comment-submit" type="submit" class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl px-4 py-2 text-xs sm:text-sm transition">Publicar comentário</button>
+      </form>
+
+      <!-- Estados da lista de comentários -->
+      <div id="comments-loading" class="text-xs text-slate-500 py-4 text-center">Carregando comentários...</div>
+      <div id="comments-empty" class="hidden text-xs text-slate-500 py-4 text-center bg-slate-50 rounded-xl border border-slate-100">Seja o primeiro a comentar nesta notícia!</div>
+      <div id="comments-list" class="space-y-3"></div>
+    </section>
+  </main>
+
+  <div id="portal-footer"></div>
+
+  <script type="module">
+    import { esc, fmtDateTime } from './js/utils.js';
+    import { initPortalLayout } from './js/portal/layout.js';
+    import { getPostBySlug, renderSafeMarkdown } from './js/portal/posts.js';
+    import { listCommentsByPost, createComment, deleteComment, toggleHideComment } from './js/portal/comments.js';
+
+    const { user, isAdmin } = await initPortalLayout('noticias');
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+
+    const loadingEl = document.getElementById('post-loading');
+    const notFoundEl = document.getElementById('post-not-found');
+    const articleEl = document.getElementById('post-article');
+    const commentsSection = document.getElementById('comments-section');
+
+    if (!slug) {
+      loadingEl.classList.add('hidden');
+      notFoundEl.classList.remove('hidden');
+    } else {
+      try {
+        const post = await getPostBySlug(slug);
+        loadingEl.classList.add('hidden');
+
+        if (!post) {
+          notFoundEl.classList.remove('hidden');
+        } else {
+          // Atualiza SEO dinâmico
+          document.title = `${post.title} | AutoContábil Hub — Notícias`;
+          const metaDesc = document.getElementById('meta-description');
+          if (metaDesc) metaDesc.setAttribute('content', post.summary);
+          const ogTitle = document.getElementById('og-title');
+          if (ogTitle) ogTitle.setAttribute('content', post.title);
+          const ogDesc = document.getElementById('og-description');
+          if (ogDesc) ogDesc.setAttribute('content', post.summary);
+          const canonicalUrl = `https://yuridavid9.github.io/Projeto-Contabil/noticia.html?slug=${encodeURIComponent(post.slug)}`;
+          const canonicalLink = document.getElementById('canonical-link');
+          if (canonicalLink) canonicalLink.setAttribute('href', canonicalUrl);
+          const ogUrl = document.getElementById('og-url');
+          if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+
+          // Preenche cabeçalho da notícia
+          document.getElementById('post-category').textContent = post.category?.name || 'Geral';
+          const dateEl = document.getElementById('post-date');
+          dateEl.textContent = fmtDateTime(post.published_at || post.created_at);
+          dateEl.setAttribute('datetime', post.published_at || post.created_at);
+          document.getElementById('post-author').textContent = post.author?.display_name || 'Equipe AutoContábil';
+          document.getElementById('post-title').textContent = post.title;
+          document.getElementById('post-summary').textContent = post.summary;
+
+          if (post.cover_url && /^https?:\/\//i.test(post.cover_url)) {
+            const coverEl = document.getElementById('post-cover');
+            coverEl.src = post.cover_url;
+            coverEl.alt = post.title;
+            coverEl.classList.remove('hidden');
+          }
+
+          // Renderiza conteúdo Markdown sanitizado com DOMPurify
+          document.getElementById('post-body').innerHTML = await renderSafeMarkdown(post.content_md);
+
+          // Fonte oficial
+          if (post.source_name || post.source_url) {
+            const sourceBox = document.getElementById('post-source-box');
+            const sourceContent = document.getElementById('post-source-content');
+            const label = post.source_name || post.source_url;
+            if (post.source_url && /^https?:\/\//i.test(post.source_url)) {
+              const a = document.createElement('a');
+              a.href = post.source_url;
+              a.target = '_blank';
+              a.rel = 'noopener noreferrer';
+              a.className = 'text-indigo-600 hover:text-indigo-800 underline font-semibold';
+              a.textContent = label;
+              sourceContent.appendChild(a);
+            } else {
+              sourceContent.textContent = label;
+            }
+            sourceBox.classList.remove('hidden');
+          }
+
+          articleEl.classList.remove('hidden');
+          commentsSection.classList.remove('hidden');
+
+          await setupComments(post.id);
+        }
+      } catch {
+        loadingEl.classList.add('hidden');
+        notFoundEl.classList.remove('hidden');
+      }
+    }
+
+    async function setupComments(postId) {
+      const guestBox = document.getElementById('comment-guest-box');
+      const loginLink = document.getElementById('comment-login-link');
+      const commentForm = document.getElementById('comment-form');
+      const commentBody = document.getElementById('comment-body');
+      const commentCounter = document.getElementById('comment-counter');
+      const commentFeedback = document.getElementById('comment-feedback');
+      const submitBtn = document.getElementById('btn-comment-submit');
+      const commentsLoading = document.getElementById('comments-loading');
+      const commentsEmpty = document.getElementById('comments-empty');
+      const commentsList = document.getElementById('comments-list');
+      const commentsCount = document.getElementById('comments-count');
+
+      if (!user) {
+        loginLink.href = `entrar.html?next=${encodeURIComponent('noticia.html?slug=' + slug)}`;
+        guestBox.classList.remove('hidden');
+      } else {
+        commentForm.classList.remove('hidden');
+        commentBody.addEventListener('input', () => {
+          commentCounter.textContent = `${commentBody.value.length} / 1000`;
+        });
+      }
+
+      function showCommentFeedback(msg, kind = 'err') {
+        commentFeedback.textContent = msg;
+        commentFeedback.className = 'rounded-xl border px-3.5 py-2.5 text-xs font-medium ' + (
+          kind === 'ok'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            : 'bg-rose-50 border-rose-200 text-rose-800'
+        );
+        commentFeedback.classList.remove('hidden');
+      }
+
+      async function renderComments() {
+        commentsLoading.classList.remove('hidden');
+        commentsEmpty.classList.add('hidden');
+        commentsList.innerHTML = '';
+
+        try {
+          const items = await listCommentsByPost(postId);
+          commentsLoading.classList.add('hidden');
+          commentsCount.textContent = `(${items.length})`;
+
+          if (!items.length) {
+            commentsEmpty.classList.remove('hidden');
+            return;
+          }
+
+          items.forEach((c) => {
+            const card = document.createElement('div');
+            card.className = `rounded-xl border p-4 text-sm ${c.hidden ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
+
+            const header = document.createElement('div');
+            header.className = 'flex flex-wrap items-center justify-between gap-2 mb-1.5 text-xs text-slate-500';
+
+            const authorWrap = document.createElement('div');
+            authorWrap.className = 'flex items-center gap-1.5';
+
+            const authorStrong = document.createElement('strong');
+            authorStrong.className = 'text-slate-800 font-bold';
+            authorStrong.textContent = c.author?.display_name || 'Contador';
+            authorWrap.appendChild(authorStrong);
+
+            if (c.author?.role === 'admin') {
+              const badge = document.createElement('span');
+              badge.className = 'bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase';
+              badge.textContent = 'Admin';
+              authorWrap.appendChild(badge);
+            }
+
+            if (c.hidden) {
+              const hiddenBadge = document.createElement('span');
+              hiddenBadge.className = 'bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase';
+              hiddenBadge.textContent = 'Oculto pelo moderador';
+              authorWrap.appendChild(hiddenBadge);
+            }
+
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = `• ${fmtDateTime(c.created_at)}`;
+            authorWrap.appendChild(dateSpan);
+
+            header.appendChild(authorWrap);
+
+            // Ações: apagar (próprio usuário ou admin) e ocultar/mostrar (admin)
+            const canDelete = user && (user.id === c.user_id || isAdmin);
+            if (canDelete || isAdmin) {
+              const actions = document.createElement('div');
+              actions.className = 'flex items-center gap-2';
+
+              if (isAdmin) {
+                const hideBtn = document.createElement('button');
+                hideBtn.type = 'button';
+                hideBtn.className = 'text-amber-700 hover:text-amber-900 font-semibold underline';
+                hideBtn.textContent = c.hidden ? 'Mostrar' : 'Ocultar';
+                hideBtn.addEventListener('click', async () => {
+                  try {
+                    await toggleHideComment(c.id, !c.hidden);
+                    await renderComments();
+                  } catch (err) {
+                    alert(err.message);
+                  }
+                });
+                actions.appendChild(hideBtn);
+              }
+
+              if (canDelete) {
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.className = 'text-rose-600 hover:text-rose-800 font-semibold underline';
+                delBtn.textContent = 'Apagar';
+                delBtn.addEventListener('click', async () => {
+                  if (!confirm('Deseja realmente apagar este comentário?')) return;
+                  try {
+                    await deleteComment(c.id);
+                    await renderComments();
+                  } catch (err) {
+                    alert(err.message);
+                  }
+                });
+                actions.appendChild(delBtn);
+              }
+
+              header.appendChild(actions);
+            }
+
+            const bodyP = document.createElement('p');
+            bodyP.className = 'text-slate-700 whitespace-pre-line break-words leading-relaxed';
+            // Texto puro com textContent (nunca interpreta HTML)
+            bodyP.textContent = c.body;
+
+            card.appendChild(header);
+            card.appendChild(bodyP);
+            commentsList.appendChild(card);
+          });
+        } catch (err) {
+          commentsLoading.textContent = err.message || 'Erro ao carregar comentários.';
+        }
+      }
+
+      if (user) {
+        commentForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          commentFeedback.classList.add('hidden');
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Publicando...';
+          try {
+            await createComment({
+              postId,
+              userId: user.id,
+              body: commentBody.value
+            });
+            commentBody.value = '';
+            commentCounter.textContent = '0 / 1000';
+            showCommentFeedback('Comentário publicado com sucesso!', 'ok');
+            await renderComments();
+          } catch (err) {
+            showCommentFeedback(err.message, 'err');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Publicar comentário';
+          }
+        });
+      }
+
+      await renderComments();
+    }
+  </script>
+</body>
+</html>
