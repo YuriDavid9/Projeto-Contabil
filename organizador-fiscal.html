@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organizador Fiscal de Documentos | AutoContábil Hub</title>
+  <meta name="description" content="Padronize nomes de comprovantes, notas e guias fiscais, organize em pastas por competência e gere um arquivo ZIP com manifesto De/Para localmente no navegador.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/organizador-fiscal.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="Organizador Fiscal de Documentos | AutoContábil Hub">
+  <meta property="og:description" content="Padronize nomes de arquivos fiscais, separe por competência e gere um ZIP com manifesto De/Para no navegador.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/organizador-fiscal.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Organizador Fiscal de Documentos — AutoContábil Hub",
+          "url": "https://yuridavid9.github.io/Projeto-Contabil/organizador-fiscal.html",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "inLanguage": "pt-BR",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+          "description": "Padronize nomes de arquivos, organize documentos por competência e tipo (XML, PDF, imagens) e gere um pacote ZIP estruturado com manifesto De/Para localmente no navegador."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "O Organizador altera meus arquivos originais no computador?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Não. Seus arquivos originais permanecem intactos onde estão. A ferramenta gera um novo pacote .zip contendo as cópias renomeadas e organizadas em pastas, além de uma planilha De/Para."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "O que é o arquivo manifesto_de_para.csv incluído no ZIP?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "É uma planilha de controle que lista o nome original de cada arquivo ao lado do novo nome padronizado, pasta de destino, data, CNPJ, tipo, fornecedor e valor, facilitando a conferência pelo escritório contábil."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Posso salvar meu próprio padrão de nomes para usar todo mês?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim. Você pode criar uma máscara personalizada usando variáveis como {AAAA}, {MM}, {DD}, {TIPO}, {FORNECEDOR} e {VALOR} e salvá-la no seu navegador para reutilizar nos meses seguintes."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="ferramentas.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">← Catálogo de Ferramentas</a>
+        <a href="index.html#organizador" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">⚡ Abrir Organizador</a>
+        <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+    <!-- Bloco de Privacidade -->
+    <div class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl px-4 py-3 text-sm mb-6">
+      <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span><strong>Processamento 100% local no navegador:</strong> seus comprovantes, PDFs e notas fiscais não saem do seu computador.</span>
+    </div>
+
+    <!-- Cabeçalho da Ferramenta -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-6">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-bold mb-3">
+        <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md">Área Fiscal</span>
+        <span class="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-md">Gratuito • Sem cadastro</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">🗂️ Organizador Fiscal de Documentos</h1>
+      <p class="mt-2 text-base text-slate-600 leading-relaxed">
+        Transforme lotes de arquivos com nomes confusos (scans, fotos de WhatsApp, boletos e comprovantes PIX) em pastas padronizadas por competência e fornecedor, prontas para enviar à contabilidade.
+      </p>
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <a href="index.html#organizador" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition">Abrir ferramenta →</a>
+        <a href="ferramentas.html" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 hover:bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition">Ver todas as ferramentas</a>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <!-- 1. O que faz e para quem -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">O que faz e para quem é indicada</h2>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          O Organizador Fiscal analisa os nomes originais dos arquivos — e, quando são PDFs com camada de texto, lê o conteúdo localmente via PDF.js — para sugerir automaticamente data, CNPJ, tipo de documento (PIX, NF-e, Boleto, Recibo, Guia, Extrato, Contrato ou Comprovante), fornecedor e valor.
+        </p>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          <strong>Para quem:</strong> Clientes de escritórios contábeis, MEIs, assistentes financeiros e equipes administrativas que precisam organizar o malote digital mensal sem renomear arquivo por arquivo na mão.
+        </p>
+      </section>
+
+      <!-- 2. Passo a passo -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Como usar (Passo a passo)</h2>
+        <ol class="mt-3 list-decimal pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li>Clique em <strong>Abrir ferramenta</strong> para acessar a aba do Organizador Fiscal.</li>
+          <li>Arraste seus arquivos (PDF, XML, JPG, PNG) para a área de seleção ou clique em <strong>Carregar exemplos</strong> para ver o funcionamento com 6 documentos simulados.</li>
+          <li>Escolha a regra de nomeação desejada e a estrutura de pastas (por <code>AAAA-MM</code>, por <code>Fornecedor</code> ou ambos) e confira a prévia da árvore de diretórios.</li>
+          <li>Complete ou edite qualquer campo diretamente na tabela e clique em <strong>Baixar ZIP Padronizado</strong> (ou baixe apenas a planilha de controle <em>Manifesto De/Para</em>).</li>
+        </ol>
+      </section>
+
+      <!-- 3. Formatos aceitos -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Formatos aceitos e exportações</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li><strong>Entrada:</strong> Documentos PDF (com extração local de texto quando disponível), XML, imagens (JPG, JPEG, PNG), CSV e OFX.</li>
+          <li><strong>Pacote ZIP:</strong> Gera um arquivo <code>documentos_padronizados_*.zip</code> contendo todas as pastas e arquivos renomeados mais o arquivo <code>manifesto_de_para.csv</code>.</li>
+          <li><strong>Regras reutilizáveis:</strong> Permite salvar máscaras personalizadas com <code>{AAAA}</code>, <code>{MM}</code>, <code>{DD}</code>, <code>{TIPO}</code>, <code>{FORNECEDOR}</code> e <code>{VALOR}</code> no navegador.</li>
+        </ul>
+      </section>
+
+      <!-- 4. Exemplo com dados de demonstração -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Exemplo com dados de demonstração</h2>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Ao acionar o lote de exemplos, a ferramenta preenche a fila com <strong>6 arquivos típicos de fechamento mensal</strong>: <code>comprovante_pix_final_12.pdf</code> (Delta Materiais), <code>SCAN_20261012_0001.pdf</code> (Alfa Comércio), <code>IMG_8841.jpg</code> (Recibo Imobiliária Sol), <code>boleto energisa out (2).pdf</code>, <code>NOVO_documento (3).pdf</code> (Guia Receita Federal) e uma imagem de comprovante vinda do WhatsApp. Você vê na hora os novos nomes padronizados (ex.: <code>2026-10-07_PIX_DELTA-MATERIAIS_1815,37.pdf</code>) e pode até baixar o ZIP de demonstração.
+        </p>
+      </section>
+
+      <!-- 5. Privacidade e Limitações -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Privacidade e limitações</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li><strong>Processamento 100% local:</strong> A leitura de PDFs e a montagem do pacote ZIP (via JSZip) ocorrem exclusivamente na memória do seu navegador.</li>
+          <li><strong>Sem OCR para imagens digitalizadas:</strong> PDFs gerados como imagem escaneada (sem texto selecionável) ou fotos não passam por reconhecimento óptico de caracteres (OCR); nesses casos, preencha ou ajuste os campos na tabela antes de gerar o ZIP.</li>
+          <li><strong>Preservação dos originais:</strong> Os arquivos da sua máquina não são modificados; o download entrega um novo pacote organizado.</li>
+        </ul>
+      </section>
+
+      <!-- 6. Perguntas Frequentes (FAQ) -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Perguntas frequentes (FAQ)</h2>
+        <div class="mt-4 space-y-4">
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">O Organizador altera meus arquivos originais no computador?</summary>
+            <p class="mt-2 text-sm text-slate-600">Não. Seus arquivos originais permanecem intactos onde estão. A ferramenta gera um novo pacote .zip contendo as cópias renomeadas e organizadas em pastas, além de uma planilha De/Para.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">O que é o arquivo manifesto_de_para.csv incluído no ZIP?</summary>
+            <p class="mt-2 text-sm text-slate-600">É uma planilha de controle que lista o nome original de cada arquivo ao lado do novo nome padronizado, pasta de destino, data, CNPJ, tipo, fornecedor e valor, facilitando a conferência pelo escritório contábil.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">Posso salvar meu próprio padrão de nomes para usar todo mês?</summary>
+            <p class="mt-2 text-sm text-slate-600">Sim. Você pode criar uma máscara personalizada usando variáveis como {AAAA}, {MM}, {DD}, {TIPO}, {FORNECEDOR} e {VALOR} e salvá-la no seu navegador para reutilizar nos meses seguintes.</p>
+          </details>
+        </div>
+      </section>
+
+      <!-- Outras ferramentas -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-slate-900">Explore outras ferramentas do Hub</h2>
+        <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="extrator-xml-nfe.html">Extrator de XML (NF-e/NFC-e)</a>
+          <span class="text-slate-300">•</span>
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="conciliador-bancario-ofx.html">Conciliador Bancário (OFX/CSV)</a>
+          <span class="text-slate-300">•</span>
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="validador-cnpj.html">Validador de CNPJ, CPF e Chave NF-e</a>
+        </div>
+      </section>
+    </div>
+
+    <!-- Aviso informativo -->
+    <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Conteúdo informativo. <strong>Não substitui a orientação do seu contador</strong> nem dispensa a conferência e guarda dos comprovantes fiscais originais.
+    </div>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="font-extrabold text-white text-base">AutoContábil <span class="text-emerald-400">Hub</span></p>
+        <p class="text-slate-400 mt-1">As ferramentas processam seus arquivos localmente no navegador. O portal de notícias usa conta e comentários armazenados em servidor.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Precisa de automação contábil sob medida?</p>
+        <p class="text-slate-400">Rotinas fiscais, integrações, planilhas inteligentes, BPO financeiro e contábil.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Yuri David</p>
+        <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20AutoCont%C3%A1bil%20Hub.">💬 WhatsApp: (83) 98639-8472</a>
+        <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="ferramentas.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="index.html">App</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="termos.html">Termos</a>
+    </div>
+    <div class="border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">
+      Conteúdo informativo. Não substitui a orientação do seu contador.
+    </div>
+  </footer>
+</body>
+</html>

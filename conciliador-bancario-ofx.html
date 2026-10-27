@@ -1,26 +1,230 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Conciliador Bancário OFX e CSV | AutoContábil Hub</title>
-  <meta name="description" content="Compare lançamentos de extratos OFX ou CSV com o razão contábil no navegador e identifique pendências.">
+  <meta name="description" content="Compare lançamentos de extratos OFX ou CSV com o razão contábil no navegador, identifique divergências e exporte relatórios CSV ou XLSX.">
   <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/conciliador-bancario-ofx.html">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="Conciliador Bancário OFX e CSV | AutoContábil Hub">
+  <meta property="og:description" content="Compare lançamentos de extratos OFX ou CSV com o razão contábil no navegador e identifique pendências.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/conciliador-bancario-ofx.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Conciliador Bancário OFX e CSV — AutoContábil Hub",
+          "url": "https://yuridavid9.github.io/Projeto-Contabil/conciliador-bancario-ofx.html",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "inLanguage": "pt-BR",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+          "description": "Compare extratos bancários OFX ou CSV com os lançamentos do razão contábil localmente no navegador, identifique divergências e vincule pares manualmente."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Como o conciliador encontra os lançamentos correspondentes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Ele cruza primeiro lançamentos com mesmo valor em centavos e datas dentro da tolerância configurada, avaliando também palavras-chave da descrição. Quando encontra datas e descrições compatíveis com valores diferentes, sinaliza como Divergência de Valor."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Posso conciliar manualmente dois lançamentos que têm descrições diferentes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim. Basta selecionar uma pendência bancária e uma pendência interna na tela e confirmar o vínculo manual. O par passa a aparecer com o status Conciliado manualmente."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Os dados do meu extrato bancário ficam salvos na internet?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Nunca. O processamento é totalmente local no seu navegador. Mesmo se você marcar a opção de lembrar dados, eles ficam restritos ao armazenamento local do seu navegador e podem ser apagados com um clique."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-  <header class="bg-slate-900 text-white"><div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-5 text-sm"><a class="font-semibold hover:text-emerald-300" href="ferramentas.html">← Catálogo de Ferramentas</a><a class="font-semibold text-slate-300 hover:text-white" href="noticias.html">Notícias</a></div></header>
-  <main class="mx-auto max-w-4xl px-4 py-10">
-    <h1 class="text-3xl font-extrabold text-slate-900">Conciliador bancário de OFX e CSV</h1>
-    <p class="mt-3 text-lg text-slate-600">Compare extratos bancários com lançamentos internos e revise correspondências e diferenças no próprio navegador.</p>
-    <div class="mt-5"><a class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white transition" href="index.html#conciliador">Abrir ferramenta →</a></div>
-    <div class="mt-7 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 leading-7">
-      <section><h2 class="text-xl font-bold">Para que serve</h2><p class="mt-2">O conciliador importa transações OFX ou CSV e compara data, valor e descrição com os lançamentos do razão. O resultado separa itens conciliados, divergências de valor, pendências bancárias e pendências internas. Correspondências podem ser ligadas manualmente, e valores com mesma data e descrição são sinalizados como possíveis duplicados para revisão. A ferramenta ajuda a organizar uma conferência, mas não faz lançamentos contábeis nem decide qual transação está correta.</p></section>
-      <section><h2 class="text-xl font-bold">Como usar</h2><ol class="mt-2 list-decimal space-y-1 pl-6"><li>Abra o app e selecione <strong>Conciliador Bancário</strong>.</li><li>Carregue o extrato OFX/CSV e o arquivo CSV do razão, ou use a simulação.</li><li>Confira as pendências, diferenças e avisos de duplicados.</li><li>Vincule manualmente pares confirmados e exporte o relatório CSV ou XLSX.</li></ol></section>
-      <section><h2 class="text-xl font-bold">Limitações</h2><p class="mt-2">Os parsers dependem dos campos presentes nos arquivos; adapte ou confira colunas que tenham cabeçalhos não reconhecidos. A semelhança textual e a proximidade de datas apenas sugerem correspondências. O armazenamento local é opcional e pode ser removido na interface. Revise o relatório e os documentos bancários originais antes da escrituração.</p></section>
-      <section><h2 class="text-xl font-bold">Outras ferramentas</h2><p class="mt-2"><a class="text-indigo-700 underline" href="validador-cnpj.html">Validador de CNPJ e CPF</a> · <a class="text-indigo-700 underline" href="extrator-xml-nfe.html">Extrator de XML NF-e</a></p></section>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="ferramentas.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">← Catálogo de Ferramentas</a>
+        <a href="index.html#conciliador" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">⚡ Abrir Conciliador</a>
+        <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+    <!-- Bloco de Privacidade -->
+    <div class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl px-4 py-3 text-sm mb-6">
+      <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span><strong>Processamento 100% local no navegador:</strong> seus extratos bancários OFX e CSV não saem do seu computador.</span>
+    </div>
+
+    <!-- Cabeçalho da Ferramenta -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-6">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-bold mb-3">
+        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-md">Área Contábil</span>
+        <span class="bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-md">Gratuito • Sem cadastro</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">🏦 Conciliador Bancário de OFX e CSV</h1>
+      <p class="mt-2 text-base text-slate-600 leading-relaxed">
+        Cruze movimentações do extrato bancário (OFX ou CSV) com os lançamentos do razão ou controle interno, identifique tarifas não contabilizadas, divergências de centavos e possíveis lançamentos duplicados.
+      </p>
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <a href="index.html#conciliador" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition">Abrir ferramenta →</a>
+        <a href="ferramentas.html" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 hover:bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition">Ver todas as ferramentas</a>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <!-- 1. O que faz e para quem -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">O que faz e para quem é indicada</h2>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          O Conciliador Bancário importa transações de arquivos OFX ou CSV e compara data, valor e similaridade textual com os lançamentos internos do razão contábil. Ele separa automaticamente os registros em cinco grupos claros: <em>Conciliado</em>, <em>Conciliado manualmente</em>, <em>Divergência de Valor</em>, <em>Pendência Bancária</em> e <em>Pendência Interna</em>.
+        </p>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          <strong>Para quem:</strong> Analistas contábeis, profissionais de BPO financeiro e empresários que desejam agilizar a conferência mensal entre extrato bancário e controle financeiro antes da escrituração.
+        </p>
+      </section>
+
+      <!-- 2. Passo a passo -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Como usar (Passo a passo)</h2>
+        <ol class="mt-3 list-decimal pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li>Clique em <strong>Abrir ferramenta</strong> para abrir a aba do Conciliador Bancário.</li>
+          <li>Carregue o arquivo do extrato bancário (<code>.ofx</code> ou <code>.csv</code>) e o arquivo CSV do razão/anotações (ou clique em <strong>Simulação</strong> para preencher os dois lados com um exemplo completo).</li>
+          <li>Ajuste a tolerância de dias para compensação bancária e execute a conciliação automática.</li>
+          <li>Filtre as pendências, vincule pares manualmente se desejar e exporte o relatório de auditoria em <strong>CSV</strong> ou <strong>XLSX colorido por status</strong>.</li>
+        </ol>
+      </section>
+
+      <!-- 3. Formatos aceitos -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Formatos aceitos e exportações</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li><strong>Extrato OFX:</strong> Arquivos padrão bancário contendo blocos <code>&lt;STMTTRN&gt;</code>, data (<code>DTPOSTED</code>), valor (<code>TRNAMT</code>) e histórico (<code>NAME</code>/<code>MEMO</code>).</li>
+          <li><strong>Planilhas CSV:</strong> Arquivos separados por ponto e vírgula (<code>;</code>), vírgula (<code>,</code>) ou tabulação, reconhecendo coluna única de valor ou colunas separadas de débito e crédito.</li>
+          <li><strong>Relatório exportado:</strong> Planilha CSV com resumo da auditoria ao final ou planilha Excel (<code>.xlsx</code>) estilizada com cores para cada status.</li>
+        </ul>
+      </section>
+
+      <!-- 4. Exemplo com dados de demonstração -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Exemplo com dados de demonstração</h2>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          O botão de simulação carrega <strong>13 lançamentos bancários e 13 registros internos</strong> de outubro/2026. Ele demonstra casos reais do dia a dia contábil: lançamentos que batem exatamente (como PIX de <em>Alfa Comércio Ltda</em> de R$ 4.500,00 e DARF PIS/COFINS de R$ -1.640,22), compensação com 1 dia de diferença (boleto <em>Energisa</em>), divergência de valor (aluguel da <em>Imobiliária Sol</em> pago com juros/multa de R$ 75,00), tarifas bancárias e IOF não anotados no razão e cheques ainda pendentes de compensação.
+        </p>
+      </section>
+
+      <!-- 5. Privacidade e Limitações -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Privacidade e limitações</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li><strong>Privacidade garantida:</strong> Nenhum extrato bancário ou razão é enviado pela internet. O armazenamento local no navegador é opcional (opt-in) e pode ser limpo a qualquer momento pelo botão <em>Apagar dados salvos</em>.</li>
+          <li><strong>Cabeçalhos personalizados:</strong> Caso uma planilha CSV use nomes de colunas incomuns e sem cabeçalho identificável, a ferramenta assume a ordem padrão (1ª coluna Data, 2ª Descrição, 3ª Valor).</li>
+          <li><strong>Apoio à conferência:</strong> A ferramenta não realiza lançamentos contábeis automáticos no seu sistema ERP; ela prepara o papel de trabalho para revisão do contador.</li>
+        </ul>
+      </section>
+
+      <!-- 6. Perguntas Frequentes (FAQ) -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Perguntas frequentes (FAQ)</h2>
+        <div class="mt-4 space-y-4">
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">Como o conciliador encontra os lançamentos correspondentes?</summary>
+            <p class="mt-2 text-sm text-slate-600">Ele cruza primeiro lançamentos com mesmo valor em centavos e datas dentro da tolerância configurada, avaliando também palavras-chave da descrição. Quando encontra datas e descrições compatíveis com valores diferentes, sinaliza como Divergência de Valor.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">Posso conciliar manualmente dois lançamentos que têm descrições diferentes?</summary>
+            <p class="mt-2 text-sm text-slate-600">Sim. Basta selecionar uma pendência bancária e uma pendência interna na tela e confirmar o vínculo manual. O par passa a aparecer com o status "Conciliado manualmente".</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">Os dados do meu extrato bancário ficam salvos na internet?</summary>
+            <p class="mt-2 text-sm text-slate-600">Nunca. O processamento é totalmente local no seu navegador. Mesmo se você marcar a opção de lembrar dados, eles ficam restritos ao armazenamento local do seu navegador e podem ser apagados com um clique.</p>
+          </details>
+        </div>
+      </section>
+
+      <!-- Outras ferramentas -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-slate-900">Explore outras ferramentas do Hub</h2>
+        <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="extrator-xml-nfe.html">Extrator de XML (NF-e/NFC-e)</a>
+          <span class="text-slate-300">•</span>
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="organizador-fiscal.html">Organizador Fiscal de Documentos</a>
+          <span class="text-slate-300">•</span>
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="validador-cnpj.html">Validador de CNPJ, CPF e Chave NF-e</a>
+        </div>
+      </section>
+    </div>
+
+    <!-- Aviso informativo -->
+    <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Conteúdo informativo. <strong>Não substitui a orientação do seu contador</strong> nem a conferência dos extratos e documentos contábeis originais.
     </div>
   </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="font-extrabold text-white text-base">AutoContábil <span class="text-emerald-400">Hub</span></p>
+        <p class="text-slate-400 mt-1">As ferramentas processam seus arquivos localmente no navegador. O portal de notícias usa conta e comentários armazenados em servidor.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Precisa de automação contábil sob medida?</p>
+        <p class="text-slate-400">Rotinas fiscais, integrações, planilhas inteligentes, BPO financeiro e contábil.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Yuri David</p>
+        <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20AutoCont%C3%A1bil%20Hub.">💬 WhatsApp: (83) 98639-8472</a>
+        <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="ferramentas.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="index.html">App</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="termos.html">Termos</a>
+    </div>
+    <div class="border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">
+      Conteúdo informativo. Não substitui a orientação do seu contador.
+    </div>
+  </footer>
 </body>
 </html>

@@ -1,26 +1,229 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Validador de CNPJ, CPF e Chave NF-e | AutoContábil Hub</title>
-  <meta name="description" content="Valide os dígitos verificadores de CNPJ, CPF e chave de acesso NF-e no navegador, sem enviar os números a servidores.">
+  <meta name="description" content="Valide os dígitos verificadores de CNPJ (numérico e alfanumérico), CPF e chave de acesso NF-e de 44 dígitos localmente no navegador.">
   <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/validador-cnpj.html">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="Validador de CNPJ, CPF e Chave NF-e | AutoContábil Hub">
+  <meta property="og:description" content="Valide os dígitos verificadores de CNPJ, CPF e chave de acesso NF-e no navegador, sem enviar os números a servidores.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/validador-cnpj.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Validador de CNPJ, CPF e Chave NF-e — AutoContábil Hub",
+          "url": "https://yuridavid9.github.io/Projeto-Contabil/validador-cnpj.html",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "inLanguage": "pt-BR",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+          "description": "Verifique instantaneamente os dígitos verificadores de CNPJ (inclusive o novo padrão alfanumérico), CPF e chaves de 44 dígitos de NF-e/NFC-e no navegador."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "O validador já aceita o novo CNPJ alfanumérico?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Sim. O cálculo de módulo 11 implementado segue a regra técnica para converter letras e números pelos seus códigos ASCII (subtraindo 48), validando tanto CNPJs atuais quanto o padrão alfanumérico."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Preciso remover pontos, barras ou traços antes de colar?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Não é necessário. A ferramenta ignora automaticamente espaços, pontos, barras e hífens antes de validar os caracteres."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Os números consultados ficam registrados em algum banco de dados?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Não. O cálculo ocorre instantaneamente em memória no seu navegador e nenhum CNPJ, CPF ou chave é transmitido pela rede."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-  <header class="bg-slate-900 text-white"><div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-5 text-sm"><a class="font-semibold hover:text-emerald-300" href="ferramentas.html">← Catálogo de Ferramentas</a><a class="font-semibold text-slate-300 hover:text-white" href="noticias.html">Notícias</a></div></header>
-  <main class="mx-auto max-w-4xl px-4 py-10">
-    <h1 class="text-3xl font-extrabold text-slate-900">Validador de CNPJ, CPF e chave NF-e</h1>
-    <p class="mt-3 text-lg text-slate-600">Confira a estrutura e os dígitos verificadores de documentos antes de importar ou organizar informações contábeis.</p>
-    <div class="mt-5"><a class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white transition" href="index.html#utilitarios">Abrir ferramenta →</a></div>
-    <div class="mt-7 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 leading-7">
-      <section><h2 class="text-xl font-bold">Para que serve</h2><p class="mt-2">O validador verifica CNPJ, CPF e chave de acesso de NF-e/NFC-e diretamente no navegador. A validação detecta erros de digitação no formato e nos dígitos verificadores; ela não consulta cadastros oficiais, não confirma a situação cadastral de uma empresa e não atesta a autenticidade de uma nota. O algoritmo de CNPJ aceita o formato alfanumérico previsto para novos identificadores, além do formato numérico legado.</p></section>
-      <section><h2 class="text-xl font-bold">Como usar</h2><ol class="mt-2 list-decimal space-y-1 pl-6"><li>Abra o AutoContábil Hub pelo botão acima.</li><li>Selecione a aba <strong>Utilitários</strong> e a opção CNPJ, CPF ou chave NF-e.</li><li>Digite ou cole o identificador, com ou sem pontuação.</li><li>Pressione <strong>Validar</strong> e confira a mensagem apresentada.</li></ol></section>
-      <section><h2 class="text-xl font-bold">Limitações</h2><p class="mt-2">A validação acontece apenas no dispositivo e não pesquisa Receita Federal, Sintegra ou SEFAZ. Chaves de NF-e são avaliadas pelo comprimento e dígito verificador, não pela autorização ou situação do documento. Para decisão fiscal, consulte a fonte oficial e confira os dados com um profissional.</p></section>
-      <section><h2 class="text-xl font-bold">Outras ferramentas</h2><p class="mt-2"><a class="text-indigo-700 underline" href="extrator-xml-nfe.html">Extrator de XML NF-e</a> · <a class="text-indigo-700 underline" href="conciliador-bancario-ofx.html">Conciliador bancário OFX</a></p></section>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="ferramentas.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">← Catálogo de Ferramentas</a>
+        <a href="index.html#utilitarios" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">⚡ Abrir Validador</a>
+        <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+    <!-- Bloco de Privacidade -->
+    <div class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl px-4 py-3 text-sm mb-6">
+      <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span><strong>Processamento 100% local no navegador:</strong> os números digitados ou colados nunca saem do seu computador.</span>
+    </div>
+
+    <!-- Cabeçalho da Ferramenta -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-6">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-bold mb-3">
+        <span class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md">Área Fiscal</span>
+        <span class="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-md">Gratuito • Sem cadastro</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">🔍 Validador de CNPJ, CPF e Chave NF-e</h1>
+      <p class="mt-2 text-base text-slate-600 leading-relaxed">
+        Confira rapidamente se um CNPJ (numérico ou no novo padrão alfanumérico), CPF ou chave de acesso de 44 dígitos possui estrutura e dígitos verificadores válidos antes de importar ou escriturar documentos.
+      </p>
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <a href="index.html#utilitarios" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition">Abrir ferramenta →</a>
+        <a href="ferramentas.html" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 hover:bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition">Ver todas as ferramentas</a>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <!-- 1. O que faz e para quem -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">O que faz e para quem é indicada</h2>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          O Validador verifica instantaneamente os dígitos verificadores (módulo 11) de CNPJ, CPF e chave de acesso de NF-e/NFC-e diretamente no navegador, apontando erros de digitação, tamanho incorreto ou sequências inválidas. A rotina de CNPJ já suporta tanto o formato numérico tradicional quanto o novo formato alfanumérico de 14 posições.
+        </p>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          <strong>Para quem:</strong> Equipes fiscais, contábeis, faturistas e departamentos de cadastro que precisam checar rapidamente identificadores recebidos em planilhas, e-mails ou documentos avulsos.
+        </p>
+      </section>
+
+      <!-- 2. Passo a passo -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Como usar (Passo a passo)</h2>
+        <ol class="mt-3 list-decimal pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li>Clique em <strong>Abrir ferramenta</strong> para acessar a aba de <strong>Utilitários</strong> do AutoContábil Hub (no Modo Completo, disponível também pelo seletor no topo).</li>
+          <li>No cartão <strong>Validador de documentos</strong>, escolha o tipo: <em>CNPJ</em>, <em>CPF</em> ou <em>Chave de NF-e (44 dígitos)</em>.</li>
+          <li>Digite ou cole o código com ou sem máscara (pontos, barras, hífens ou espaços são limpos automaticamente).</li>
+          <li>Clique em <strong>Validar</strong> e veja na hora se o dígito verificador confere.</li>
+        </ol>
+      </section>
+
+      <!-- 3. Formatos aceitos -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Formatos aceitos</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li><strong>CNPJ:</strong> 14 caracteres, aceitando tanto apenas números (ex.: <code>11.222.333/0001-81</code>) quanto letras e números nas 12 primeiras posições seguidas de 2 dígitos verificadores numéricos.</li>
+          <li><strong>CPF:</strong> 11 dígitos numéricos, com ou sem pontuação (rejeitando sequências repetidas como <code>000.000.000-00</code>).</li>
+          <li><strong>Chave de NF-e / NFC-e:</strong> 44 posições com verificação do 44º dígito pelo cálculo ponderado de módulo 11.</li>
+        </ul>
+      </section>
+
+      <!-- 4. Exemplo com dados de demonstração -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Exemplo com dados de demonstração</h2>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Para testar rapidamente, copie o CNPJ fictício de exemplo utilizado nas notas de demonstração do Hub: <code>11.222.333/0001-81</code> (ou sem pontuação: <code>11222333000181</code>). Ao clicar em Validar, a ferramenta confirmará que o identificador é válido. Em seguida, troque o último dígito de <code>1</code> para <code>2</code> e veja a detecção imediata do erro de digitação.
+        </p>
+      </section>
+
+      <!-- 5. Privacidade e Limitações -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Privacidade e limitações</h2>
+        <ul class="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base text-slate-700">
+          <li><strong>Privacidade em primeiro lugar:</strong> A validação é puramente matemática e executada no seu próprio navegador, sem registrar ou enviar os números consultados.</li>
+          <li><strong>Não consulta bases governamentais:</strong> A ferramenta não pesquisa Receita Federal, Sintegra ou SEFAZ. Portanto, ela confirma que o número foi digitado corretamente, mas não atesta a situação cadastral ativa da empresa nem a autorização de uso da NF-e.</li>
+        </ul>
+      </section>
+
+      <!-- 6. Perguntas Frequentes (FAQ) -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-xl font-extrabold text-slate-900">Perguntas frequentes (FAQ)</h2>
+        <div class="mt-4 space-y-4">
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">O validador já aceita o novo CNPJ alfanumérico?</summary>
+            <p class="mt-2 text-sm text-slate-600">Sim. O cálculo de módulo 11 implementado segue a regra técnica para converter letras e números pelos seus códigos ASCII (subtraindo 48), validando tanto CNPJs atuais quanto o padrão alfanumérico.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">Preciso remover pontos, barras ou traços antes de colar?</summary>
+            <p class="mt-2 text-sm text-slate-600">Não é necessário. A ferramenta ignora automaticamente espaços, pontos, barras e hífens antes de validar os caracteres.</p>
+          </details>
+          <details class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <summary class="font-bold text-slate-900 cursor-pointer">Os números consultados ficam registrados em algum banco de dados?</summary>
+            <p class="mt-2 text-sm text-slate-600">Não. O cálculo ocorre instantaneamente em memória no seu navegador e nenhum CNPJ, CPF ou chave é transmitido pela rede.</p>
+          </details>
+        </div>
+      </section>
+
+      <!-- Outras ferramentas -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-slate-900">Explore outras ferramentas do Hub</h2>
+        <div class="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="extrator-xml-nfe.html">Extrator de XML (NF-e/NFC-e)</a>
+          <span class="text-slate-300">•</span>
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="conciliador-bancario-ofx.html">Conciliador Bancário (OFX/CSV)</a>
+          <span class="text-slate-300">•</span>
+          <a class="text-indigo-700 hover:text-indigo-900 underline" href="organizador-fiscal.html">Organizador Fiscal de Documentos</a>
+        </div>
+      </section>
+    </div>
+
+    <!-- Aviso informativo -->
+    <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Conteúdo informativo. <strong>Não substitui a orientação do seu contador</strong> nem a consulta cadastral nos órgãos oficiais.
     </div>
   </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="font-extrabold text-white text-base">AutoContábil <span class="text-emerald-400">Hub</span></p>
+        <p class="text-slate-400 mt-1">As ferramentas processam seus arquivos localmente no navegador. O portal de notícias usa conta e comentários armazenados em servidor.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Precisa de automação contábil sob medida?</p>
+        <p class="text-slate-400">Rotinas fiscais, integrações, planilhas inteligentes, BPO financeiro e contábil.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Yuri David</p>
+        <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20AutoCont%C3%A1bil%20Hub.">💬 WhatsApp: (83) 98639-8472</a>
+        <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="ferramentas.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="index.html">App</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="termos.html">Termos</a>
+    </div>
+    <div class="border-t border-slate-800 text-center text-[11px] text-slate-400 py-3 px-4">
+      Conteúdo informativo. Não substitui a orientação do seu contador.
+    </div>
+  </footer>
 </body>
 </html>
