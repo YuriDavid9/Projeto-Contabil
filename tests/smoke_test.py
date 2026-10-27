@@ -17,6 +17,56 @@ MOJIBAKE_RE = re.compile(
     r"[" + MOJIBAKE_MARKERS + r"][\u0080-\u00BF" + MOJIBAKE_EXTRA + r"]"
 )
 
+TOOL_PAGES = [
+    "index.html",
+    "ferramentas.html",
+    "extrator-xml-nfe.html",
+    "conciliador-bancario-ofx.html",
+    "validador-cnpj.html",
+]
+FORBIDDEN_PATTERNS = re.compile(r"(supabase|js/portal)", re.IGNORECASE)
+IMPORT_RE = re.compile(
+    r"""(?:import\s+[^'"]*?from\s+|import\s*\(\s*|<script[^>]+src=["'])\s*['"]?([^'"\s>]+)""",
+    re.IGNORECASE,
+)
+
+
+def check_privacy_guard(project_root=ROOT):
+    visited = set()
+
+    def inspect_file(file_path: Path, chain: str):
+        resolved = file_path.resolve()
+        if resolved in visited or not resolved.is_file():
+            return
+        visited.add(resolved)
+        text = resolved.read_text(encoding="utf-8")
+        match = FORBIDDEN_PATTERNS.search(text)
+        if match:
+            raise AssertionError(
+                f"Privacy guard violation in {chain} ({resolved.relative_to(project_root)}): "
+                f"found forbidden reference '{match.group(0)}'"
+            )
+        for ref in IMPORT_RE.findall(text):
+            if ref.startswith(("http://", "https://", "//")):
+                if FORBIDDEN_PATTERNS.search(ref):
+                    raise AssertionError(
+                        f"Privacy guard violation in {chain}: external reference '{ref}'"
+                    )
+                continue
+            clean_ref = ref.split("?")[0].split("#")[0]
+            if not clean_ref.endswith(".js"):
+                continue
+            target = (resolved.parent / clean_ref).resolve()
+            inspect_file(target, f"{chain} -> {clean_ref}")
+
+    for page_name in TOOL_PAGES:
+        page_path = project_root / page_name
+        assert page_path.is_file(), f"Missing tool page: {page_name}"
+        inspect_file(page_path, page_name)
+
+    for js_file in sorted((project_root / "js").glob("*.js")) + sorted((project_root / "js" / "ferramentas").glob("*.js")):
+        inspect_file(js_file, str(js_file.relative_to(project_root)))
+
 
 def check_project_text_encoding(project_root=ROOT):
     issues = []
@@ -45,6 +95,7 @@ class QuietHandler(SimpleHTTPRequestHandler):
 
 def main():
     check_project_text_encoding()
+    check_privacy_guard()
     from playwright.sync_api import sync_playwright
 
     os.chdir(ROOT)
@@ -98,6 +149,35 @@ def main():
                 page.locator("#tab-utilitarios").click()
                 assert page.locator("#utilities-root section").count() == 4
                 assert page.title() == "AutoContábil Hub | Utilitários"
+
+                # Testes do catálogo de ferramentas (ferramentas.html)
+                page.goto("http://127.0.0.1:8765/ferramentas.html", wait_until="domcontentloaded")
+                assert page.get_by_role("heading", name="Catálogo de Ferramentas").is_visible()
+                catalog_counts = page.evaluate("""async () => {
+                    const mod = await import('./js/ferramentas/catalogo.js');
+                    const items = mod.CATALOGO_FERRAMENTAS;
+                    return {
+                        total: items.length,
+                        fiscal: items.filter(i => i.area === 'fiscal').length,
+                        contabil: items.filter(i => i.area === 'contabil').length,
+                        financeiro: items.filter(i => i.area === 'financeiro').length
+                    };
+                }""")
+                assert catalog_counts["total"] >= 5
+                assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["total"]
+
+                page.locator('#catalogo-filtros-area button[data-area="fiscal"]').click()
+                assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["fiscal"]
+
+                page.locator('#catalogo-filtros-area button[data-area="contabil"]').click()
+                assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["contabil"]
+
+                page.locator('#catalogo-filtros-area button[data-area="financeiro"]').click()
+                assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["financeiro"]
+
+                page.locator('#catalogo-filtros-area button[data-area="todas"]').click()
+                assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["total"]
+
                 assert not errors, "Browser errors: " + " | ".join(errors)
             finally:
                 browser.close()

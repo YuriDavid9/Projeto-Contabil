@@ -1,5 +1,4 @@
 // Catálogo centralizado de ferramentas do AutoContábil Hub.
-// IMPORTANTE: Este módulo NÃO deve importar nada de js/portal/ nem carregar Supabase.
 // Estrutura pronta para expansão futura (campos opcionais: passos, formatos, limitacoes, faq).
 
 export const AREAS_FERRAMENTAS = [

@@ -1,6 +1,7 @@
-const CACHE_NAME = 'autocontabil-shell-v7';
+const CACHE_NAME = 'autocontabil-shell-v8';
 const CORE_ASSETS = [
   './index.html',
+  './ferramentas.html',
   './styles.css',
   './favicon.svg',
   './og-image.png',
@@ -22,7 +23,8 @@ const CORE_ASSETS = [
   './js/conciliadorModule.js',
   './js/organizadorModule.js',
   './js/contactModule.js',
-  './js/utilitiesModule.js'
+  './js/utilitiesModule.js',
+  './js/ferramentas/catalogo.js'
 ];
 
 self.addEventListener('install', (event) => {

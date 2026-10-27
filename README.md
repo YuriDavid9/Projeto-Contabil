@@ -1,14 +1,15 @@
 # AutoContábil Hub
 
-Aplicação web modular para apoiar tarefas contábeis, fiscais e financeiras, acompanhada do **Portal de Notícias do AutoContábil Hub**.
+Aplicação web modular para apoiar tarefas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`ferramentas.html`) e do **Portal de Notícias** (`noticias.html`).
 
-- **Ferramentas locais (`index.html`):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (nenhum arquivo sai do computador e nenhum script do banco de dados é carregado nessas páginas).
+- **Ferramentas locais (`index.html`, `ferramentas.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (nenhum arquivo sai do computador e nenhum script de banco de dados ou autenticação é carregado nessas páginas).
 - **Portal de Notícias (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`):** utiliza banco de dados e autenticação em nuvem (**Supabase**) apenas para leitura de notícias, contas de usuários e comentários.
 - **Formulário de contato:** envia somente a mensagem informada após configurar o provedor em `js/contactModule.js`.
 
 ## Arquitetura
 
 - `index.html` contém as abas das ferramentas locais; `styles.css` contém os estilos compartilhados.
+- `ferramentas.html` e `js/ferramentas/catalogo.js` formam o catálogo centralizado de ferramentas com busca por texto, filtro por área (`fiscal`, `contabil`, `financeiro`) e atalhos diretos para abrir cada módulo no navegador (`index.html#xml`, `index.html#conciliador` etc.) ou consultar suas páginas explicativas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `validador-cnpj.html`).
 - `js/xmlModule.js` extrai NF-e/NFC-e, importa XML/ZIP, valida chave/cStat, filtra dados e exporta CSV/XLSX.
 - `js/conciliadorModule.js` concilia OFX/CSV, permite vínculo manual, aviso de duplicados e armazenamento local opt-in.
 - `js/organizadorModule.js` organiza arquivos, extrai texto de PDFs quando possível e salva regras no navegador.
@@ -28,7 +29,18 @@ Na raiz do repositório, inicie um servidor HTTP local (os módulos ES precisam 
 python3 -m http.server 5500 --bind 127.0.0.1
 ```
 
-Abra http://localhost:5500 para as ferramentas ou http://localhost:5500/noticias.html para o portal de notícias. *(Você também pode usar a extensão Live Server do VS Code).*
+Abra:
+- http://localhost:5500 para o aplicativo das ferramentas;
+- http://localhost:5500/ferramentas.html para o catálogo de ferramentas;
+- http://localhost:5500/noticias.html para o portal de notícias.
+
+### Teste automatizado de fumaça
+
+O script `tests/smoke_test.py` (executado também em `.github/workflows/static-smoke.yml`) valida codificação UTF-8, guarda de privacidade (ausência de Supabase/`js/portal` nas páginas de ferramentas), fluxos das abas locais e filtros do catálogo `ferramentas.html`:
+
+```powershell
+python3 tests/smoke_test.py
+```
 
 ## Publicar
 
