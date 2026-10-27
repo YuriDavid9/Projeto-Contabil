@@ -1,15 +1,16 @@
-import { $, $$, esc } from './utils.js';
+import { $, $$, esc, norm } from './utils.js';
 import { initXmlModule, NF, renderNF, showNFModal } from './xmlModule.js';
 import { initConciliadorModule, CB, renderCB } from './conciliadorModule.js';
 import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
 import { initContactModule } from './contactModule.js';
 import { initUtilitiesModule } from './utilitiesModule.js';
+import { CATALOGO_FERRAMENTAS, AREAS_FERRAMENTAS } from './ferramentas/catalogo.js';
 import { getModo, setModo, modoSalvo } from './modo.js';
 import { ajuda } from './ajuda.js';
 import { AJUDA_GUIADO, TERMOS_GUIADOS } from './glossario.js';
 
 const TAB_METADATA = {
-  inicio: ['Início', 'Escolha uma tarefa para consultar documentos, comparar movimentos ou organizar arquivos.'],
+  catalogo: ['Catálogo de Ferramentas', 'Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.'],
   xml: ['Extrator de XML', 'Extraia e consolide dados de NF-e e NFC-e localmente no navegador.'],
   conciliador: ['Conciliador Bancário', 'Compare OFX e CSV com o razão contábil no navegador.'],
   organizador: ['Organizador Fiscal', 'Padronize nomes e organize documentos fiscais localmente.'],
@@ -17,9 +18,17 @@ const TAB_METADATA = {
   utilitarios: ['Utilitários', 'Valide documentos, converta extratos e estime encargos tributários.']
 };
 
+const VALID_TABS = ['catalogo', 'xml', 'conciliador', 'organizador', 'utilitarios', 'contato'];
+
+const AREA_LABELS = {
+  fiscal: { nome: 'Fiscal', cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  contabil: { nome: 'Contábil', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  financeiro: { nome: 'Financeiro', cls: 'bg-amber-50 text-amber-800 border-amber-200' }
+};
+
 function updatePageMetadata(tabName) {
-  const [label, description] = TAB_METADATA[tabName];
-  const title = `AutoContábil Hub | ${label}`;
+  const [label, description] = TAB_METADATA[tabName] || TAB_METADATA.catalogo;
+  const title = tabName === 'catalogo' ? `${label} | AutoContábil Hub` : `AutoContábil Hub | ${label}`;
   document.title = title;
   $('#meta-description')?.setAttribute('content', description);
   $('#og-title')?.setAttribute('content', title);
@@ -28,35 +37,191 @@ function updatePageMetadata(tabName) {
   $('#twitter-description')?.setAttribute('content', description);
 }
 
+function normalizeTabName(rawName) {
+  const clean = String(rawName || '').trim().toLowerCase();
+  if (!clean || clean === 'inicio' || clean === 'ferramentas' || clean === 'catalogo') return 'catalogo';
+  return VALID_TABS.includes(clean) ? clean : 'catalogo';
+}
+
 function openTab(name) {
-  const allowed = getModo() === 'guiado' ? ['xml', 'conciliador', 'organizador'] : ['xml', 'conciliador', 'organizador', 'contato', 'utilitarios'];
-  const tabName = name === 'inicio' && getModo() === 'guiado' ? 'inicio' : (allowed.includes(name) ? name : 'xml');
-  $$('.tab-btn').forEach((button) => {
-    const selected = button.dataset.tab === tabName;
-    button.setAttribute('aria-selected', String(selected));
-    button.tabIndex = selected ? 0 : -1;
-  });
+  const tabName = normalizeTabName(name);
+  const isCatalogo = tabName === 'catalogo';
+
   $$('.tab-panel').forEach((panel) => {
     const selected = panel.id === `panel-${tabName}`;
     panel.hidden = !selected;
     panel.classList.toggle('hidden', !selected);
   });
+
+  const backBar = $('#tool-back-bar');
+  if (backBar) {
+    backBar.classList.toggle('hidden', isCatalogo);
+  }
+
+  const modoToggle = $('#modo-toggle');
+  if (modoToggle) {
+    const hasGuidedMode = ['xml', 'conciliador', 'organizador'].includes(tabName);
+    modoToggle.classList.toggle('hidden', !hasGuidedMode);
+  }
+
+  const navCatalogo = $('#tab-catalogo');
+  if (navCatalogo) {
+    if (isCatalogo) {
+      navCatalogo.setAttribute('aria-current', 'page');
+      navCatalogo.className = 'bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition';
+    } else {
+      navCatalogo.removeAttribute('aria-current');
+      navCatalogo.className = 'text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition';
+    }
+  }
+
+  if (isCatalogo) {
+    document.body.dataset.modo = 'completo';
+  } else {
+    document.body.dataset.modo = getModo();
+  }
+
   updatePageMetadata(tabName);
-  if (location.hash !== `#${tabName}`) history.replaceState(null, '', `#${tabName}`);
+
+  if (isCatalogo) {
+    if (location.hash) {
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  } else if (location.hash !== `#${tabName}`) {
+    history.replaceState(null, '', `#${tabName}`);
+  }
 }
 
-function showModePrompt() {
-  const overlay = $('#modo-overlay');
-  overlay.hidden = false;
-  $('#modo-guiado').focus();
+function initCatalogo() {
+  const buscaInput = $('#catalogo-busca');
+  const filtrosContainer = $('#catalogo-filtros-area');
+  const gridEl = $('#catalogo-grid');
+  const vazioEl = $('#catalogo-vazio');
+  const limparBtn = $('#btn-limpar-catalogo');
+
+  if (!buscaInput || !filtrosContainer || !gridEl || !vazioEl) return;
+
+  let areaAtiva = 'todas';
+
+  function renderFilterButtons() {
+    filtrosContainer.innerHTML = '';
+    AREAS_FERRAMENTAS.forEach((area) => {
+      const ativo = area.slug === areaAtiva;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.area = area.slug;
+      btn.setAttribute('aria-pressed', String(ativo));
+      btn.className = ativo
+        ? 'px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-sm transition'
+        : 'px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition';
+      btn.textContent = area.nome;
+      btn.addEventListener('click', () => {
+        areaAtiva = area.slug;
+        renderFilterButtons();
+        renderCards();
+      });
+      filtrosContainer.appendChild(btn);
+    });
+  }
+
+  function renderCards() {
+    const termo = norm(buscaInput.value.trim()).toLowerCase();
+
+    const filtradas = CATALOGO_FERRAMENTAS.filter((item) => {
+      const bateArea = areaAtiva === 'todas' || item.area === areaAtiva;
+      if (!bateArea) return false;
+      if (!termo) return true;
+      const alvo = norm(`${item.nome} ${item.resumo} ${item.publico} ${item.area}`).toLowerCase();
+      return alvo.includes(termo);
+    });
+
+    gridEl.innerHTML = '';
+
+    if (!filtradas.length) {
+      gridEl.classList.add('hidden');
+      vazioEl.classList.remove('hidden');
+      return;
+    }
+
+    vazioEl.classList.add('hidden');
+    gridEl.classList.remove('hidden');
+
+    filtradas.forEach((item) => {
+      const badgeInfo = AREA_LABELS[item.area] || { nome: item.area, cls: 'bg-slate-100 text-slate-700 border-slate-200' };
+      const disponivel = item.status === 'disponivel';
+      const temPaginaDedicada = item.pagina && item.pagina !== item.abrirEm;
+      const targetTab = item.abrirEm && item.abrirEm.includes('#') ? item.abrirEm.split('#')[1] : '';
+      const titleHref = item.pagina || item.abrirEm;
+      const titleTargetTab = !temPaginaDedicada && targetTab ? `data-go="${esc(targetTab)}"` : '';
+
+      const card = document.createElement('article');
+      card.dataset.cardSlug = item.slug;
+      card.dataset.cardArea = item.area;
+      card.className = 'bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-6 shadow-sm flex flex-col justify-between';
+
+      card.innerHTML = `
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <span class="text-3xl" aria-hidden="true">${esc(item.icone)}</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-md border ${badgeInfo.cls}">${esc(badgeInfo.nome)}</span>
+              ${
+                disponivel
+                  ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">Disponível</span>'
+                  : '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">Em breve</span>'
+              }
+            </div>
+          </div>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-snug">
+            <a href="${esc(titleHref)}" ${titleTargetTab} class="hover:text-indigo-600 transition">${esc(item.nome)}</a>
+          </h2>
+          <p class="text-sm text-slate-600 mt-2 leading-relaxed">${esc(item.resumo)}</p>
+          <p class="text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
+            <strong class="text-slate-700">Para quem:</strong> ${esc(item.publico)}
+          </p>
+        </div>
+        <div class="mt-5 pt-3 flex flex-wrap items-center gap-2">
+          ${
+            disponivel
+              ? `<a href="${esc(item.abrirEm)}" ${targetTab ? `data-go="${esc(targetTab)}"` : ''} class="flex-1 text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 px-4 text-xs sm:text-sm transition">Abrir ferramenta →</a>`
+              : `<span class="flex-1 text-center bg-slate-200 text-slate-500 font-bold rounded-xl py-2.5 px-4 text-xs sm:text-sm cursor-not-allowed">Em breve</span>`
+          }
+          ${
+            temPaginaDedicada
+              ? `<a href="${esc(item.pagina)}" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-2.5 px-3.5 text-xs sm:text-sm transition">Como funciona</a>`
+              : ''
+          }
+        </div>
+      `;
+
+      gridEl.appendChild(card);
+    });
+  }
+
+  buscaInput.addEventListener('input', renderCards);
+  limparBtn?.addEventListener('click', () => {
+    buscaInput.value = '';
+    areaAtiva = 'todas';
+    renderFilterButtons();
+    renderCards();
+  });
+
+  renderFilterButtons();
+  renderCards();
 }
 
 function chooseMode(value) {
   setModo(value);
-  $('#modo-overlay').hidden = true;
-  $('#modo-toggle').textContent = `Modo: ${value === 'guiado' ? 'Guiado' : 'Completo'} ⇄ ${value === 'guiado' ? 'Completo' : 'Guiado'}`;
-  if (value === 'guiado') openTab('inicio');
-  else openTab(location.hash.slice(1) || 'xml');
+  const overlay = $('#modo-overlay');
+  if (overlay) overlay.hidden = true;
+  const modoToggle = $('#modo-toggle');
+  if (modoToggle) {
+    modoToggle.textContent = `Modo: ${value === 'guiado' ? 'Guiado' : 'Completo'} ⇄ ${value === 'guiado' ? 'Completo' : 'Guiado'}`;
+  }
+  const currentTab = normalizeTabName(location.hash.slice(1));
+  if (currentTab === 'catalogo') {
+    document.body.dataset.modo = 'completo';
+  }
   renderNF();
   renderCB();
   renderOG();
@@ -92,52 +257,30 @@ const modalEl = $('#modal');
 if (modalEl) modalEl.addEventListener('click', (event) => { if (event.target.id === 'modal') modal.close(); });
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') modal.close(); });
 
-$('#modo-guiado').addEventListener('click', () => chooseMode('guiado'));
-$('#modo-completo').addEventListener('click', () => chooseMode('completo'));
-$('#modo-fechar').addEventListener('click', () => chooseMode('guiado'));
-$('#modo-toggle').addEventListener('click', () => chooseMode(getModo() === 'guiado' ? 'completo' : 'guiado'));
-$('#modo-overlay').addEventListener('click', (event) => { if (event.target.id === 'modo-overlay') chooseMode('guiado'); });
-document.addEventListener('keydown', (event) => {
-  const overlay = $('#modo-overlay');
-  if (overlay.hidden) return;
-  if (event.key === 'Escape') chooseMode('guiado');
-  if (event.key === 'Tab') {
-    const choices = [$('#modo-guiado'), $('#modo-completo'), $('#modo-fechar')];
-    const first = choices[0];
-    const last = choices[choices.length - 1];
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-  }
-});
-document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => openTab(button.dataset.go)));
+$('#modo-guiado')?.addEventListener('click', () => chooseMode('guiado'));
+$('#modo-completo')?.addEventListener('click', () => chooseMode('completo'));
+$('#modo-fechar')?.addEventListener('click', () => chooseMode('guiado'));
+$('#modo-toggle')?.addEventListener('click', () => chooseMode(getModo() === 'guiado' ? 'completo' : 'guiado'));
+$('#modo-overlay')?.addEventListener('click', (event) => { if (event.target.id === 'modo-overlay') chooseMode('guiado'); });
 
-const selectedMode = modoSalvo();
-if (selectedMode) {
-  setModo(selectedMode, false);
-  $('#modo-toggle').textContent = `Modo: ${selectedMode === 'guiado' ? 'Guiado' : 'Completo'} ⇄ ${selectedMode === 'guiado' ? 'Completo' : 'Guiado'}`;
-} else showModePrompt();
+const initialMode = modoSalvo() || 'completo';
+setModo(initialMode, false);
+const modoToggleBtn = $('#modo-toggle');
+if (modoToggleBtn) {
+  modoToggleBtn.textContent = `Modo: ${initialMode === 'guiado' ? 'Guiado' : 'Completo'} ⇄ ${initialMode === 'guiado' ? 'Completo' : 'Guiado'}`;
+}
 
-$$('.tab-btn').forEach((button) => button.addEventListener('click', () => openTab(button.dataset.tab)));
-const tabList = $('[role="tablist"]');
-if (tabList) tabList.addEventListener('keydown', (event) => {
-  const tabs = $$('.tab-btn').filter((button) => getModo() === 'guiado' ? !button.classList.contains('so-completo') : !button.classList.contains('so-guiado'));
-  const currentIndex = tabs.indexOf(document.activeElement);
-  if (currentIndex < 0) return;
-
-  let nextIndex;
-  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
-  else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-  else if (event.key === 'Home') nextIndex = 0;
-  else if (event.key === 'End') nextIndex = tabs.length - 1;
-  else return;
-
-  event.preventDefault();
-  tabs[nextIndex].focus();
-  openTab(tabs[nextIndex].dataset.tab);
-});
 window.addEventListener('hashchange', () => openTab(location.hash.slice(1)));
 
 document.addEventListener('click', (event) => {
+  const goTarget = event.target.closest('[data-go]');
+  if (goTarget) {
+    event.preventDefault();
+    openTab(goTarget.dataset.go);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
   const actionTarget = event.target.closest('[data-act]');
   if (!actionTarget) return;
 
@@ -172,17 +315,20 @@ document.addEventListener('click', (event) => {
   }
 });
 
+initCatalogo();
 initXmlModule();
 initConciliadorModule();
 initOrganizadorModule();
 initContactModule();
 initUtilitiesModule();
+
 const contextualHelp = { 'panel-xml': AJUDA_GUIADO.notas, 'panel-conciliador': AJUDA_GUIADO.banco, 'panel-organizador': AJUDA_GUIADO.documentos };
 Object.entries(contextualHelp).forEach(([id, content]) => {
   const panel = document.getElementById(id);
   const title = panel?.querySelector('h2');
   if (title && !panel.querySelector('[data-ajuda]')) title.insertAdjacentHTML('afterend', ajuda(content, id));
 });
+
 const technicalTables = ['xml-tbody', 'cb-bank-tbody', 'cb-led-tbody', 'cb-tbody', 'og-tbody'];
 function setGuidedTableDetails(modo = getModo()) {
   technicalTables.forEach((tbodyId) => {
@@ -206,11 +352,13 @@ function setGuidedTableDetails(modo = getModo()) {
 }
 setGuidedTableDetails();
 document.addEventListener('modo:alterado', (event) => setGuidedTableDetails(event.detail.modo));
+
 const glossary = $('#glossario-dialog');
 if (glossary) glossary.querySelector('dl').innerHTML = TERMOS_GUIADOS.map(([term, explanation]) => `<dt>${esc(term)}</dt><dd>${esc(explanation)}</dd>`).join('');
 $('#ajuda-global')?.addEventListener('click', () => glossary?.showModal());
 $('#glossario-fechar')?.addEventListener('click', () => glossary?.close());
 glossary?.addEventListener('click', (event) => { if (event.target === glossary) glossary.close(); });
+
 document.querySelectorAll('#xml-demo, #cb-demo, #og-demo').forEach((button) => {
   button.addEventListener('click', () => {
     const panel = button.closest('.tab-panel');
@@ -224,7 +372,8 @@ document.querySelectorAll('#xml-demo, #cb-demo, #og-demo').forEach((button) => {
     if (note) note.hidden = false;
   });
 });
-openTab(selectedMode === 'completo' ? (location.hash.slice(1) || 'xml') : (location.hash.slice(1) || 'inicio'));
+
+openTab(location.hash.slice(1) || 'catalogo');
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

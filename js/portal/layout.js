@@ -27,7 +27,7 @@ export async function initPortalLayout(activePage = 'noticias') {
           </a>
           <div class="flex flex-wrap items-center gap-2">
             <nav class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação do portal">
-              <a href="ferramentas.html" class="${linkClass('ferramentas')}">🧰 Ferramentas</a>
+              <a href="index.html" class="${linkClass('ferramentas')}">🧰 Catálogo de Ferramentas</a>
               <a href="noticias.html" class="${linkClass('noticias')}">📰 Notícias</a>
               ${isAdmin ? `<a href="admin.html" class="${linkClass('admin')}">⚙️ Painel</a>` : ''}
             </nav>
@@ -78,7 +78,7 @@ export async function initPortalLayout(activePage = 'noticias') {
           </div>
         </div>
         <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
-          <a class="hover:text-white underline" href="ferramentas.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+          <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="termos.html">Termos</a>

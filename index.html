@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AutoContábil Hub | Extrator de XML</title>
-  <meta id="meta-description" name="description" content="Extraia e consolide dados de NF-e e NFC-e localmente no navegador.">
+  <title>Catálogo de Ferramentas | AutoContábil Hub</title>
+  <meta id="meta-description" name="description" content="Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.">
   <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AutoContábil Hub">
-  <meta id="og-title" property="og:title" content="AutoContábil Hub | Extrator de XML">
-  <meta id="og-description" property="og:description" content="Extraia e consolide dados de NF-e e NFC-e localmente no navegador.">
+  <meta id="og-title" property="og:title" content="Catálogo de Ferramentas | AutoContábil Hub">
+  <meta id="og-description" property="og:description" content="Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.">
   <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/">
   <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
   <meta property="og:image:alt" content="AutoContábil Hub com o monograma AC e ferramentas contábeis no navegador">
   <meta name="twitter:card" content="summary_large_image">
-  <meta id="twitter-title" name="twitter:title" content="AutoContábil Hub | Extrator de XML">
-  <meta id="twitter-description" name="twitter:description" content="Extraia e consolide dados de NF-e e NFC-e localmente no navegador.">
+  <meta id="twitter-title" name="twitter:title" content="Catálogo de Ferramentas | AutoContábil Hub">
+  <meta id="twitter-description" name="twitter:description" content="Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.">
   <meta name="twitter:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
   <meta name="twitter:image:alt" content="AutoContábil Hub com o monograma AC e ferramentas contábeis no navegador">
   <script type="application/ld+json">
@@ -46,37 +46,68 @@
   <script data-goatcounter="https://SEU-CODIGO.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   -->
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col" data-modo="guiado">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans" data-modo="completo">
   <div id="modo-overlay" class="modo-overlay" hidden><section class="modo-card" role="dialog" aria-modal="true" aria-labelledby="modo-title"><h2 id="modo-title" class="text-2xl font-extrabold mb-2">Como você quer usar?</h2><p class="text-sm text-slate-600 mb-5">Seus arquivos não saem do seu computador.</p><div class="grid sm:grid-cols-2 gap-3"><button id="modo-guiado" class="modo-choice rounded-xl border border-slate-200 p-5 text-left hover:border-indigo-500"><span class="block font-bold">Guiado</span><span class="block mt-1 text-sm text-slate-600">Com explicações e linguagem simples. Ideal para quem está começando.</span></button><button id="modo-completo" class="modo-choice rounded-xl border border-slate-200 p-5 text-left hover:border-indigo-500"><span class="block font-bold">Completo</span><span class="block mt-1 text-sm text-slate-600">Visão técnica, para quem já conhece documentos fiscais.</span></button></div><button id="modo-fechar" class="mt-4 text-sm underline text-slate-600">Continuar no modo Guiado</button></section></div>
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-6">
-      <div class="flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="#catalogo" data-go="catalogo" class="flex items-center gap-3 group">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
         <div>
-          <h1 class="text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></h1>
-          <p class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</p>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
         </div>
-      </div>
-      <nav class="grid grid-cols-3 gap-1 bg-slate-800 p-1 rounded-xl lg:ml-auto lg:flex lg:shrink-0" role="tablist" aria-label="Módulos">
-        <button id="tab-xml" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="xml" aria-controls="panel-xml" aria-selected="true" tabindex="0"><span aria-hidden="true">📄</span><span class="text-center leading-tight" data-t="xml">Extrator de XML</span></button>
-        <button id="tab-conciliador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="conciliador" aria-controls="panel-conciliador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🏦</span><span class="text-center leading-tight">Conciliador Bancário</span></button>
-        <button id="tab-organizador" class="tab-btn min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="organizador" aria-controls="panel-organizador" aria-selected="false" tabindex="-1"><span aria-hidden="true">🗂️</span><span class="text-center leading-tight" data-t="organizador">Organizador Fiscal</span></button>
-        <button id="tab-contato" class="tab-btn so-completo min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="contato" aria-controls="panel-contato" aria-selected="false" tabindex="-1"><span aria-hidden="true">✉️</span><span class="text-center leading-tight">Contato</span></button>
-        <button id="tab-utilitarios" class="tab-btn so-completo min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold transition" role="tab" data-tab="utilitarios" aria-controls="panel-utilitarios" aria-selected="false" tabindex="-1"><span aria-hidden="true">🧰</span><span class="text-center leading-tight">Utilitários</span></button>
-        <button id="tab-inicio" class="tab-btn so-guiado min-w-0 px-2 py-2 rounded-lg text-xs font-semibold" role="tab" data-tab="inicio" aria-controls="panel-inicio" aria-selected="false" tabindex="-1">Início</button>
-        <a href="noticias.html" class="min-w-0 flex flex-col items-center justify-center gap-0.5 px-2 py-2 rounded-lg text-xs lg:flex-row lg:gap-2 lg:px-4 lg:text-sm lg:whitespace-nowrap font-semibold text-slate-300 hover:bg-slate-700/60 hover:text-white transition"><span aria-hidden="true">📰</span><span class="text-center leading-tight">Notícias</span></a>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="#catalogo" id="tab-catalogo" data-go="catalogo" aria-current="page" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">🧰 Catálogo de Ferramentas</a>
+        <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
       </nav>
-      <button id="modo-toggle" class="self-end lg:self-auto rounded-lg border border-slate-600 px-3 py-2 text-xs font-semibold" type="button">Modo: Guiado ⇄ Completo</button>
     </div>
   </header>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
-    <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-2.5 text-sm mb-4">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+    <div class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl px-4 py-3 text-sm mb-6">
       <svg class="w-4 h-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      <span>Processamento 100% local (client-side): seus arquivos não saem do seu computador.</span>
+      <span><strong>Processamento 100% local no navegador:</strong> seus arquivos XML, OFX, CSV e PDF são lidos apenas no seu computador e nunca são enviados a servidores.</span>
     </div>
-    <section id="panel-inicio" class="tab-panel fade-in so-guiado" role="tabpanel" aria-labelledby="tab-inicio" tabindex="-1" hidden><div class="mb-5"><h2 class="text-2xl font-extrabold text-slate-900">O que você quer fazer?</h2><p class="mt-2 text-lg">Aqui você não precisa saber nada de contabilidade. Escolha o que quer fazer e eu explico cada passo.</p><p class="mt-1 text-slate-700">Seus arquivos ficam só no seu computador.</p></div><div class="grid md:grid-cols-3 gap-4"><button class="start-card rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm hover:border-indigo-400" data-go="xml"><span class="block text-lg font-bold">Tenho notas fiscais e quero entender o que tem nelas</span><span class="mt-2 block text-sm text-slate-600">Veja quanto vendeu e quanto comprou, com base nas notas carregadas.</span></button><button class="start-card rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm hover:border-indigo-400" data-go="conciliador"><span class="block text-lg font-bold">Quero conferir se o que o banco mostra bate com o que anotei</span><span class="mt-2 block text-sm text-slate-600">Compare entradas e saídas da conta com suas anotações.</span></button><button class="start-card rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm hover:border-indigo-400" data-go="organizador"><span class="block text-lg font-bold">Quero arrumar meus documentos para mandar ao contador</span><span class="mt-2 block text-sm text-slate-600">Veja uma prévia de nomes e pastas organizados por mês.</span></button></div></section>
-    <section id="panel-xml" class="tab-panel fade-in" role="tabpanel" aria-labelledby="tab-xml" tabindex="-1">
+
+    <div id="tool-back-bar" class="hidden mb-5 flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm">
+      <a href="#catalogo" data-go="catalogo" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">← Voltar ao Catálogo de Ferramentas</a>
+      <button id="modo-toggle" class="rounded-lg border border-slate-300 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition" type="button">Modo: Completo ⇄ Guiado</button>
+    </div>
+
+    <section id="panel-catalogo" class="tab-panel fade-in" aria-labelledby="catalogo-heading">
+      <div class="mb-6">
+        <h1 id="catalogo-heading" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Catálogo de Ferramentas</h1>
+        <p class="text-sm sm:text-base text-slate-600 mt-1.5 max-w-3xl">
+          Explore nossas ferramentas gratuitas para conferência de notas fiscais, conciliação bancária, organização de documentos e validação de cadastros. Escolha uma ferramenta abaixo para ver detalhes ou abri-la diretamente no navegador.
+        </p>
+      </div>
+
+      <section aria-label="Filtros do catálogo" class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 mb-6 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="relative flex-1">
+            <label for="catalogo-busca" class="sr-only">Buscar ferramenta por nome, resumo ou público</label>
+            <span class="absolute left-3.5 top-2.5 text-slate-400" aria-hidden="true">🔎</span>
+            <input id="catalogo-busca" type="search" placeholder="Buscar ferramenta (ex.: XML, OFX, CNPJ, organizar)..." class="w-full pl-10 pr-3 py-2 rounded-xl border border-slate-300 text-sm focus:border-indigo-500 focus:outline-none">
+          </div>
+          <div id="catalogo-filtros-area" class="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filtrar por área"></div>
+        </div>
+      </section>
+
+      <div id="catalogo-vazio" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center">
+        <p class="text-base font-bold text-slate-800">Nenhuma ferramenta encontrada para este filtro</p>
+        <p class="text-xs text-slate-500 mt-1">Tente limpar a busca ou selecionar "Todas as áreas".</p>
+        <button id="btn-limpar-catalogo" type="button" class="mt-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl px-4 py-2 text-xs transition">Mostrar todas as ferramentas</button>
+      </div>
+
+      <div id="catalogo-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite"></div>
+
+      <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+        Conteúdo e ferramentas de caráter informativo e de apoio operacional. <strong>Não substitui a orientação do seu contador</strong> nem a conferência na legislação oficial.
+      </div>
+    </section>
+
+    <section id="panel-xml" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900"><span class="so-completo">Extrator &amp; Consolidador de XML</span><span class="so-guiado">Entender minhas notas fiscais</span></h2>
         <p class="so-guiado text-slate-600 text-sm mt-2">A nota fiscal eletrônica vem em um arquivo XML. Aqui você vê o que está dentro dele sem precisar abrir o código. Os arquivos XML originais devem ser guardados; esta tela só os lê.</p>
@@ -152,7 +183,7 @@
       <div id="xml-resumo-ano" class="so-guiado mt-4"><div class="rounded-xl border border-slate-200 bg-white p-4"><label for="xml-cnpj-proprio" class="block text-sm font-semibold">Qual é o seu CNPJ? <span class="font-normal text-slate-500">(opcional)</span></label><input id="xml-cnpj-proprio" type="text" inputmode="numeric" class="mt-2 w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2" placeholder="00.000.000/0000-00"><div id="xml-resumo-conteudo" class="mt-4"></div><p class="mt-3 text-xs text-slate-600">Considera só as notas que você carregou aqui. Pode não representar todo o seu faturamento.</p><p class="text-xs text-slate-600">Informativo. Confirme com seu contador.</p></div></div>
     </section>
 
-    <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-conciliador" tabindex="-1">
+    <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900"><span class="so-completo">Conciliador Bancário</span><span class="so-guiado">Conferir banco e anotações</span></h2>
         <p class="so-guiado text-slate-600 text-sm mt-2">Confira se o que você anotou bate com o banco. O extrato mostra as entradas e saídas da conta. Suas anotações podem estar em uma planilha CSV simples com data, descrição e valor.</p>
@@ -279,7 +310,7 @@
       </div>
     </section>
 
-    <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-organizador" tabindex="-1">
+    <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900"><span class="so-completo">Organizador Fiscal</span><span class="so-guiado">Organizar documentos</span></h2>
         <p class="so-guiado text-slate-600 text-sm mt-2">Este módulo padroniza os nomes dos arquivos e separa cópias por mês. Assim, seu contador recebe tudo com nome padronizado e separado por mês.</p>
@@ -359,7 +390,7 @@
         </div>
       </div>
     </section>
-    <section id="panel-contato" class="tab-panel so-completo fade-in hidden" role="tabpanel" aria-labelledby="tab-contato" tabindex="-1">
+    <section id="panel-contato" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 id="contato" class="text-2xl font-extrabold text-slate-900">Contato</h2>
         <p class="text-slate-500 text-sm">Envie uma mensagem para falar sobre o AutoContábil Hub.</p>
@@ -399,7 +430,7 @@
         <button id="contact-submit" type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Enviar mensagem</button>
       </form>
     </section>
-    <section id="panel-utilitarios" class="tab-panel so-completo fade-in hidden" role="tabpanel" aria-labelledby="tab-utilitarios" tabindex="-1">
+    <section id="panel-utilitarios" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
       <div class="mb-4"><h2 class="text-2xl font-extrabold text-slate-900">Utilitários</h2><p class="text-slate-500 text-sm">Validações e conversões executadas neste navegador.</p></div>
       <div id="utilities-root"></div>
     </section>
@@ -422,9 +453,9 @@
       </div>
     </div>
     <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
-      <a class="hover:text-white underline" href="ferramentas.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="#catalogo" data-go="catalogo">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
-      <a class="hover:text-white underline" href="#contato">Contato</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="#contato" data-go="contato">Contato</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="termos.html">Termos</a>
     </div>

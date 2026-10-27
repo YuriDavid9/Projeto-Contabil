@@ -121,46 +121,11 @@ def main():
                 page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
                 page.goto("http://127.0.0.1:8765/", wait_until="domcontentloaded")
 
-                assert page.get_by_role("dialog", name="Como você quer usar?").is_visible()
-                assert page.locator("#modo-overlay").get_by_text("Seus arquivos não saem do seu computador.", exact=True).is_visible()
-                page.locator("#modo-guiado").click()
-                assert page.locator("#panel-inicio").is_visible()
-                assert page.get_by_text("O que você quer fazer?").is_visible()
-                assert page.get_by_text("Aqui você não precisa saber nada de contabilidade. Escolha o que quer fazer e eu explico cada passo.").is_visible()
-                assert page.get_by_text("Tenho notas fiscais e quero entender o que tem nelas").is_visible()
-                assert page.get_by_text("Quero conferir se o que o banco mostra bate com o que anotei").is_visible()
-                assert page.get_by_text("Quero arrumar meus documentos para mandar ao contador").is_visible()
-                assert page.get_by_text("Conteúdo informativo. Não substitui a orientação do seu contador.").is_visible()
-                assert page.get_by_role("tab").count() == 4
-                page.reload(wait_until="domcontentloaded")
                 assert not page.locator("#modo-overlay").is_visible()
-                assert page.locator("body").get_attribute("data-modo") == "guiado"
-                page.locator('#panel-inicio [data-go="xml"]').click()
-                page.locator("#xml-demo").click()
-                assert page.get_by_text("Estes dados são de exemplo, inventados para você ver como funciona.").is_visible()
-                assert page.locator("#xml-tbody tr").count() == 5
-
-                page.locator("#tab-conciliador").click()
-                page.locator("#cb-demo").click()
-                assert page.locator("#cb-bank-tbody tr").count() == 13
-                assert page.locator("#cb-led-tbody tr").count() == 13
-
-                page.locator("#tab-organizador").click()
-                page.locator("#og-demo").click()
-                assert page.locator("#og-tbody tr").count() == 6
-
-                page.locator("#modo-toggle").click()
-                assert page.locator("body").get_attribute("data-modo") == "completo"
-                assert page.get_by_role("tab").count() == 5
-                page.locator("#tab-contato").click()
-                assert page.locator("#contact-form").is_visible()
-                page.locator("#tab-utilitarios").click()
-                assert page.locator("#utilities-root section").count() == 4
-                assert page.title() == "AutoContábil Hub | Utilitários"
-
-                # Testes do catálogo de ferramentas (ferramentas.html)
-                page.goto("http://127.0.0.1:8765/ferramentas.html", wait_until="domcontentloaded")
+                assert page.locator("#panel-catalogo").is_visible()
                 assert page.get_by_role("heading", name="Catálogo de Ferramentas").is_visible()
+                assert page.get_by_text("Abrir App", exact=False).count() == 0
+
                 catalog_counts = page.evaluate("""async () => {
                     const mod = await import('./js/ferramentas/catalogo.js');
                     const items = mod.CATALOGO_FERRAMENTAS;
@@ -184,6 +149,54 @@ def main():
                 assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["financeiro"]
 
                 page.locator('#catalogo-filtros-area button[data-area="todas"]').click()
+                assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["total"]
+
+                # Abrir Extrator de XML a partir do catálogo principal
+                page.locator('[data-card-slug="extrator-xml-nfe"] [data-go="xml"]').click()
+                assert page.locator("#panel-xml").is_visible()
+                page.locator("#xml-demo").click()
+                assert page.get_by_text("Estes dados são de exemplo, inventados para você ver como funciona.").is_visible()
+                assert page.locator("#xml-tbody tr").count() == 5
+
+                # Voltar ao catálogo e abrir Conciliador Bancário
+                page.locator("#tab-catalogo").click()
+                assert page.locator("#panel-catalogo").is_visible()
+                page.locator('[data-card-slug="conciliador-bancario-ofx"] [data-go="conciliador"]').click()
+                assert page.locator("#panel-conciliador").is_visible()
+                page.locator("#cb-demo").click()
+                assert page.locator("#cb-bank-tbody tr").count() == 13
+                assert page.locator("#cb-led-tbody tr").count() == 13
+
+                # Voltar ao catálogo e abrir Organizador Fiscal
+                page.locator("#tab-catalogo").click()
+                page.locator('[data-card-slug="organizador-fiscal"] [data-go="organizador"]').click()
+                assert page.locator("#panel-organizador").is_visible()
+                page.locator("#og-demo").click()
+                assert page.locator("#og-tbody tr").count() == 6
+
+                # Alternar modo Guiado / Completo dentro da ferramenta
+                assert page.locator("body").get_attribute("data-modo") == "completo"
+                page.locator("#modo-toggle").click()
+                assert page.locator("body").get_attribute("data-modo") == "guiado"
+                page.locator("#modo-toggle").click()
+                assert page.locator("body").get_attribute("data-modo") == "completo"
+
+                # Voltar ao catálogo e abrir Utilitários
+                page.locator("#tab-catalogo").click()
+                page.locator('[data-card-slug="utilitarios-contabeis"]').get_by_role("link", name="Abrir ferramenta →").click()
+                assert page.locator("#panel-utilitarios").is_visible()
+                assert page.locator("#utilities-root section").count() == 4
+                assert page.title() == "AutoContábil Hub | Utilitários"
+
+                # Abrir Contato pelo rodapé
+                page.locator('footer [data-go="contato"]').click()
+                assert page.locator("#panel-contato").is_visible()
+                assert page.locator("#contact-form").is_visible()
+
+                # Testes de ferramentas.html (compatibilidade sem botão Abrir App)
+                page.goto("http://127.0.0.1:8765/ferramentas.html", wait_until="domcontentloaded")
+                assert page.get_by_role("heading", name="Catálogo de Ferramentas").is_visible()
+                assert page.get_by_text("Abrir App", exact=False).count() == 0
                 assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["total"]
 
                 # Testes das páginas explicativas das ferramentas
