@@ -55,52 +55,53 @@ def main():
     try:
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch()
-            page = browser.new_page()
-            errors = []
-            page.on("pageerror", lambda error: errors.append(str(error)))
-            page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
-            page.goto("http://127.0.0.1:8765/", wait_until="domcontentloaded")
+            try:
+                page = browser.new_page()
+                errors = []
+                page.on("pageerror", lambda error: errors.append(str(error)))
+                page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
+                page.goto("http://127.0.0.1:8765/", wait_until="domcontentloaded")
 
-            assert page.get_by_role("dialog", name="Como você quer usar?").is_visible()
-            assert page.get_by_text("Seus arquivos não saem do seu computador.").is_visible()
-            page.locator("#modo-guiado").click()
-            assert page.locator("#panel-inicio").is_visible()
-            assert page.get_by_text("O que você quer fazer?").is_visible()
-            assert page.get_by_text("Aqui você não precisa saber nada de contabilidade. Escolha o que quer fazer e eu explico cada passo.").is_visible()
-            assert page.get_by_text("Tenho notas fiscais e quero entender o que tem nelas").is_visible()
-            assert page.get_by_text("Quero conferir se o que o banco mostra bate com o que anotei").is_visible()
-            assert page.get_by_text("Quero arrumar meus documentos para mandar ao contador").is_visible()
-            assert page.get_by_text("Conteúdo informativo. Não substitui a orientação do seu contador.").is_visible()
-            assert page.get_by_role("tab").count() == 4
-            page.reload(wait_until="domcontentloaded")
-            assert not page.locator("#modo-overlay").is_visible()
-            assert page.locator("body").get_attribute("data-modo") == "guiado"
-            page.locator('#panel-inicio [data-go="xml"]').click()
-            page.locator("#xml-demo").click()
-            assert page.get_by_text("Estes dados são de exemplo, inventados para você ver como funciona.").is_visible()
-            assert page.locator("#xml-tbody tr").count() == 5
+                assert page.get_by_role("dialog", name="Como você quer usar?").is_visible()
+                assert page.locator("#modo-overlay").get_by_text("Seus arquivos não saem do seu computador.", exact=True).is_visible()
+                page.locator("#modo-guiado").click()
+                assert page.locator("#panel-inicio").is_visible()
+                assert page.get_by_text("O que você quer fazer?").is_visible()
+                assert page.get_by_text("Aqui você não precisa saber nada de contabilidade. Escolha o que quer fazer e eu explico cada passo.").is_visible()
+                assert page.get_by_text("Tenho notas fiscais e quero entender o que tem nelas").is_visible()
+                assert page.get_by_text("Quero conferir se o que o banco mostra bate com o que anotei").is_visible()
+                assert page.get_by_text("Quero arrumar meus documentos para mandar ao contador").is_visible()
+                assert page.get_by_text("Conteúdo informativo. Não substitui a orientação do seu contador.").is_visible()
+                assert page.get_by_role("tab").count() == 4
+                page.reload(wait_until="domcontentloaded")
+                assert not page.locator("#modo-overlay").is_visible()
+                assert page.locator("body").get_attribute("data-modo") == "guiado"
+                page.locator('#panel-inicio [data-go="xml"]').click()
+                page.locator("#xml-demo").click()
+                assert page.get_by_text("Estes dados são de exemplo, inventados para você ver como funciona.").is_visible()
+                assert page.locator("#xml-tbody tr").count() == 5
 
-            page.locator("#tab-conciliador").click()
-            page.locator("#cb-demo").click()
-            assert page.locator("#cb-bank-tbody tr").count() == 13
-            assert page.locator("#cb-led-tbody tr").count() == 13
+                page.locator("#tab-conciliador").click()
+                page.locator("#cb-demo").click()
+                assert page.locator("#cb-bank-tbody tr").count() == 13
+                assert page.locator("#cb-led-tbody tr").count() == 13
 
-            page.locator("#tab-organizador").click()
-            page.locator("#og-demo").click()
-            assert page.locator("#og-tbody tr").count() == 6
+                page.locator("#tab-organizador").click()
+                page.locator("#og-demo").click()
+                assert page.locator("#og-tbody tr").count() == 6
 
-            page.locator("#modo-toggle").click()
-            assert page.locator("body").get_attribute("data-modo") == "completo"
-            assert page.get_by_role("tab").count() == 5
-            page.locator("#tab-contato").click()
-            assert page.locator("#contact-form").is_visible()
-            page.locator("#tab-utilitarios").click()
-            assert page.locator("#utilities-root section").count() == 4
-            assert page.title() == "AutoContábil Hub | Utilitários"
-            assert not errors, "Browser errors: " + " | ".join(errors)
+                page.locator("#modo-toggle").click()
+                assert page.locator("body").get_attribute("data-modo") == "completo"
+                assert page.get_by_role("tab").count() == 5
+                page.locator("#tab-contato").click()
+                assert page.locator("#contact-form").is_visible()
+                page.locator("#tab-utilitarios").click()
+                assert page.locator("#utilities-root section").count() == 4
+                assert page.title() == "AutoContábil Hub | Utilitários"
+                assert not errors, "Browser errors: " + " | ".join(errors)
+            finally:
+                browser.close()
     finally:
-        if browser:
-            browser.close()
         server.shutdown()
         server.server_close()
 
