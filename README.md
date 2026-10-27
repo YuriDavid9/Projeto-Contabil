@@ -9,7 +9,7 @@ Aplicação web modular para apoiar tarefas contábeis, fiscais e financeiras, a
 ## Arquitetura
 
 - `index.html` contém as abas das ferramentas locais; `styles.css` contém os estilos compartilhados.
-- `ferramentas.html` e `js/ferramentas/catalogo.js` formam o catálogo centralizado de ferramentas com busca por texto, filtro por área (`fiscal`, `contabil`, `financeiro`) e atalhos diretos para abrir cada módulo no navegador (`index.html#xml`, `index.html#conciliador` etc.) ou consultar suas páginas explicativas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `validador-cnpj.html`).
+- `ferramentas.html` e `js/ferramentas/catalogo.js` formam o catálogo centralizado de ferramentas com busca por texto, filtro por área (`fiscal`, `contabil`, `financeiro`) e atalhos diretos para abrir cada módulo no navegador (`index.html#xml`, `index.html#conciliador`, `index.html#organizador`, `index.html#utilitarios`) ou consultar suas páginas explicativas padronizadas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`).
 - `js/xmlModule.js` extrai NF-e/NFC-e, importa XML/ZIP, valida chave/cStat, filtra dados e exporta CSV/XLSX.
 - `js/conciliadorModule.js` concilia OFX/CSV, permite vínculo manual, aviso de duplicados e armazenamento local opt-in.
 - `js/organizadorModule.js` organiza arquivos, extrai texto de PDFs quando possível e salva regras no navegador.

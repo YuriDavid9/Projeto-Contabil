@@ -1,6 +1,7 @@
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
+import json
 import os
 import re
 
@@ -22,7 +23,14 @@ TOOL_PAGES = [
     "ferramentas.html",
     "extrator-xml-nfe.html",
     "conciliador-bancario-ofx.html",
+    "organizador-fiscal.html",
     "validador-cnpj.html",
+]
+DEDICATED_TOOL_SPECS = [
+    ("extrator-xml-nfe.html", "index.html#xml"),
+    ("conciliador-bancario-ofx.html", "index.html#conciliador"),
+    ("organizador-fiscal.html", "index.html#organizador"),
+    ("validador-cnpj.html", "index.html#utilitarios"),
 ]
 FORBIDDEN_PATTERNS = re.compile(r"(supabase|js/portal)", re.IGNORECASE)
 IMPORT_RE = re.compile(
@@ -177,6 +185,23 @@ def main():
 
                 page.locator('#catalogo-filtros-area button[data-area="todas"]').click()
                 assert page.locator("#catalogo-grid [data-card-slug]").count() == catalog_counts["total"]
+
+                # Testes das páginas explicativas das ferramentas
+                for page_file, expected_target in DEDICATED_TOOL_SPECS:
+                    page.goto(f"http://127.0.0.1:8765/{page_file}", wait_until="domcontentloaded")
+                    assert page.locator("h1").is_visible()
+                    open_btn = page.get_by_role("link", name="Abrir ferramenta →")
+                    assert open_btn.is_visible()
+                    assert open_btn.get_attribute("href") == expected_target
+                    assert page.get_by_text("Processamento 100% local no navegador:").is_visible()
+                    assert page.get_by_text("Não substitui a orientação do seu contador").first.is_visible()
+                    assert page.locator("details").count() >= 3
+
+                    ld_raw = page.locator('script[type="application/ld+json"]').inner_text()
+                    ld_data = json.loads(ld_raw)
+                    types = {node.get("@type") for node in ld_data.get("@graph", [])}
+                    assert "SoftwareApplication" in types, f"Missing SoftwareApplication in {page_file}"
+                    assert "FAQPage" in types, f"Missing FAQPage in {page_file}"
 
                 assert not errors, "Browser errors: " + " | ".join(errors)
             finally:

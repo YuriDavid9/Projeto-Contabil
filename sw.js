@@ -1,4 +1,4 @@
-const CACHE_NAME = 'autocontabil-shell-v8';
+const CACHE_NAME = 'autocontabil-shell-v9';
 const CORE_ASSETS = [
   './index.html',
   './ferramentas.html',
@@ -11,6 +11,7 @@ const CORE_ASSETS = [
   './validador-cnpj.html',
   './extrator-xml-nfe.html',
   './conciliador-bancario-ofx.html',
+  './organizador-fiscal.html',
   './404.html',
   './js/app.js',
   './js/modo.js',
