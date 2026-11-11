@@ -1,4 +1,4 @@
-import { $, $$, esc, norm } from './utils.js';
+import { $, $$, esc, norm, toast } from './utils.js';
 import { initXmlModule, NF, renderNF, showNFModal } from './xmlModule.js';
 import { initConciliadorModule, CB, renderCB } from './conciliadorModule.js';
 import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
@@ -320,7 +320,7 @@ document.addEventListener('click', (event) => {
       renderNF();
       break;
     case 'copy':
-      navigator.clipboard?.writeText(actionTarget.dataset.v).then(() => console.log('copiado'), () => console.log('falha ao copiar'));
+      navigator.clipboard?.writeText(actionTarget.dataset.v).then(() => toast('Chave copiada.', 'ok'), () => toast('Não foi possível copiar.', 'err'));
       break;
     case 'cb-filter':
       CB.filter = actionTarget.dataset.k;

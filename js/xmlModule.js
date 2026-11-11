@@ -1,11 +1,20 @@
 import {
-  $, esc, brl, fmtDateTime, fmtDoc, fmtChave, readFileText, toast, showMsgs,
+  $, esc, brl, fmtDateTime, fmtDoc, fmtChave, parseDateAny, readFileText, toast, showMsgs,
   bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, loadSheetJS, normalizeCNPJ
 } from './utils.js';
 import { getModo } from './modo.js';
 import { LIMITE_MEI_ANUAL } from './config.js';
 
 const NF = { notas: [], q: '', page: 1, size: 10, model: '', start: '', end: '', cfop: '' };
+
+function classifyStatus(cStat) {
+  const code = String(cStat || '').trim();
+  if (code === '100' || code === '150') return { key: 'autorizada', label: 'Autorizada', cls: 'bg-emerald-100 text-emerald-800', validForKpi: true };
+  if (code === '101' || code === '151' || code === '135') return { key: 'cancelada', label: 'Cancelada', cls: 'bg-rose-100 text-rose-800', validForKpi: false };
+  if (code === '110' || code === '301' || code === '302') return { key: 'denegada', label: 'Denegada', cls: 'bg-rose-100 text-rose-800', validForKpi: false };
+  if (!code) return { key: 'sem_protocolo', label: 'Sem protocolo', cls: 'bg-amber-100 text-amber-800', validForKpi: true };
+  return { key: 'outro', label: `cStat ${code}`, cls: 'bg-amber-100 text-amber-800', validForKpi: false };
+}
 
 function calcDV(value) {
   let weight = 2;
@@ -19,24 +28,36 @@ function calcDV(value) {
 }
 
 function buildDemoXML(data) {
+  const emitDoc = String(data?.emit?.doc || '').replace(/\D/g, '');
+  const destDocVal = String(data?.dest?.doc || '').replace(/\D/g, '');
+  if (!/^(\d{11}|\d{14})$/.test(emitDoc) || !/^(\d{11}|\d{14})$/.test(destDocVal)) {
+    throw new Error('Documento do emitente e destinatário deve ter 11 (CPF) ou 14 (CNPJ) dígitos.');
+  }
+  const cUF = String(data.cUF || 25).padStart(2, '0');
   const vProd = r2(data.itens.reduce((total, item) => total + item.q * item.vu, 0));
   const vICMS = r2(vProd * data.icms);
   const vPIS = r2(vProd * 0.0165);
   const vCOFINS = r2(vProd * 0.076);
   const frete = data.frete || 0;
-  const vNF = r2(vProd + frete);
-  const base = `25${data.dt.slice(2, 4)}${data.dt.slice(5, 7)}${data.emit.doc}${data.mod}${String(data.serie).padStart(3, '0')}${String(data.nNF).padStart(9, '0')}1${String(data.cNF).padStart(8, '0')}`;
+  const vSeg = data.vSeg || 0;
+  const vOutro = data.vOutro || 0;
+  const vDesc = data.vDesc || 0;
+  const vST = data.vST || 0;
+  const vIPI = data.vIPI || 0;
+  const vNF = r2(vProd + frete + vSeg + vOutro + vST + vIPI - vDesc);
+  const base = `${cUF}${data.dt.slice(2, 4)}${data.dt.slice(5, 7)}${emitDoc.padStart(14, '0')}${data.mod}${String(data.serie).padStart(3, '0')}${String(data.nNF).padStart(9, '0')}1${String(data.cNF).padStart(8, '0')}`;
   const chave = base + calcDV(base);
-  const destDoc = data.dest.doc.length === 14 ? `<CNPJ>${data.dest.doc}</CNPJ>` : `<CPF>${data.dest.doc}</CPF>`;
+  const emitDocTag = emitDoc.length === 14 ? `<CNPJ>${emitDoc}</CNPJ>` : `<CPF>${emitDoc}</CPF>`;
+  const destDoc = destDocVal.length === 14 ? `<CNPJ>${destDocVal}</CNPJ>` : `<CPF>${destDocVal}</CPF>`;
   const dets = data.itens.map((item, index) => `<det nItem="${index + 1}"><prod><cProd>${1000 + index}</cProd><xProd>${xmlEsc(item.desc)}</xProd><NCM>${item.ncm || '19059090'}</NCM><CFOP>${data.cfop || 5102}</CFOP><uCom>UN</uCom><qCom>${item.q.toFixed(4)}</qCom><vUnCom>${item.vu.toFixed(2)}</vUnCom><vProd>${r2(item.q * item.vu).toFixed(2)}</vProd></prod></det>`).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>
 <nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00"><NFe><infNFe Id="NFe${chave}" versao="4.00">
-<ide><cUF>25</cUF><natOp>${xmlEsc(data.natOp || 'VENDA DE MERCADORIA')}</natOp><mod>${data.mod}</mod><serie>${data.serie}</serie><nNF>${data.nNF}</nNF><dhEmi>${data.dt}T${data.hora}:00-03:00</dhEmi></ide>
-<emit><CNPJ>${data.emit.doc}</CNPJ><xNome>${xmlEsc(data.emit.nome)}</xNome><enderEmit><xMun>João Pessoa</xMun><UF>PB</UF></enderEmit></emit>
+<ide><cUF>${cUF}</cUF><natOp>${xmlEsc(data.natOp || 'VENDA DE MERCADORIA')}</natOp><mod>${data.mod}</mod><serie>${data.serie}</serie><nNF>${data.nNF}</nNF><dhEmi>${data.dt}T${data.hora}:00-03:00</dhEmi></ide>
+<emit>${emitDocTag}<xNome>${xmlEsc(data.emit.nome)}</xNome><enderEmit><xMun>João Pessoa</xMun><UF>PB</UF></enderEmit></emit>
 <dest>${destDoc}<xNome>${xmlEsc(data.dest.nome)}</xNome></dest>
 ${dets}
-<total><ICMSTot><vBC>${vProd.toFixed(2)}</vBC><vICMS>${vICMS.toFixed(2)}</vICMS><vProd>${vProd.toFixed(2)}</vProd><vFrete>${frete.toFixed(2)}</vFrete><vDesc>0.00</vDesc><vPIS>${vPIS.toFixed(2)}</vPIS><vCOFINS>${vCOFINS.toFixed(2)}</vCOFINS><vNF>${vNF.toFixed(2)}</vNF></ICMSTot></total>
-</infNFe></NFe><protNFe versao="4.00"><infProt><tpAmb>1</tpAmb><chNFe>${chave}</chNFe><nProt>1252600${data.nNF}</nProt><cStat>100</cStat></infProt></protNFe></nfeProc>`;
+<total><ICMSTot><vBC>${vProd.toFixed(2)}</vBC><vICMS>${vICMS.toFixed(2)}</vICMS><vST>${vST.toFixed(2)}</vST><vProd>${vProd.toFixed(2)}</vProd><vFrete>${frete.toFixed(2)}</vFrete><vSeg>${vSeg.toFixed(2)}</vSeg><vDesc>${vDesc.toFixed(2)}</vDesc><vIPI>${vIPI.toFixed(2)}</vIPI><vPIS>${vPIS.toFixed(2)}</vPIS><vCOFINS>${vCOFINS.toFixed(2)}</vCOFINS><vOutro>${vOutro.toFixed(2)}</vOutro><vNF>${vNF.toFixed(2)}</vNF></ICMSTot></total>
+</infNFe></NFe><protNFe versao="4.00"><infProt><tpAmb>1</tpAmb><chNFe>${chave}</chNFe><nProt>1252600${data.nNF}</nProt><cStat>${data.cStat || '100'}</cStat></infProt></protNFe></nfeProc>`;
 }
 
 const DEMO_NFES = [
@@ -47,9 +68,35 @@ const DEMO_NFES = [
   { mod: 55, serie: 1, nNF: 3302, cNF: 55667788, dt: '2026-10-15', hora: '10:12', icms: 0.18, emit: { doc: '99000111000177', nome: 'Papelaria Central do Nordeste LTDA' }, dest: { doc: '77888999000155', nome: 'Escritório Contábil Monteiro & Associados' }, itens: [{ desc: 'Resma Papel A4 500fls', q: 25, vu: 24.9, ncm: '48025610' }, { desc: 'Pasta Suspensa (cx 50)', q: 6, vu: 79.9, ncm: '48203000' }] }
 ];
 
+function parseXmlDoc(xmlText) {
+  if (typeof DOMParser !== 'undefined') {
+    const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    if (doc.getElementsByTagName('parsererror').length) throw new Error('XML malformado ou corrompido');
+    return doc;
+  }
+  const str = String(xmlText || '');
+  if (!str.includes('<') || !str.includes('>')) throw new Error('XML malformado ou corrompido');
+  const decode = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+  const makeNode = (raw, attrs = '') => ({
+    get textContent() { return decode(raw.replace(/<[^>]+>/g, '')); },
+    getAttribute(name) {
+      const m = new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, 'i').exec(attrs);
+      return m ? decode(m[1]) : null;
+    },
+    getElementsByTagName(tag) {
+      if (tag === 'parsererror') return [];
+      const re = new RegExp(`<${tag}(\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'gi');
+      const list = [];
+      let m;
+      while ((m = re.exec(raw))) list.push(makeNode(m[2], m[1] || ''));
+      return list;
+    }
+  });
+  return makeNode(str);
+}
+
 function parseNFe(xmlText, fileName) {
-  const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
-  if (doc.getElementsByTagName('parsererror').length) throw new Error('XML malformado ou corrompido');
+  const doc = parseXmlDoc(xmlText);
   const first = (root, tag) => (root ? root.getElementsByTagName(tag)[0] || null : null);
   const textOf = (root, tag) => {
     const element = first(root, tag);
@@ -61,7 +108,9 @@ function parseNFe(xmlText, fileName) {
   };
   const inf = first(doc, 'infNFe');
   if (!inf) throw new Error('não é uma NF-e/NFC-e (tag infNFe ausente — pode ser evento, inutilização ou resumo)');
-  const chave = ((inf.getAttribute('Id') || '').replace(/^NFe/i, '') || textOf(doc, 'chNFe')).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+  const protNFe = first(doc, 'protNFe');
+  const infProt = first(protNFe, 'infProt') || protNFe;
+  const chave = ((inf.getAttribute('Id') || '').replace(/^NFe/i, '') || textOf(infProt, 'chNFe')).replace(/[^0-9A-Za-z]/g, '').toUpperCase();
   const chaveValid = /^[0-9A-Z]{44}$/i.test(chave) && Number(chave[43]) === calcDV(chave.slice(0, 43));
   const ide = first(inf, 'ide');
   const emit = first(inf, 'emit');
@@ -71,6 +120,7 @@ function parseNFe(xmlText, fileName) {
   const documentOf = (element) => textOf(element, 'CNPJ') || textOf(element, 'CPF') || textOf(element, 'idEstrangeiro');
   const itens = [...inf.getElementsByTagName('det')].map((item) => {
     const product = first(item, 'prod');
+    const imposto = first(item, 'imposto');
     return {
       n: item.getAttribute('nItem') || '',
       cod: textOf(product, 'cProd'),
@@ -80,9 +130,35 @@ function parseNFe(xmlText, fileName) {
       un: textOf(product, 'uCom'),
       q: numericOf(product, 'qCom'),
       vu: numericOf(product, 'vUnCom'),
-      v: numericOf(product, 'vProd')
+      v: numericOf(product, 'vProd'),
+      vICMS: numericOf(imposto, 'vICMS'),
+      vIPI: numericOf(imposto, 'vIPI'),
+      vPIS: numericOf(imposto, 'vPIS'),
+      vCOFINS: numericOf(imposto, 'vCOFINS')
     };
   });
+
+  const vProd = numericOf(tot, 'vProd');
+  const vNF = numericOf(tot, 'vNF');
+  const vICMS = numericOf(tot, 'vICMS');
+  const vPIS = numericOf(tot, 'vPIS');
+  const vCOFINS = numericOf(tot, 'vCOFINS');
+  const vBC = numericOf(tot, 'vBC');
+  const vFrete = numericOf(tot, 'vFrete');
+  const vSeg = numericOf(tot, 'vSeg');
+  const vOutro = numericOf(tot, 'vOutro');
+  const vDesc = numericOf(tot, 'vDesc');
+  const vST = numericOf(tot, 'vST');
+  const vIPI = numericOf(tot, 'vIPI');
+  const cStat = textOf(infProt, 'cStat');
+  const statusInfo = classifyStatus(cStat);
+
+  const expectedVNF = vProd + vFrete + vSeg + vOutro + vST + vIPI - vDesc;
+  const itemsSum = itens.reduce((sum, item) => sum + item.v, 0);
+  const totalsOk = Math.abs(expectedVNF - vNF) <= 0.05 && Math.abs(itemsSum - vProd) <= 0.05;
+  const warnings = [];
+  if (!totalsOk) warnings.push('totais não conferem');
+  if (!chaveValid) warnings.push('chave inválida');
 
   return {
     arquivo: fileName,
@@ -94,19 +170,27 @@ function parseNFe(xmlText, fileName) {
     natOp: textOf(ide, 'natOp'),
     emit: { nome: textOf(emit, 'xNome'), doc: documentOf(emit), fant: textOf(emit, 'xFant') },
     dest: { nome: textOf(dest, 'xNome') || 'Consumidor não identificado', doc: documentOf(dest) },
-    vProd: numericOf(tot, 'vProd'),
-    vNF: numericOf(tot, 'vNF'),
-    vICMS: numericOf(tot, 'vICMS'),
-    vPIS: numericOf(tot, 'vPIS'),
-    vCOFINS: numericOf(tot, 'vCOFINS'),
-    vBC: numericOf(tot, 'vBC'),
-    vFrete: numericOf(tot, 'vFrete'),
-    vDesc: numericOf(tot, 'vDesc'),
-    vST: numericOf(tot, 'vST'),
-    vIPI: numericOf(tot, 'vIPI'),
-    protocolo: textOf(doc, 'nProt'),
-    cStat: textOf(first(doc, 'infProt'), 'cStat'),
+    vProd,
+    vNF,
+    vICMS,
+    vPIS,
+    vCOFINS,
+    vBC,
+    vFrete,
+    vSeg,
+    vOutro,
+    vDesc,
+    vST,
+    vIPI,
+    protocolo: textOf(infProt, 'nProt'),
+    cStat,
+    status: statusInfo.key,
+    statusLabel: statusInfo.label,
+    statusCls: statusInfo.cls,
+    validForKpi: statusInfo.validForKpi,
     chaveValid,
+    totalsOk,
+    avisoConferencia: warnings.join('; '),
     itens
   };
 }
@@ -121,7 +205,8 @@ function addNotas(entries) {
     try {
       const note = parseNFe(entry.text, entry.name);
       if (!note.chaveValid) errors.push(`${entry.name}: chave de acesso inválida (44 dígitos e DV incorreto) — nota importada com aviso.`);
-      if (!['100', '150'].includes(note.cStat)) errors.push(`${entry.name}: situação fiscal cStat ${note.cStat || 'ausente'} diferente de 100/150 — confira a nota.`);
+      if (!note.totalsOk) errors.push(`${entry.name}: totais não conferem (soma dos itens ou cálculo de vNF diverge em mais de R$ 0,05).`);
+      if (note.status !== 'autorizada') errors.push(`${entry.name}: situação fiscal ${note.statusLabel} (cStat ${note.cStat || 'ausente'}) — confira a nota.`);
       const key = note.chave || `${entry.name}${note.nNF}`;
       if (seen.has(key)) {
         duplicates++;
@@ -197,7 +282,8 @@ function renderNF() {
     cfopSelect.value = cfops.includes(NF.cfop) ? NF.cfop : '';
     if (!cfopSelect.value) NF.cfop = '';
   }
-  const sum = (key) => r2(NF.notas.reduce((total, note) => total + note[key], 0));
+  const validKpiNotes = NF.notas.filter((note) => note.validForKpi !== false && note.status !== 'cancelada' && note.status !== 'denegada');
+  const sum = (key) => r2(validKpiNotes.reduce((total, note) => total + note[key], 0));
 
   renderYearSummary();
 
@@ -223,8 +309,8 @@ function renderNF() {
   const slice = list.slice(start, NF.page * NF.size);
 
   $('#xml-tbody').innerHTML = slice.length ? slice.map((note) => `
-    <tr class="hover:bg-slate-50 ${note.chaveValid && ['100', '150'].includes(note.cStat) ? '' : 'bg-amber-50'}">
-      <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-1.5 py-0.5 ${note.mod === '65' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${esc(note.mod)}</span>${!note.chaveValid ? '<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Chave de acesso inválida">Chave inválida</span>' : ''}${!['100', '150'].includes(note.cStat) ? `<span class="ml-1 text-[10px] font-semibold text-rose-700" title="${getModo() === 'guiado' ? 'Situação informada no arquivo' : 'Confira a situação fiscal'}">${getModo() === 'guiado' ? 'Situação' : 'cStat'} ${esc(note.cStat || 'ausente')}</span>` : ''}</td>
+    <tr class="hover:bg-slate-50 ${note.chaveValid && note.totalsOk && note.status === 'autorizada' ? '' : 'bg-amber-50'}">
+      <td class="px-3 py-2"><span class="text-[11px] font-bold rounded-md px-1.5 py-0.5 ${note.mod === '65' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'}">${esc(note.mod)}</span><span class="ml-1 text-[10px] font-bold rounded-md px-1.5 py-0.5 ${note.statusCls || 'bg-slate-100 text-slate-700'}">${esc(note.statusLabel || 'Autorizada')}</span>${!note.chaveValid ? '<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Chave de acesso inválida">Chave inválida</span>' : ''}${!note.totalsOk ? '<span class="ml-1 text-[10px] font-semibold text-rose-700" title="Diferença entre soma dos itens/campos e vNF">totais não conferem</span>' : ''}</td>
       <td class="px-3 py-2 font-semibold whitespace-nowrap">${esc(note.nNF)} <span class="text-slate-400 font-normal">/ ${esc(note.serie)}</span></td>
       <td class="px-3 py-2 whitespace-nowrap">${esc(fmtDateTime(note.emissao))}</td>
       <td class="px-3 py-2 min-w-[14rem]"><div class="font-medium">${esc(note.emit.nome)}</div><div class="text-xs text-slate-500">${esc(fmtDoc(note.emit.doc))}</div></td>
@@ -296,7 +382,7 @@ function showNFModal(key) {
       ${detailRow(getModo() === 'guiado' ? 'Emitente: quem emitiu a nota' : 'Emitente', `${esc(note.emit.nome)}<br><span class="text-xs text-slate-500">${esc(fmtDoc(note.emit.doc))}</span>`)}
       ${detailRow(getModo() === 'guiado' ? 'Destinatário: quem recebeu a nota' : 'Destinatário', `${esc(note.dest.nome)}<br><span class="text-xs text-slate-500">${esc(fmtDoc(note.dest.doc))}</span>`)}
       ${detailRow(getModo() === 'guiado' ? 'Descrição da operação' : 'Natureza da operação', esc(note.natOp || '—'))}
-      ${detailRow(getModo() === 'guiado' ? 'Situação informada no arquivo' : 'Protocolo / Status', `${esc(note.protocolo || '—')} ${note.cStat ? (getModo() === 'guiado' ? '• código da situação ' : '• cStat ') + esc(note.cStat) : ''}`)}
+      ${detailRow(getModo() === 'guiado' ? 'Situação informada no arquivo' : 'Protocolo / Status', `<span class="text-xs font-bold rounded-md px-1.5 py-0.5 ${note.statusCls || 'bg-slate-100 text-slate-700'}">${esc(note.statusLabel || 'Autorizada')}</span> ${esc(note.protocolo || '—')} ${note.cStat ? (getModo() === 'guiado' ? '• código da situação ' : '• cStat ') + esc(note.cStat) : ''}${!note.totalsOk ? ' • <strong class="text-rose-700">totais não conferem</strong>' : ''}`)}
       ${detailRow('Arquivo', esc(note.arquivo))}
     </dl>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
@@ -313,9 +399,10 @@ function showNFModal(key) {
 
 function exportNF() {
   const filteredNotes = nfFiltered();
-  const head = ['Modelo', 'Número NF', 'Série', 'Data/Hora Emissão', 'Chave de Acesso', 'Emitente - Razão Social', 'Emitente - CNPJ/CPF', 'Destinatário - Razão Social', 'Destinatário - CNPJ/CPF', 'Valor Produtos (vProd)', 'Valor Total NF (vNF)', 'ICMS (vICMS)', 'PIS (vPIS)', 'COFINS (vCOFINS)', 'Arquivo'];
-  const rows = filteredNotes.map((note) => [note.mod === '65' ? '65 - NFC-e' : '55 - NF-e', note.nNF, note.serie, fmtDateTime(note.emissao), note.chave, note.emit.nome, fmtDoc(note.emit.doc), note.dest.nome, fmtDoc(note.dest.doc), n2(note.vProd), n2(note.vNF), n2(note.vICMS), n2(note.vPIS), n2(note.vCOFINS), note.arquivo]);
-  const totals = filteredNotes.reduce((accumulator, note) => ({
+  const head = ['Modelo', 'Número NF', 'Série', 'Data/Hora Emissão', 'Chave de Acesso', 'Status', 'Aviso de conferência', 'Emitente - Razão Social', 'Emitente - CNPJ/CPF', 'Destinatário - Razão Social', 'Destinatário - CNPJ/CPF', 'Valor Produtos (vProd)', 'Valor Total NF (vNF)', 'ICMS (vICMS)', 'PIS (vPIS)', 'COFINS (vCOFINS)', 'Arquivo'];
+  const rows = filteredNotes.map((note) => [note.mod === '65' ? '65 - NFC-e' : '55 - NF-e', note.nNF, note.serie, fmtDateTime(note.emissao), note.chave, note.statusLabel || 'Autorizada', note.avisoConferencia || '', note.emit.nome, fmtDoc(note.emit.doc), note.dest.nome, fmtDoc(note.dest.doc), n2(note.vProd), n2(note.vNF), n2(note.vICMS), n2(note.vPIS), n2(note.vCOFINS), note.arquivo]);
+  const validFiltered = filteredNotes.filter((note) => note.validForKpi !== false && note.status !== 'cancelada' && note.status !== 'denegada');
+  const totals = validFiltered.reduce((accumulator, note) => ({
     vProd: accumulator.vProd + note.vProd,
     vNF: accumulator.vNF + note.vNF,
     vICMS: accumulator.vICMS + note.vICMS,
@@ -323,7 +410,7 @@ function exportNF() {
     vCOFINS: accumulator.vCOFINS + note.vCOFINS
   }), { vProd: 0, vNF: 0, vICMS: 0, vPIS: 0, vCOFINS: 0 });
 
-  rows.push([], ['TOTAL (filtrados)', `${filteredNotes.length} notas`, '', '', '', '', '', '', '', n2(totals.vProd), n2(totals.vNF), n2(totals.vICMS), n2(totals.vPIS), n2(totals.vCOFINS), '']);
+  rows.push([], ['TOTAL (filtrados válidos)', `${validFiltered.length} notas`, '', '', '', '', '', '', '', '', '', n2(totals.vProd), n2(totals.vNF), n2(totals.vICMS), n2(totals.vPIS), n2(totals.vCOFINS), '']);
   downloadCSV([head, ...rows], `consolidado_nfe_${stamp()}.csv`);
   toast('Planilha exportada.', 'ok');
 }
