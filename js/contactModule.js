@@ -7,6 +7,33 @@ const CONTACT_EMAIL = 'SEU_EMAIL@EXEMPLO.COM';
 const WHATSAPP_URL = 'https://wa.me/5583986398472';
 let lastAttemptAt = 0;
 
+function isContactEmailConfigured(email = CONTACT_EMAIL) {
+  const value = String(email || '').trim();
+  if (!value || !value.includes('@')) return false;
+  if (/SEU_EMAIL|EXEMPLO\.COM/i.test(value)) return false;
+  return true;
+}
+
+function isContactEndpointConfigured(endpoint = CONTACT_ENDPOINT, accessKey = CONTACT_ACCESS_KEY) {
+  const url = String(endpoint || '').trim();
+  if (!url.startsWith('https://') || /COLOQUE_AQUI/i.test(url)) return false;
+  if (url.includes('api.web3forms.com') && !String(accessKey || '').trim()) return false;
+  return true;
+}
+
+function isContactConfigured(endpoint = CONTACT_ENDPOINT, email = CONTACT_EMAIL, accessKey = CONTACT_ACCESS_KEY) {
+  return isContactEndpointConfigured(endpoint, accessKey) && isContactEmailConfigured(email);
+}
+
+function buildContactAlternativesHtml(email = CONTACT_EMAIL, whatsappUrl = WHATSAPP_URL) {
+  const links = [];
+  if (isContactEmailConfigured(email)) {
+    links.push(`<a class="font-semibold underline" href="mailto:${esc(email)}">Enviar por e-mail</a>`);
+  }
+  links.push(`<a class="font-semibold underline" href="${esc(whatsappUrl)}" target="_blank" rel="noopener">Falar pelo WhatsApp</a>`);
+  return `<div class="mt-3 flex flex-wrap gap-3">${links.join('')}</div>`;
+}
+
 function showContactMessage(message, kind = 'info', showAlternatives = false) {
   const box = $('#contact-status');
   const styles = {
@@ -15,15 +42,25 @@ function showContactMessage(message, kind = 'info', showAlternatives = false) {
     err: 'bg-rose-50 border-rose-200 text-rose-800'
   };
   if (!box) return;
-  const alternatives = showAlternatives
-    ? `<div class="mt-3 flex flex-wrap gap-3"><a class="font-semibold underline" href="mailto:${CONTACT_EMAIL}">Enviar por e-mail</a><a class="font-semibold underline" href="${WHATSAPP_URL}" target="_blank" rel="noopener">Falar pelo WhatsApp</a></div>`
-    : '';
+  const alternatives = showAlternatives ? buildContactAlternativesHtml(CONTACT_EMAIL, WHATSAPP_URL) : '';
   box.innerHTML = `<div class="border rounded-xl px-4 py-3 text-sm ${styles[kind] || styles.info}">${esc(message)}${alternatives}</div>`;
 }
 
 function initContactModule() {
   const form = $('#contact-form');
   if (!form) return;
+
+  if (!isContactEndpointConfigured(CONTACT_ENDPOINT, CONTACT_ACCESS_KEY)) {
+    form.innerHTML = `
+      <div class="space-y-3 text-sm text-slate-700">
+        <p class="font-semibold text-slate-900">O formulário está em configuração. Fale conosco pelo WhatsApp.</p>
+        <div>
+          <a class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-900 hover:bg-emerald-400 transition" href="${esc(WHATSAPP_URL)}" target="_blank" rel="noopener">💬 Falar pelo WhatsApp</a>
+        </div>
+      </div>`;
+    return;
+  }
+
   const button = $('#contact-submit');
   const submitLabel = button.textContent;
   const honeypot = $('#contact-website');
@@ -45,14 +82,6 @@ function initContactModule() {
       showContactMessage('Mensagem recebida. Obrigado pelo contato.', 'ok');
       form.reset();
       toast('Mensagem recebida.', 'ok');
-      return;
-    }
-
-    const accessKeyRequired = CONTACT_ENDPOINT.includes('api.web3forms.com');
-    if (!CONTACT_ENDPOINT.startsWith('https://') || CONTACT_ENDPOINT.includes('COLOQUE_AQUI') || (accessKeyRequired && !CONTACT_ACCESS_KEY)) {
-      console.warn('Contact form is not configured. Set CONTACT_ENDPOINT and, for Web3Forms, CONTACT_ACCESS_KEY in js/contactModule.js.');
-      showContactMessage('O envio por formulário está indisponível no momento. Use o e-mail ou o WhatsApp abaixo.', 'err', true);
-      toast('Envio por formulário indisponível. Use um canal alternativo.', 'err');
       return;
     }
 
@@ -85,7 +114,7 @@ function initContactModule() {
       form.reset();
     } catch (error) {
       console.warn('Contact form submission failed:', error);
-      showContactMessage('Não foi possível enviar a mensagem agora. Use o e-mail ou o WhatsApp abaixo.', 'err', true);
+      showContactMessage('Não foi possível enviar a mensagem agora. Use o canal alternativo abaixo.', 'err', true);
       toast('Falha ao enviar. Use uma das alternativas de contato.', 'err');
     } finally {
       const wait = Math.max(0, 30000 - (Date.now() - lastAttemptAt));
@@ -103,4 +132,4 @@ function initContactModule() {
   });
 }
 
-export { initContactModule };
+export { initContactModule, isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml };

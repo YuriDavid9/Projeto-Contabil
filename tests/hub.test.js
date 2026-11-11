@@ -5,6 +5,7 @@ import { parseMoney, parseDateAny, csvCell, splitCSV, dayDiff } from '../js/util
 import { reconcile, parseOFX, parseTxCSV } from '../js/conciliadorModule.js';
 import { calcDV, buildDemoXML, parseNFe } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
+import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
 
 test('parseMoney interpreta formatos brasileiros, americanos, negativos e preserva hifens internos', () => {
   assert.equal(parseMoney('1.234,56'), 1234.56);
@@ -144,4 +145,28 @@ test('guessMeta preserva fornecedores como Mar Azul e Dez Distribuidora e buildN
   );
   const baseWithoutExt = longFile.replace(/\.pdf$/, '');
   assert.ok(baseWithoutExt.length <= 120);
+});
+
+test('contactModule valida configuracao de endpoint e e-mail e omite mailto quando nao configurado', () => {
+  assert.equal(isContactConfigured(), false);
+  assert.equal(isContactEndpointConfigured('COLOQUE_AQUI_O_ENDPOINT', ''), false);
+  assert.equal(isContactEndpointConfigured('http://inseguro.com/api', ''), false);
+  assert.equal(isContactEndpointConfigured('https://api.web3forms.com/submit', ''), false);
+  assert.equal(isContactEndpointConfigured('https://api.web3forms.com/submit', 'chave-valida'), true);
+  assert.equal(isContactEndpointConfigured('https://formspree.io/f/xyz123', ''), true);
+
+  assert.equal(isContactEmailConfigured('SEU_EMAIL@EXEMPLO.COM'), false);
+  assert.equal(isContactEmailConfigured('contato@exemplo.com'), false);
+  assert.equal(isContactEmailConfigured('contato@autocontabil.com.br'), true);
+
+  assert.equal(isContactConfigured('https://formspree.io/f/xyz123', 'SEU_EMAIL@EXEMPLO.COM'), false);
+  assert.equal(isContactConfigured('https://formspree.io/f/xyz123', 'contato@autocontabil.com.br'), true);
+
+  const unconfiguredHtml = buildContactAlternativesHtml('SEU_EMAIL@EXEMPLO.COM', 'https://wa.me/5583986398472');
+  assert.equal(unconfiguredHtml.includes('mailto:'), false);
+  assert.equal(unconfiguredHtml.includes('https://wa.me/5583986398472'), true);
+
+  const configuredHtml = buildContactAlternativesHtml('contato@autocontabil.com.br', 'https://wa.me/5583986398472');
+  assert.equal(configuredHtml.includes('mailto:contato@autocontabil.com.br'), true);
+  assert.equal(configuredHtml.includes('https://wa.me/5583986398472'), true);
 });

@@ -33,4 +33,8 @@
    - Módulo dedicado `js/modal.js` com gerenciamento de foco (focus trap com `Tab`/`Shift+Tab` e devolução do foco ao fechar).
    - Contêiner `#toasts` com `role="status"` e `aria-live="polite"`.
    - Nota transparente sobre privacidade e carregamento de bibliotecas visuais via CDN no rodapé e no `README.md`.
-   - Suíte `tests/hub.test.js` (`node --test`) e workflow `.github/workflows/test.yml` ativos ao lado de `.github/workflows/static-smoke.yml`.
+   - **Suíte `tests/hub.test.js` (`node --test`)** e workflow `.github/workflows/test.yml` ativos ao lado de `.github/workflows/static-smoke.yml`.
+
+## Pendências
+
+- Configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js`.
