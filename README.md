@@ -1,9 +1,9 @@
 # AutoContábil Hub
 
-Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`index.html` / `ferramentas.html`), da página de **Serviços Sob Medida** (`servicos.html`), da lista de espera do **AutoContábil Pro** (`pro.html`), dos **Guias Práticos** (`guias/`) e do **Portal de Notícias** (`noticias.html`).
+Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`index.html` / `ferramentas.html`), da página de **Serviços Sob Medida** (`servicos.html`), da lista de espera do **AutoContábil Pro** (`pro.html`), da página dedicada de **Contato** (`contato.html`), dos **Guias Práticos** (`guias/`) e do **Portal de Notícias** (`noticias.html`).
 
-- **Ferramentas locais, Serviços e Guias (`index.html`, `ferramentas.html`, `servicos.html`, `guias/*.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (seus arquivos não são enviados a servidores; nenhum script de banco de dados, analytics ou pixel de rastreamento é carregado nessas páginas e o `Content-Security-Policy` restringe `connect-src` estritamente a `'self'`).
-- **Lista de espera do AutoContábil Pro (`pro.html`) e Formulário de contato:** enquanto o provedor de formulário não estiver configurado em `js/contactModule.js`, exibem um aviso transparente e direcionam o contato para o WhatsApp com identificação da página de origem.
+- **Ferramentas locais, Serviços e Guias (`index.html`, `ferramentas.html`, `servicos.html`, `guias/*.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (seus arquivos não são enviados a servidores; nenhum script de banco de dados, analytics ou pixel de rastreamento é carregado nessas páginas, não há formulários de envio externo e o `Content-Security-Policy` restringe `connect-src` estritamente a `'self'`).
+- **Formulário de contato (`contato.html`) e Lista de espera do AutoContábil Pro (`pro.html`):** ficam em páginas separadas das ferramentas para preservar o CSP estrito do `index.html`. Enquanto o provedor de formulário não estiver configurado em `js/contactModule.js`, ambos exibem um aviso transparente e direcionam o contato para o WhatsApp com identificação da página de origem.
 - **Portal de Notícias (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`):** utiliza banco de dados e autenticação em nuvem (**Supabase**) apenas para leitura de notícias, contas de usuários e comentários.
 
 ## Estrutura Modular
@@ -11,6 +11,7 @@ Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e fi
 - `index.html` apresenta o **Catálogo de Ferramentas** como tela principal (com HTML estático indexável) e hospeda os painéis das ferramentas locais (`#xml`, `#conciliador`, `#organizador`, `#utilitarios`, `#contato`); `styles.css` contém os estilos compartilhados.
 - `servicos.html` apresenta os serviços remotos sob medida (consolidação de XML, conciliação bancária mensal e automação de planilhas), processo em 4 etapas e FAQ honesto sobre privacidade/LGPD.
 - `pro.html` apresenta as funcionalidades em validação do **AutoContábil Pro** e a lista de espera sem cobrança.
+- `contato.html` hospeda o formulário de contato isolado das páginas de ferramentas, reutilizando `js/contactModule.js`.
 - `guias/` reúne os guias estáticos para SEO com referências a fontes oficiais (`guias/index.html`, `guias/como-consolidar-xml-nfe-excel.html`, `guias/como-conciliar-extrato-ofx-razao-contabil.html`, `guias/cnpj-alfanumerico-o-que-muda-como-validar.html`).
 - `js/negocio.js` centraliza os dados do negócio (`NEGOCIO`), a lista de serviços (`SERVICOS`), as faixas de preço para validação (`FAIXAS_PRO`) e a função pura `buildWhatsappLink({ origem, servico })`.
 - `js/app.js` coordena a navegação entre o catálogo e as abas das ferramentas, atalhos de teclado e modos de visualização.
@@ -23,13 +24,18 @@ Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e fi
 - `js/ferramentas/catalogo.js` centraliza os itens do catálogo e links para as páginas explicativas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`).
 - `js/portal/` reúne os módulos exclusivos do Portal de Notícias (`supabase.js`, `pure.js`, `auth.js`, `posts.js`, `comments.js`, `admin.js`), e `sql/` contém o schema (`sql/schema.sql`) e migrações idempotentes (`sql/migrations/2026-11-11_hardening.sql`).
 
-## Como configurar `js/negocio.js` e formulários
+## Como configurar `js/negocio.js`, WhatsApp e formulários
 
 1. **Dados do negócio e preços dos serviços (`js/negocio.js`):**
-   - Edite `NEGOCIO` para atualizar telefone do WhatsApp, cidade ou preencher `email` e `dominio` (enquanto `email: null`, nenhum link de e-mail é exibido em `servicos.html`).
+   - Edite `NEGOCIO` para atualizar dados de contato ou preencher `email` e `dominio` (enquanto `email: null`, nenhum link de e-mail é exibido em `servicos.html`).
    - Em `SERVICOS`, cada oferta tem `precoAPartirDe: null` por padrão (exibindo `"Solicitar orçamento"` em `servicos.html`). Para exibir um valor inicial real, basta preencher `precoAPartirDe` (ex.: `350` ou `'R$ 350,00'`).
-2. **Endpoint de formulário (`js/contactModule.js`):**
-   - Preencha `CONTACT_ENDPOINT` (com URL `https://...`) e `CONTACT_EMAIL` para ativar o envio direto na aba Contato e na lista de espera em `pro.html`.
+   - Em `FAIXAS_PRO`, revise as faixas de pesquisa de demanda antes de divulgar `pro.html`.
+2. **Como trocar o número de WhatsApp em todo o site:**
+   - Altere `NEGOCIO.whatsapp` em `js/negocio.js` (apenas dígitos com DDI + DDD, ex.: `'5583986398472'`).
+   - Rode `node scripts/verificar-links-wa.mjs --atualizar` para atualizar todos os atributos `href="https://wa.me/..."` estáticos nos arquivos `.html` e `node scripts/verificar-links-wa.mjs` para validar que todos os links usam o mesmo número e identificam a origem.
+3. **Como ativar os formulários de contato e lista de espera (`contato.html` e `pro.html`):**
+   - Em `js/contactModule.js`, preencha `CONTACT_ENDPOINT` (com a URL `https://...` do seu provedor, ex.: Formspree ou Web3Forms), `CONTACT_ACCESS_KEY` (se exigido pelo provedor) e `CONTACT_EMAIL`.
+   - Em `contato.html` e em `pro.html` (e **somente** nesses dois arquivos), edite a meta tag `<meta http-equiv="Content-Security-Policy" ...>` trocando `connect-src 'self'` por `connect-src 'self' https://SEU-PROVEDOR` (ex.: `connect-src 'self' https://formspree.io` ou `connect-src 'self' https://api.web3forms.com`). Nunca altere o `connect-src 'self'` de `index.html` ou das páginas de ferramentas.
 
 ## Executar localmente
 
@@ -43,6 +49,7 @@ Abra no navegador:
 - http://localhost:8080 — Catálogo de Ferramentas e suíte principal;
 - http://localhost:8080/servicos.html — Serviços sob medida;
 - http://localhost:8080/pro.html — Lista de espera do AutoContábil Pro;
+- http://localhost:8080/contato.html — Página de contato;
 - http://localhost:8080/guias/ — Guias práticos;
 - http://localhost:8080/noticias.html — Portal de Notícias.
 

@@ -52,6 +52,8 @@ export const SERVICOS = [
   }
 ];
 
+// IMPORTANTE: As faixas abaixo são apenas opções de pesquisa de demanda para a lista de espera, NÃO são preços definidos.
+// Revise estas opções antes de divulgar pro.html amplamente.
 export const FAIXAS_PRO = [
   'Até R$ 49/mês',
   'Entre R$ 50 e R$ 99/mês',

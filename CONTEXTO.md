@@ -30,12 +30,13 @@
    - As funções puras do portal residem em `js/portal/pure.js`, permitindo que `npm test` rode 100% offline.
    - Em `public.comments`, `authenticated` possui `GRANT INSERT (post_id, user_id, body)` restrito, o trigger `comments_rate_limit()` força `new.created_at := now()` e `new.hidden := false`, e a policy `comments_insert` exige que o post exista e esteja `published`.
    - Em `public.posts`, constraints `posts_source_url_check` e `posts_cover_url_check` exigem URLs `http://` ou `https://`.
-4. **Content-Security-Policy (CSP) por perfil de página:**
-   - Páginas de ferramentas locais, serviços e guias (`index.html`, `ferramentas.html`, `servicos.html`, `extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`, `guias/*.html`, `privacidade.html`, `termos.html`, `404.html`) utilizam `connect-src 'self'`.
-   - `pro.html` possui CSP próprio que adiciona em `connect-src` apenas a origem do `CONTACT_ENDPOINT` quando configurado.
+4. **Content-Security-Policy (CSP) por perfil de página e formulário em `contato.html`:**
+   - O formulário de contato ficou em `contato.html` (fora do `index.html`) por causa do CSP (no navegador, alterar `<meta http-equiv="Content-Security-Policy">` via JavaScript não libera novas origens) e para preservar intacta a garantia de privacidade `connect-src 'self'` das páginas de ferramentas.
+   - Páginas de ferramentas locais, serviços e guias (`index.html`, `ferramentas.html`, `servicos.html`, `extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`, `guias/*.html`, `privacidade.html`, `termos.html`, `404.html`) mantêm `connect-src 'self'` estrito e não possuem `<form` que envie dados para fora.
+   - `contato.html` e `pro.html` possuem CSP estático no próprio HTML (`connect-src 'self'` por padrão, com instrução comentada logo acima para trocar por `connect-src 'self' https://SEU-PROVEDOR` quando o formulário for ativado).
    - Páginas do portal (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`) utilizam `connect-src 'self' https://trnkzwserimzkftbwuge.supabase.co https://cdn.jsdelivr.net`.
 5. **PWA e Service Worker (`sw.js`):**
-   - `CORE_ASSETS` inclui todas as páginas estáticas (`servicos.html`, `pro.html`, `guias/*.html`) e todos os módulos locais importados por `index.html` (incluindo `./js/modal.js` e `./js/negocio.js`), com cache versionado em `autocontabil-shell-v14`.
+   - `CORE_ASSETS` inclui todas as páginas estáticas (`servicos.html`, `pro.html`, `contato.html`, `guias/*.html`) e todos os módulos locais importados por `index.html`, `contato.html` e `pro.html`, com cache versionado em `autocontabil-shell-v15`.
 6. **Catálogo principal, Modo Guiado e Acessibilidade (`index.html`, `js/app.js`, `js/modal.js`):**
    - O **Catálogo de Ferramentas** é a tela inicial de `index.html` e possui links estáticos no HTML para indexação imediata por buscadores.
 7. **Regra única de "nota válida" no Extrator de XML (`js/xmlModule.js`):**
@@ -47,8 +48,8 @@
 
 ## Pendências do dono
 
-- Definir preços iniciais (`precoAPartirDe`) e, se desejar exibir, o `email` e `dominio` em `js/negocio.js`.
-- Configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js` (e adicionar o domínio do endpoint em `connect-src` de `pro.html` e da página de contato quando ativar).
+- Escolher provedor de formulário, configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js` e trocar `connect-src 'self'` pela origem do provedor apenas em `contato.html` e `pro.html`.
+- Definir preços iniciais (`precoAPartirDe`) e, se desejar exibir, o `email` e `dominio` em `js/negocio.js`, além de revisar as opções de pesquisa de demanda em `FAIXAS_PRO` antes de divulgar `pro.html`.
 - Rodar `sql/migrations/2026-11-11_hardening.sql` no SQL Editor do Supabase.
 - Confirmar enquadramento fiscal/CNAE e emissão de nota fiscal de serviço (NFS-e) com o contador.
 - Avaliar registro de domínio próprio `.com.br`.
@@ -64,6 +65,7 @@
 
 ## Para depois
 
+- Avaliar um **endpoint próprio para envio de formulários** (ex.: função serverless) caso o volume de contatos e inscrições na lista de espera justifique.
 - **Layouts de exportação por sistema contábil** (Domínio, Alterdata, Fortes, Calima etc.).
 - **Regras salvas de conciliação** com sugestão de lançamento contábil por cliente.
 - **Cobrança por assinatura (Pix/cartão via provedor com webhook)** após validação da demanda do Pro.
