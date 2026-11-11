@@ -1,54 +1,43 @@
 # AutoContábil Hub
 
-Aplicação web modular para apoiar tarefas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`ferramentas.html`) e do **Portal de Notícias** (`noticias.html`).
+Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`index.html` / `ferramentas.html`) e do **Portal de Notícias** (`noticias.html`).
 
-- **Ferramentas locais (`index.html`, `ferramentas.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (nenhum arquivo sai do computador e nenhum script de banco de dados ou autenticação é carregado nessas páginas).
+- **Ferramentas locais (`index.html`, `ferramentas.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (seus arquivos não são enviados a servidores; as bibliotecas de interface são carregadas de CDN e nenhum script de banco de dados ou autenticação é carregado nessas páginas).
 - **Portal de Notícias (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`):** utiliza banco de dados e autenticação em nuvem (**Supabase**) apenas para leitura de notícias, contas de usuários e comentários.
 - **Formulário de contato:** envia somente a mensagem informada após configurar o provedor em `js/contactModule.js`.
 
-## Arquitetura
+## Estrutura Modular
 
-- `index.html` apresenta o **Catálogo de Ferramentas** como tela principal (com busca por texto e filtro por área: `fiscal`, `contabil`, `financeiro`) e hospeda os painéis das ferramentas locais abertos a partir dos cards (`#xml`, `#conciliador`, `#organizador`, `#utilitarios`, `#contato`); `styles.css` contém os estilos compartilhados.
-- `js/ferramentas/catalogo.js` centraliza os dados do catálogo de ferramentas e os links para abrir cada ferramenta ou consultar suas páginas explicativas padronizadas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`). `ferramentas.html` é mantido por compatibilidade de links diretos.
-- `js/xmlModule.js` extrai NF-e/NFC-e, importa XML/ZIP, valida chave/cStat, filtra dados e exporta CSV/XLSX.
-- `js/conciliadorModule.js` concilia OFX/CSV, permite vínculo manual, aviso de duplicados e armazenamento local opt-in.
-- `js/organizadorModule.js` organiza arquivos, extrai texto de PDFs quando possível e salva regras no navegador.
-- `js/contactModule.js` controla o formulário de contato; `js/utilitiesModule.js` fornece validadores, conversores, mesclagem e cálculo estimado.
-- `js/app.js` coordena a navegação das ferramentas; `js/modo.js`, `js/glossario.js`, `js/ajuda.js` e `js/passos.js` controlam os modos Guiado e Completo.
-- `noticias.html`, `noticia.html`, `entrar.html` e `admin.html` compõem o Portal de Notícias, apoiados pelos módulos exclusivos em `js/portal/` (`config.js`, `supabase.js`, `auth.js`, `layout.js`, `posts.js`, `comments.js` e `admin.js`).
-- `sql/schema.sql` e `sql/seed.sql` guardam a estrutura do banco PostgreSQL (Supabase), gatilhos e políticas de segurança RLS (Row Level Security).
-- `privacidade.html`, `termos.html`, `404.html`, `manifest.webmanifest` e `sw.js` são as páginas institucionais e recursos de publicação/PWA.
+- `index.html` apresenta o **Catálogo de Ferramentas** como tela principal e hospeda os painéis das ferramentas locais (`#xml`, `#conciliador`, `#organizador`, `#utilitarios`, `#contato`); `styles.css` contém os estilos compartilhados.
+- `js/app.js` coordena a navegação entre o catálogo e as abas das ferramentas, atalhos de teclado e modos de visualização.
+- `js/utils.js` reúne funções utilitárias puras (moeda, datas, CSV com BOM UTF-8 e separador `;`, similaridade, normalização) e helpers de interface.
+- `js/xmlModule.js` — **Extrator de XML (NF-e/NFC-e):** importa XMLs e pacotes ZIP, valida chave de 44 dígitos, protocolo (`cStat`) e conferência de totais, filtra dados e exporta CSV/XLSX. Inclui botão **"Carregar Lote de Demonstração"**.
+- `js/conciliadorModule.js` — **Conciliador Bancário:** concilia extratos OFX/CSV com o razão contábil por tolerância de dias e similaridade, detecta possíveis duplicidades e permite vínculo manual. Inclui botão **"Simulação"**.
+- `js/organizadorModule.js` — **Organizador Fiscal:** padroniza nomes de arquivos fiscais, extrai metadados de XML/PDF e gera pacote ZIP estruturado com árvore de pastas. Inclui botão **"Carregar exemplos"**.
+- `js/utilitiesModule.js` e `js/contactModule.js` fornecem validadores (CNPJ alfanumérico, CPF, chave NF-e), conversores OFX/CSV e formulário de contato.
+- `js/ferramentas/catalogo.js` centraliza os itens do catálogo e links para as páginas explicativas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`).
 
-Não há build nem dependências locais. Tailwind CSS, JSZip, Inter, Supabase JS, Marked e DOMPurify vêm de CDN; SheetJS e PDF.js são carregados sob demanda.
+Não há etapa de build nem bundler. Tailwind CSS, JSZip e fonte Inter são carregados via CDN; SheetJS e PDF.js são carregados sob demanda.
 
 ## Executar localmente
 
-Na raiz do repositório, inicie um servidor HTTP local (os módulos ES precisam de `http://`, não funcionam abrindo o arquivo direto com duplo clique):
+Como o projeto utiliza módulos ES (`<script type="module">`), **não abra o `index.html` diretamente via `file://`**. Inicie um servidor HTTP local na raiz do repositório:
 
 ```powershell
-python3 -m http.server 5500 --bind 127.0.0.1
+python3 -m http.server 8080
 ```
 
-Abra:
-- http://localhost:5500 para o aplicativo das ferramentas;
-- http://localhost:5500/ferramentas.html para o catálogo de ferramentas;
-- http://localhost:5500/noticias.html para o portal de notícias.
+Abra no navegador:
+- http://localhost:8080 — Catálogo de Ferramentas e suíte principal (teste cada módulo clicando em **"Carregar Lote de Demonstração"**, **"Simulação"** e **"Carregar exemplos"**);
+- http://localhost:8080/noticias.html — Portal de Notícias.
 
-### Teste automatizado de fumaça
+## Publicação
 
-O script `tests/smoke_test.py` (executado também em `.github/workflows/static-smoke.yml`) valida codificação UTF-8, guarda de privacidade (ausência de Supabase/`js/portal` nas páginas de ferramentas), fluxos das abas locais e filtros do catálogo `ferramentas.html`:
+O projeto é estático e servido diretamente da raiz do repositório oficial (`https://github.com/YuriDavid9/Projeto-Contabil`):
 
-```powershell
-python3 tests/smoke_test.py
-```
-
-## Publicar
-
-O projeto é estático e não precisa de comando de build.
-
-1. No GitHub, abra **Settings → Pages**.
-2. Escolha **Deploy from a branch**, branch `main`, pasta `/(root)` e salve.
-3. No painel do **Supabase** (*Authentication → URL Configuration*), defina o **Site URL** para `https://yuridavid9.github.io/Projeto-Contabil` e mantenha `https://yuridavid9.github.io/Projeto-Contabil/entrar.html` em **Redirect URLs**.
+1. Faça push das alterações para a branch `main` em https://github.com/YuriDavid9/Projeto-Contabil.
+2. Em **Settings → Pages**, mantenha **Source: Deploy from a branch**, branch `main` e pasta `/(root)`.
+3. O site publicado fica disponível em `https://yuridavid9.github.io/Projeto-Contabil/`.
 
 ## Contato
 

@@ -53,6 +53,15 @@ function openTab(name) {
     panel.classList.toggle('hidden', !selected);
   });
 
+  $$('[role="tab"]').forEach((tabBtn) => {
+    const selected = tabBtn.dataset.tab === tabName;
+    tabBtn.setAttribute('aria-selected', String(selected));
+    tabBtn.tabIndex = selected ? 0 : -1;
+    tabBtn.className = selected
+      ? 'tab-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition'
+      : 'tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition';
+  });
+
   const backBar = $('#tool-back-bar');
   if (backBar) {
     backBar.classList.toggle('hidden', isCatalogo);
@@ -271,6 +280,22 @@ if (modoToggleBtn) {
 }
 
 window.addEventListener('hashchange', () => openTab(location.hash.slice(1)));
+
+$$('[role="tab"]').forEach((tabBtn, idx, tabs) => {
+  tabBtn.addEventListener('click', () => openTab(tabBtn.dataset.tab));
+  tabBtn.addEventListener('keydown', (event) => {
+    let nextIdx = -1;
+    if (event.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'Home') nextIdx = 0;
+    else if (event.key === 'End') nextIdx = tabs.length - 1;
+    if (nextIdx >= 0) {
+      event.preventDefault();
+      tabs[nextIdx].focus();
+      openTab(tabs[nextIdx].dataset.tab);
+    }
+  });
+});
 
 document.addEventListener('click', (event) => {
   const goTarget = event.target.closest('[data-go]');

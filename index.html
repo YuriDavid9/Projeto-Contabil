@@ -72,6 +72,13 @@
 
     <div id="tool-back-bar" class="hidden mb-5 flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-sm">
       <a href="#catalogo" data-go="catalogo" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">← Voltar ao Catálogo de Ferramentas</a>
+      <div class="flex flex-wrap items-center gap-1" role="tablist" aria-label="Ferramentas">
+        <button id="tab-xml" data-tab="xml" role="tab" aria-selected="false" aria-controls="panel-xml" tabindex="-1" type="button" class="tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">📄 XML</button>
+        <button id="tab-conciliador" data-tab="conciliador" role="tab" aria-selected="false" aria-controls="panel-conciliador" tabindex="-1" type="button" class="tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">🏦 Conciliador</button>
+        <button id="tab-organizador" data-tab="organizador" role="tab" aria-selected="false" aria-controls="panel-organizador" tabindex="-1" type="button" class="tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">🗂️ Organizador</button>
+        <button id="tab-utilitarios" data-tab="utilitarios" role="tab" aria-selected="false" aria-controls="panel-utilitarios" tabindex="-1" type="button" class="tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">🧰 Utilitários</button>
+        <button id="tab-contato" data-tab="contato" role="tab" aria-selected="false" aria-controls="panel-contato" tabindex="-1" type="button" class="tab-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">✉️ Contato</button>
+      </div>
       <button id="modo-toggle" class="rounded-lg border border-slate-300 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition" type="button">Modo: Completo ⇄ Guiado</button>
     </div>
 
@@ -107,7 +114,7 @@
       </div>
     </section>
 
-    <section id="panel-xml" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
+    <section id="panel-xml" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-xml" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900"><span class="so-completo">Extrator &amp; Consolidador de XML</span><span class="so-guiado">Entender minhas notas fiscais</span></h2>
         <p class="so-guiado text-slate-600 text-sm mt-2">A nota fiscal eletrônica vem em um arquivo XML. Aqui você vê o que está dentro dele sem precisar abrir o código. Os arquivos XML originais devem ser guardados; esta tela só os lê.</p>
@@ -183,7 +190,7 @@
       <div id="xml-resumo-ano" class="so-guiado mt-4"><div class="rounded-xl border border-slate-200 bg-white p-4"><label for="xml-cnpj-proprio" class="block text-sm font-semibold">Qual é o seu CNPJ? <span class="font-normal text-slate-500">(opcional)</span></label><input id="xml-cnpj-proprio" type="text" inputmode="numeric" class="mt-2 w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2" placeholder="00.000.000/0000-00"><div id="xml-resumo-conteudo" class="mt-4"></div><p class="mt-3 text-xs text-slate-600">Considera só as notas que você carregou aqui. Pode não representar todo o seu faturamento.</p><p class="text-xs text-slate-600">Informativo. Confirme com seu contador.</p></div></div>
     </section>
 
-    <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
+    <section id="panel-conciliador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-conciliador" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900"><span class="so-completo">Conciliador Bancário</span><span class="so-guiado">Conferir banco e anotações</span></h2>
         <p class="so-guiado text-slate-600 text-sm mt-2">Confira se o que você anotou bate com o banco. O extrato mostra as entradas e saídas da conta. Suas anotações podem estar em uma planilha CSV simples com data, descrição e valor.</p>
@@ -310,7 +317,7 @@
       </div>
     </section>
 
-    <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
+    <section id="panel-organizador" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-organizador" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 class="text-2xl font-extrabold text-slate-900"><span class="so-completo">Organizador Fiscal</span><span class="so-guiado">Organizar documentos</span></h2>
         <p class="so-guiado text-slate-600 text-sm mt-2">Este módulo padroniza os nomes dos arquivos e separa cópias por mês. Assim, seu contador recebe tudo com nome padronizado e separado por mês.</p>
@@ -390,7 +397,7 @@
         </div>
       </div>
     </section>
-    <section id="panel-contato" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
+    <section id="panel-contato" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-contato" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 id="contato" class="text-2xl font-extrabold text-slate-900">Contato</h2>
         <p class="text-slate-500 text-sm">Envie uma mensagem para falar sobre o AutoContábil Hub.</p>
@@ -430,7 +437,7 @@
         <button id="contact-submit" type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Enviar mensagem</button>
       </form>
     </section>
-    <section id="panel-utilitarios" class="tab-panel fade-in hidden" role="tabpanel" tabindex="-1" hidden>
+    <section id="panel-utilitarios" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-utilitarios" tabindex="-1" hidden>
       <div class="mb-4"><h2 class="text-2xl font-extrabold text-slate-900">Utilitários</h2><p class="text-slate-500 text-sm">Validações e conversões executadas neste navegador.</p></div>
       <div id="utilities-root"></div>
     </section>
