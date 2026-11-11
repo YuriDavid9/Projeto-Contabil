@@ -14,7 +14,7 @@ const TIPO_RE = [
   ['CONTRATO', /contrato/],
   ['COMPROVANTE', /compr|pagto|pagamento|transf/]
 ];
-const NOISE = /\b(final|scan|scanner|img|image|imagem|whatsapp|copia|cópia|copy|novo|nova|documento|doc|arquivo|v\d+|at|pdf|jpg|jpeg|png|banco|out|nov|dez|jan|fev|mar|abr|mai|jun|jul|ago|set)\b/gi;
+const NOISE = /\b(final|scan|scanner|img|image|imagem|whatsapp|copia|cópia|copy|v\d+|pdf|jpg|jpeg|png)\b/gi;
 
 function guessMeta(name, lastMod) {
   const base = name.replace(/\.[^.]+$/, '');
@@ -81,7 +81,8 @@ function buildName(documentItem, template) {
   };
 
   let name = template.replace(/\{(\w+)\}/g, (_, key) => map[key] ?? '').replace(/[\\/:*?"<>|]+/g, '-').replace(/_{2,}/g, '_').replace(/-{3,}/g, '--').replace(/^[_\-\s]+|[_\-\s]+$/g, '');
-  return `${name || 'documento'}.${documentItem.ext}`;
+  name = (name || 'documento').slice(0, 120).replace(/[_\-\s]+$/, '') || 'documento';
+  return `${name}.${documentItem.ext}`;
 }
 
 function folderOf(documentItem, mode) {
@@ -230,16 +231,18 @@ function ogTemplate() {
 
 function ogPlan() {
   const template = ogTemplate();
-  const mode = $('#og-tree-mode').value;
+  const mode = $('#og-tree-mode')?.value || 'anomes';
   const used = new Set();
   return OG.docs.map((documentItem) => {
-    let name = buildName(documentItem, template);
+    const rawBase = buildName(documentItem, template).replace(/\.[^.]+$/, '');
+    let name = `${rawBase}.${documentItem.ext}`;
     let folder = folderOf(documentItem, mode);
     let path = (folder ? `${folder}/` : '') + name;
     let index = 2;
     while (used.has(path.toLowerCase())) {
-      const base = buildName(documentItem, template).replace(/\.[^.]+$/, '');
-      name = `${base}_${index++}.${documentItem.ext}`;
+      const suffix = `_${index++}`;
+      const truncatedBase = rawBase.slice(0, Math.max(1, 120 - suffix.length)).replace(/[_\-\s]+$/, '');
+      name = `${truncatedBase}${suffix}.${documentItem.ext}`;
       path = (folder ? `${folder}/` : '') + name;
     }
     used.add(path.toLowerCase());
@@ -332,18 +335,28 @@ async function zipOG() {
   const plan = ogPlan();
   if (!plan.length) return;
 
+  const totalBytes = OG.docs.reduce((sum, item) => sum + (item.size || 0), 0);
+  if (totalBytes > 300 * 1024 * 1024) {
+    showMsgs('#og-msgs', ['Atenção: a soma dos arquivos ultrapassa 300 MB. A geração do pacote ZIP pode demorar ou exigir mais memória do navegador.'], 'warn');
+    toast('Aviso: lote acima de 300 MB.', 'warn');
+  }
+
   const button = $('#og-zip');
   const previousLabel = button.textContent;
   button.disabled = true;
-  button.textContent = '⏳ Gerando ZIP…';
+  button.textContent = `⏳ Gerando ZIP… 0/${plan.length}`;
 
   try {
     const zip = new JSZip();
-    for (const item of plan) {
+    for (let index = 0; index < plan.length; index++) {
+      const item = plan[index];
+      button.textContent = `⏳ Gerando ZIP… ${index + 1}/${plan.length}`;
       zip.file(item.path, item.d.demo ? await demoBlob(item.d, item.name) : item.d.file);
     }
     zip.file('manifesto_de_para.csv', toCSV(manifestRows(plan)));
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }, (meta) => {
+      button.textContent = `⏳ Gerando ZIP… ${plan.length}/${plan.length} (${Math.round(meta.percent)}%)`;
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -455,4 +468,4 @@ function initOrganizadorModule() {
   document.addEventListener('modo:alterado', () => renderOG());
 }
 
-export { initOrganizadorModule, OG, ogPlan, manifestRows, renderOG, detectPdfMetadata };
+export { initOrganizadorModule, OG, ogPlan, manifestRows, renderOG, detectPdfMetadata, guessMeta, buildName };
