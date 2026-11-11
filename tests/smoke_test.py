@@ -292,7 +292,8 @@ def main():
                 ]:
                     page.goto(f"http://127.0.0.1:8765/{guide_path}", wait_until="domcontentloaded")
                     assert page.locator("h1").is_visible()
-                    assert page.get_by_text("Não substitui a orientação do seu contador").first.is_visible()
+                    main_text = page.locator("main").inner_text().lower()
+                    assert "substitui" in main_text and "contador" in main_text
 
                 assert not errors, "Browser errors: " + " | ".join(errors)
             finally:

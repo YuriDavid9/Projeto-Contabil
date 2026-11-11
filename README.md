@@ -1,25 +1,35 @@
 # AutoContábil Hub
 
-Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`index.html` / `ferramentas.html`) e do **Portal de Notícias** (`noticias.html`).
+Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e financeiras, acompanhada do **Catálogo de Ferramentas** (`index.html` / `ferramentas.html`), da página de **Serviços Sob Medida** (`servicos.html`), da lista de espera do **AutoContábil Pro** (`pro.html`), dos **Guias Práticos** (`guias/`) e do **Portal de Notícias** (`noticias.html`).
 
-- **Ferramentas locais (`index.html`, `ferramentas.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (seus arquivos não são enviados a servidores; as bibliotecas de interface são carregadas de CDN, nenhum script de banco de dados ou autenticação é carregado nessas páginas e o `Content-Security-Policy` restringe `connect-src` a `'self'`).
+- **Ferramentas locais, Serviços e Guias (`index.html`, `ferramentas.html`, `servicos.html`, `guias/*.html` e páginas explicativas):** XMLs, extratos OFX/CSV e documentos PDF são processados **100% localmente no navegador** (seus arquivos não são enviados a servidores; nenhum script de banco de dados, analytics ou pixel de rastreamento é carregado nessas páginas e o `Content-Security-Policy` restringe `connect-src` estritamente a `'self'`).
+- **Lista de espera do AutoContábil Pro (`pro.html`) e Formulário de contato:** enquanto o provedor de formulário não estiver configurado em `js/contactModule.js`, exibem um aviso transparente e direcionam o contato para o WhatsApp com identificação da página de origem.
 - **Portal de Notícias (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`):** utiliza banco de dados e autenticação em nuvem (**Supabase**) apenas para leitura de notícias, contas de usuários e comentários.
-- **Formulário de contato:** enquanto não configurado em `js/contactModule.js`, direciona o atendimento diretamente para o WhatsApp; quando configurado, envia somente a mensagem informada.
 
 ## Estrutura Modular
 
-- `index.html` apresenta o **Catálogo de Ferramentas** como tela principal e hospeda os painéis das ferramentas locais (`#xml`, `#conciliador`, `#organizador`, `#utilitarios`, `#contato`); `styles.css` contém os estilos compartilhados.
+- `index.html` apresenta o **Catálogo de Ferramentas** como tela principal (com HTML estático indexável) e hospeda os painéis das ferramentas locais (`#xml`, `#conciliador`, `#organizador`, `#utilitarios`, `#contato`); `styles.css` contém os estilos compartilhados.
+- `servicos.html` apresenta os serviços remotos sob medida (consolidação de XML, conciliação bancária mensal e automação de planilhas), processo em 4 etapas e FAQ honesto sobre privacidade/LGPD.
+- `pro.html` apresenta as funcionalidades em validação do **AutoContábil Pro** e a lista de espera sem cobrança.
+- `guias/` reúne os guias estáticos para SEO com referências a fontes oficiais (`guias/index.html`, `guias/como-consolidar-xml-nfe-excel.html`, `guias/como-conciliar-extrato-ofx-razao-contabil.html`, `guias/cnpj-alfanumerico-o-que-muda-como-validar.html`).
+- `js/negocio.js` centraliza os dados do negócio (`NEGOCIO`), a lista de serviços (`SERVICOS`), as faixas de preço para validação (`FAIXAS_PRO`) e a função pura `buildWhatsappLink({ origem, servico })`.
 - `js/app.js` coordena a navegação entre o catálogo e as abas das ferramentas, atalhos de teclado e modos de visualização.
 - `js/utils.js` reúne funções utilitárias puras (moeda, datas, CSV com BOM UTF-8 e separador `;`, similaridade, normalização) e helpers de interface.
 - `js/xmlModule.js` — **Extrator de XML (NF-e/NFC-e):** importa XMLs e pacotes ZIP, valida chave de 44 dígitos, protocolo (`cStat` unificado via `isValidNote`) e conferência de totais, filtra dados, gera resumo anual para MEI e exporta CSV/XLSX. Inclui botão **"Carregar Lote de Demonstração"**.
 - `js/conciliadorModule.js` — **Conciliador Bancário:** concilia extratos OFX/CSV com o razão contábil com indexação por centavos e sinal, detecta possíveis duplicidades e permite vínculo manual. Inclui botão **"Simulação"**.
 - `js/organizadorModule.js` — **Organizador Fiscal:** padroniza nomes de arquivos fiscais, extrai metadados de XML/PDF e gera pacote ZIP estruturado com árvore de pastas. Inclui botão **"Carregar exemplos"**.
 - `js/modal.js` controla abertura, fechamento, foco e armadilha de teclado (`Tab`) do modal de inspeção.
-- `js/utilitiesModule.js` e `js/contactModule.js` fornecem validadores (CNPJ alfanumérico, CPF, chave NF-e), conversores OFX/CSV e formulário de contato.
+- `js/utilitiesModule.js` e `js/contactModule.js` fornecem validadores (CNPJ alfanumérico, CPF, chave NF-e), conversores OFX/CSV e os formulários de contato e lista de espera.
 - `js/ferramentas/catalogo.js` centraliza os itens do catálogo e links para as páginas explicativas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`).
 - `js/portal/` reúne os módulos exclusivos do Portal de Notícias (`supabase.js`, `pure.js`, `auth.js`, `posts.js`, `comments.js`, `admin.js`), e `sql/` contém o schema (`sql/schema.sql`) e migrações idempotentes (`sql/migrations/2026-11-11_hardening.sql`).
 
-Não há etapa de build nem bundler. Seus arquivos não são enviados; as bibliotecas de interface são carregadas de CDN (Tailwind CSS, JSZip e fonte Inter; SheetJS e PDF.js sob demanda).
+## Como configurar `js/negocio.js` e formulários
+
+1. **Dados do negócio e preços dos serviços (`js/negocio.js`):**
+   - Edite `NEGOCIO` para atualizar telefone do WhatsApp, cidade ou preencher `email` e `dominio` (enquanto `email: null`, nenhum link de e-mail é exibido em `servicos.html`).
+   - Em `SERVICOS`, cada oferta tem `precoAPartirDe: null` por padrão (exibindo `"Solicitar orçamento"` em `servicos.html`). Para exibir um valor inicial real, basta preencher `precoAPartirDe` (ex.: `350` ou `'R$ 350,00'`).
+2. **Endpoint de formulário (`js/contactModule.js`):**
+   - Preencha `CONTACT_ENDPOINT` (com URL `https://...`) e `CONTACT_EMAIL` para ativar o envio direto na aba Contato e na lista de espera em `pro.html`.
 
 ## Executar localmente
 
@@ -30,7 +40,10 @@ python3 -m http.server 8080
 ```
 
 Abra no navegador:
-- http://localhost:8080 — Catálogo de Ferramentas e suíte principal (teste cada módulo clicando em **"Carregar Lote de Demonstração"**, **"Simulação"** e **"Carregar exemplos"**);
+- http://localhost:8080 — Catálogo de Ferramentas e suíte principal;
+- http://localhost:8080/servicos.html — Serviços sob medida;
+- http://localhost:8080/pro.html — Lista de espera do AutoContábil Pro;
+- http://localhost:8080/guias/ — Guias práticos;
 - http://localhost:8080/noticias.html — Portal de Notícias.
 
 ## Testes automatizados
