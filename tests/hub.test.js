@@ -6,6 +6,7 @@ import { reconcile, parseOFX, parseTxCSV } from '../js/conciliadorModule.js';
 import { calcDV, buildDemoXML, parseNFe } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
+import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
 
 test('parseMoney interpreta formatos brasileiros, americanos, negativos e preserva hifens internos', () => {
   assert.equal(parseMoney('1.234,56'), 1234.56);
@@ -169,4 +170,19 @@ test('contactModule valida configuracao de endpoint e e-mail e omite mailto quan
   const configuredHtml = buildContactAlternativesHtml('contato@autocontabil.com.br', 'https://wa.me/5583986398472');
   assert.equal(configuredHtml.includes('mailto:contato@autocontabil.com.br'), true);
   assert.equal(configuredHtml.includes('https://wa.me/5583986398472'), true);
+});
+
+test('isHttpUrl e funcoes puras do portal validam URLs HTTP/HTTPS, slugs e traduzem erros de constraints', () => {
+  assert.equal(isHttpUrl('https://www.gov.br/receitafederal'), true);
+  assert.equal(isHttpUrl('http://exemplo.com/imagem.png'), true);
+  assert.equal(isHttpUrl('javascript:alert(1)'), false);
+  assert.equal(isHttpUrl('data:text/html,<script>alert(1)</script>'), false);
+  assert.equal(isHttpUrl('ftp://arquivos.com/doc.pdf'), false);
+  assert.equal(isHttpUrl(''), false);
+
+  assert.equal(slugify('Reforma Tributária 2026: O que muda no Simples?'), 'reforma-tributaria-2026-o-que-muda-no-simples');
+  assert.equal(translatePostError(new Error('violates check constraint "posts_source_url_check"')), 'O link da fonte deve começar com http:// ou https://.');
+  assert.equal(translatePostError(new Error('violates check constraint "posts_cover_url_check"')), 'A URL da imagem de capa deve começar com http:// ou https://.');
+  assert.equal(translateCommentError(new Error('Aguarde alguns segundos antes de comentar novamente.')), 'Aguarde 20 segundos antes de enviar outro comentário.');
+  assert.equal(translateAuthError(new Error('Invalid login credentials')), 'E-mail ou senha incorretos. Confira os dados e tente novamente.');
 });

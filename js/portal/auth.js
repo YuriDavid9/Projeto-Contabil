@@ -1,27 +1,7 @@
 import { supabase } from './supabase.js';
+import { translateAuthError } from './pure.js';
 
-export function translateAuthError(error) {
-  const msg = String(error?.message || error || '').toLowerCase();
-  if (msg.includes('user already registered') || msg.includes('already been registered')) {
-    return 'Este e-mail já está cadastrado. Tente fazer login ou recuperar sua senha.';
-  }
-  if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-    return 'E-mail ou senha incorretos. Confira os dados e tente novamente.';
-  }
-  if (msg.includes('email not confirmed')) {
-    return 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada (e a pasta de spam) e clique no link de confirmação.';
-  }
-  if (msg.includes('password should be at least') || msg.includes('weak_password')) {
-    return 'A senha deve ter pelo menos 8 caracteres.';
-  }
-  if (msg.includes('rate limit') || msg.includes('over_email_send_rate_limit') || msg.includes('for security purposes')) {
-    return 'Muitas tentativas seguidas ou limite de envio de e-mails atingido. Aguarde alguns minutos e tente novamente.';
-  }
-  if (msg.includes('unable to validate email') || msg.includes('invalid email')) {
-    return 'Digite um endereço de e-mail válido.';
-  }
-  return error?.message || 'Ocorreu um erro inesperado. Tente novamente.';
-}
+export { translateAuthError };
 
 export async function getSessionAndProfile() {
   const { data: sessionData } = await supabase.auth.getSession();

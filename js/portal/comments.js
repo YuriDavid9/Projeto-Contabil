@@ -1,19 +1,7 @@
 import { supabase } from './supabase.js';
+import { translateCommentError } from './pure.js';
 
-export function translateCommentError(error) {
-  const msg = String(error?.message || error || '');
-  const lower = msg.toLowerCase();
-  if (lower.includes('aguarde alguns segundos antes de comentar')) {
-    return 'Aguarde 20 segundos antes de enviar outro comentário.';
-  }
-  if (lower.includes('comments_body_check') || lower.includes('char_length(body)')) {
-    return 'O comentário deve ter entre 2 e 1000 caracteres.';
-  }
-  if (lower.includes('row-level security') || lower.includes('permission denied')) {
-    return 'Você não tem permissão para realizar esta ação. Faça login novamente.';
-  }
-  return msg || 'Não foi possível concluir a operação nos comentários.';
-}
+export { translateCommentError };
 
 export async function listCommentsByPost(postId) {
   const { data, error } = await supabase

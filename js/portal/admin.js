@@ -1,37 +1,7 @@
 import { supabase } from './supabase.js';
-import { translateCommentError } from './comments.js';
+import { isHttpUrl, slugify, translatePostError, translateCommentError } from './pure.js';
 
-export function slugify(text) {
-  return String(text || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-')
-    .slice(0, 120);
-}
-
-export function translatePostError(error) {
-  const msg = String(error?.message || error || '');
-  const lower = msg.toLowerCase();
-  if (lower.includes('posts_slug_key') || lower.includes('duplicate key')) {
-    return 'Já existe uma notícia com este slug (endereço). Escolha outro slug.';
-  }
-  if (lower.includes('posts_slug_check')) {
-    return 'O slug deve conter apenas letras minúsculas, números e hífens (ex.: minha-noticia-1).';
-  }
-  if (lower.includes('posts_title_check')) {
-    return 'O título deve ter entre 5 e 160 caracteres.';
-  }
-  if (lower.includes('posts_summary_check')) {
-    return 'O resumo deve ter no máximo 300 caracteres.';
-  }
-  if (lower.includes('row-level security') || lower.includes('permission denied')) {
-    return 'Acesso negado pelo banco de dados. Apenas administradores podem salvar notícias.';
-  }
-  return msg || 'Não foi possível salvar a notícia.';
-}
+export { isHttpUrl, slugify, translatePostError };
 
 export async function listAllPostsAdmin() {
   const { data, error } = await supabase
@@ -89,6 +59,15 @@ export async function savePostAdmin({
     throw new Error('O conteúdo da notícia não pode ficar vazio.');
   }
 
+  const cleanSourceUrl = String(source_url || '').trim();
+  const cleanCoverUrl = String(cover_url || '').trim();
+  if (cleanSourceUrl && !isHttpUrl(cleanSourceUrl)) {
+    throw new Error('O link da fonte deve começar com http:// ou https://.');
+  }
+  if (cleanCoverUrl && !isHttpUrl(cleanCoverUrl)) {
+    throw new Error('A URL da imagem de capa deve começar com http:// ou https://.');
+  }
+
   const duplicated = await checkSlugExists(cleanSlug, id);
   if (duplicated) {
     throw new Error('Já existe outra notícia usando este slug. Altere o campo Slug antes de salvar.');
@@ -101,8 +80,8 @@ export async function savePostAdmin({
     content_md: cleanContent,
     category_id: category_id ? Number(category_id) : null,
     source_name: String(source_name || '').trim() || null,
-    source_url: String(source_url || '').trim() || null,
-    cover_url: String(cover_url || '').trim() || null,
+    source_url: cleanSourceUrl || null,
+    cover_url: cleanCoverUrl || null,
     status: status === 'published' ? 'published' : 'draft'
   };
 

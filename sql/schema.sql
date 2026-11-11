@@ -20,8 +20,8 @@ create table public.posts (
   content_md text not null,
   category_id int references public.categories(id),
   source_name text,                -- ex.: "Receita Federal"
-  source_url text,                 -- link da fonte oficial
-  cover_url text,                  -- URL de imagem (upload fica para depois)
+  source_url text constraint posts_source_url_check check (source_url is null or source_url ~* '^https?://'), -- link da fonte oficial
+  cover_url text constraint posts_cover_url_check check (cover_url is null or cover_url ~* '^https?://'),   -- URL de imagem (upload fica para depois)
   status text not null default 'draft' check (status in ('draft','published')),
   published_at timestamptz,
   author_id uuid not null references public.profiles(id),
@@ -86,6 +86,8 @@ begin
              where user_id = new.user_id and created_at > now() - interval '20 seconds') then
     raise exception 'Aguarde alguns segundos antes de comentar novamente.';
   end if;
+  new.created_at := now();
+  new.hidden := false;
   return new;
 end $$;
 
@@ -132,6 +134,9 @@ create policy comments_insert on public.comments for insert
   to authenticated
   with check (
     auth.uid() = user_id
+    and exists (
+      select 1 from public.posts p where p.id = post_id and p.status = 'published'
+    )
   );
 create policy comments_delete on public.comments for delete
   using (auth.uid() = user_id or public.is_admin());
@@ -143,7 +148,9 @@ grant update (hidden) on public.comments to authenticated;  -- e a policy acima 
 -- Permissões de acesso às tabelas (respeitando sempre as policies do RLS acima)
 grant usage on schema public to anon, authenticated;
 grant select on public.profiles, public.categories, public.posts, public.comments to anon, authenticated;
-grant insert, delete on public.comments to authenticated;
+revoke insert on public.comments from anon, authenticated;
+grant insert (post_id, user_id, body) on public.comments to authenticated;
+grant delete on public.comments to authenticated;
 grant insert, update, delete on public.posts to authenticated;
 grant insert, update, delete on public.categories to authenticated;
 grant usage, select on all sequences in schema public to authenticated;

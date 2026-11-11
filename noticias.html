@@ -131,7 +131,7 @@
           const authorName = post.author?.display_name || 'Equipe AutoContábil';
           const pubDate = fmtISODate(post.published_at || post.created_at);
           const url = `noticia.html?slug=${encodeURIComponent(post.slug)}`;
-          const coverHtml = post.cover_url
+          const coverHtml = post.cover_url && /^https?:\/\//i.test(post.cover_url)
             ? `<img src="${esc(post.cover_url)}" alt="" loading="lazy" class="w-full sm:w-44 h-40 sm:h-32 object-cover rounded-xl border border-slate-100 shrink-0">`
             : '';
 

@@ -38,3 +38,4 @@
 ## Pendências
 
 - Configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js`.
+- Rodar `sql/migrations/2026-11-11_hardening.sql` no SQL Editor do Supabase.
