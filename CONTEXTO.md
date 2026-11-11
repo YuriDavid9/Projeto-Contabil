@@ -33,6 +33,9 @@
    - Em lotes com mais de 1.000 lançamentos (`extrato + razão`), `runCB` exibe aviso de processamento e cede um tick ao navegador antes de conciliar.
 7. **Formulário de contato seguro quando não configurado (`js/contactModule.js`):**
    - Enquanto `CONTACT_ENDPOINT` ou `CONTACT_EMAIL` contiverem valores de espaço reservado (`COLOQUE_AQUI`, `SEU_EMAIL`, `EXEMPLO.COM`), o módulo exibe um aviso claro com botão direto para o WhatsApp e omite links `mailto:` inválidos.
+8. **Preservação do MVP SaaS na branch `saas-mvp` (`0e5201f`):**
+   - O MVP em Next.js + Supabase (painéis MEI/contador, página de preços e `sql/saas_mvp_schema.sql`) foi preservado na branch `saas-mvp` (`0e5201f`, revertido da `main` em `ce86dcf`) e não voltou à `main` porque enviava extratos bancários para a nuvem, contradizendo a promessa de privacidade 100% local das ferramentas gratuitas.
+   - Partes reaproveitáveis no futuro: classificação de extratos em `src/lib/parsers/bankStatementParser.ts`, textos de preços e o schema de vínculo contador-cliente.
 
 ## Pendências
 
