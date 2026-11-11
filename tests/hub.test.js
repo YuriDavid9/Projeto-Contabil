@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { parseMoney, parseDateAny, csvCell, splitCSV, dayDiff } from '../js/utils.js';
-import { reconcile, parseOFX, parseTxCSV } from '../js/conciliadorModule.js';
+import { reconcile, parseOFX, parseTxCSV, sim } from '../js/conciliadorModule.js';
 import { calcDV, buildDemoXML, parseNFe, computeYearSummary } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
@@ -207,4 +207,107 @@ test('isHttpUrl e funcoes puras do portal validam URLs HTTP/HTTPS, slugs e tradu
   assert.equal(translatePostError(new Error('violates check constraint "posts_cover_url_check"')), 'A URL da imagem de capa deve começar com http:// ou https://.');
   assert.equal(translateCommentError(new Error('Aguarde alguns segundos antes de comentar novamente.')), 'Aguarde 20 segundos antes de enviar outro comentário.');
   assert.equal(translateAuthError(new Error('Invalid login credentials')), 'E-mail ou senha incorretos. Confira os dados e tente novamente.');
+});
+
+test('reconcile mantem paridade exata com implementacao de referencia (300x300) e processa 3000x3000 em menos de 3s', () => {
+  const vendors = ['ALFA COMERCIO', 'BETA DISTRIBUIDORA', 'GAMMA SERVICOS', 'DELTA MATERIAIS', 'EPSILON TECH', 'ZETA LOGISTICA', 'THETA CONSULTORIA', 'IOTA EMBALAGENS', 'KAPPA SUPRIMENTOS', 'LAMBDA SEGUROS'];
+  const buildDataset = (count) => {
+    const bank = [];
+    const ledger = [];
+    for (let i = 0; i < count; i++) {
+      const month = String((i % 12) + 1).padStart(2, '0');
+      const dayNum = (i % 27) + 1;
+      const day = String(dayNum).padStart(2, '0');
+      const nextDay = String(Math.min(28, dayNum + (i % 2))).padStart(2, '0');
+      const vendor = vendors[i % vendors.length];
+      const baseCents = ((i * 137) % 90000) + 1000;
+      const sign = i % 3 === 0 ? 1 : -1;
+      const bCents = sign * baseCents;
+      bank.push({
+        id: i + 1,
+        date: `2026-${month}-${day}`,
+        desc: `PIX ${vendor} LOTE ${i}`,
+        amount: bCents / 100,
+        cents: bCents
+      });
+      let lCents = bCents;
+      let lDesc = `Lancamento ${vendor} ref ${i}`;
+      if (i % 5 === 1) {
+        lCents = bCents + sign * 50; // divergencia com similaridade
+      } else if (i % 5 === 2) {
+        lCents = bCents + sign * 50000; // pendencia
+        lDesc = 'Historico isolado sem correspondencia';
+      }
+      ledger.push({
+        id: count + i + 1,
+        date: `2026-${month}-${nextDay}`,
+        desc: lDesc,
+        amount: lCents / 100,
+        cents: lCents
+      });
+    }
+    return { bank, ledger };
+  };
+
+  const referenceReconcileCounts = (bank, ledger, tol = 2, divDays = 10) => {
+    const usedB = new Set();
+    const usedL = new Set();
+    const exact = [];
+    for (const b of bank) {
+      for (const l of ledger) {
+        if (b.cents !== l.cents) continue;
+        const dd = dayDiff(b.date, l.date);
+        if (dd <= tol) exact.push({ bank: b, ledger: l, score: sim(b.desc, l.desc) * 10 - dd });
+      }
+    }
+    exact.sort((a, b) => b.score - a.score);
+    let ok = 0;
+    for (const c of exact) {
+      if (usedB.has(c.bank.id) || usedL.has(c.ledger.id)) continue;
+      usedB.add(c.bank.id);
+      usedL.add(c.ledger.id);
+      ok++;
+    }
+    const divCandidates = [];
+    for (const b of bank) {
+      if (usedB.has(b.id)) continue;
+      for (const l of ledger) {
+        if (usedL.has(l.id) || Math.sign(b.cents) !== Math.sign(l.cents)) continue;
+        const dd = dayDiff(b.date, l.date);
+        const s = sim(b.desc, l.desc);
+        const diff = Math.abs(b.cents - l.cents);
+        const ratio = diff / Math.max(Math.abs(l.cents), 1);
+        if (dd <= divDays && s > 0 && (ratio <= 0.25 || diff <= 100)) {
+          divCandidates.push({ bank: b, ledger: l, score: s * 10 - dd - ratio * 10 });
+        }
+      }
+    }
+    divCandidates.sort((a, b) => b.score - a.score);
+    let div = 0;
+    for (const c of divCandidates) {
+      if (usedB.has(c.bank.id) || usedL.has(c.ledger.id)) continue;
+      usedB.add(c.bank.id);
+      usedL.add(c.ledger.id);
+      div++;
+    }
+    return { ok, div, pb: bank.length - usedB.size, pi: ledger.length - usedL.size };
+  };
+
+  const small = buildDataset(300);
+  const expectedSmall = referenceReconcileCounts(small.bank, small.ledger, 2, 10);
+  const actualSmallRows = reconcile(small.bank, small.ledger, { tol: 2, divDays: 10 });
+  const actualSmall = {
+    ok: actualSmallRows.filter((r) => r.status === 'ok').length,
+    div: actualSmallRows.filter((r) => r.status === 'div').length,
+    pb: actualSmallRows.filter((r) => r.status === 'pb').length,
+    pi: actualSmallRows.filter((r) => r.status === 'pi').length
+  };
+  assert.deepEqual(actualSmall, expectedSmall);
+
+  const large = buildDataset(3000);
+  const start = performance.now();
+  const largeRows = reconcile(large.bank, large.ledger, { tol: 2, divDays: 10 });
+  const elapsedMs = performance.now() - start;
+  assert.ok(largeRows.length >= 3000);
+  assert.ok(elapsedMs < 3000, `Esperado < 3000ms para 3000x3000, levou ${elapsedMs.toFixed(1)}ms`);
 });

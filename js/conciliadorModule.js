@@ -23,14 +23,16 @@ function tokens(value) {
   return [...new Set(norm(value).toUpperCase().replace(/[^A-Z0-9]+/g, ' ').split(' ').filter((token) => token.length >= 3 && !STOP.has(token) && !/^\d+$/.test(token)))];
 }
 
-function sim(a, b) {
-  const left = tokens(a);
-  const right = tokens(b);
+function simTokens(left, right) {
   let count = 0;
   for (const item of left) {
     if (right.some((value) => item === value || (item.length >= 5 && value.length >= 5 && item.slice(0, 5) === value.slice(0, 5)))) count++;
   }
   return count;
+}
+
+function sim(a, b) {
+  return simTokens(tokens(a), tokens(b));
 }
 
 function mkTx(date, description, amount, extra = {}) {
@@ -135,27 +137,48 @@ async function loadTxFile(file, kind) {
   toast(`${list.length} lançamento(s) carregado(s).`, 'ok');
 }
 
-function findItemDuplicates(items = []) {
+function findItemDuplicates(items = [], tokenMap = null) {
   const duplicateIds = new Set();
   const groups = [];
-  const visited = new Set();
-  for (let i = 0; i < items.length; i++) {
-    if (visited.has(i)) continue;
-    const a = items[i];
-    const group = [a];
-    const normA = norm(a.desc).toUpperCase().replace(/\s+/g, ' ').trim();
-    for (let j = i + 1; j < items.length; j++) {
-      const b = items[j];
-      if (a.date !== b.date || a.cents !== b.cents) continue;
-      const normB = norm(b.desc).toUpperCase().replace(/\s+/g, ' ').trim();
-      if (normA === normB || sim(a.desc, b.desc) > 0) {
-        group.push(b);
-        visited.add(j);
-      }
+  const buckets = new Map();
+  for (const item of items) {
+    const key = `${item.date}|${item.cents}`;
+    let bucket = buckets.get(key);
+    if (!bucket) {
+      bucket = [];
+      buckets.set(key, bucket);
     }
-    if (group.length > 1) {
-      groups.push(group);
-      group.forEach((item) => duplicateIds.add(item.id));
+    bucket.push(item);
+  }
+
+  const getItemTokens = (item) => {
+    if (tokenMap && tokenMap.has(item)) return tokenMap.get(item);
+    const computed = tokens(item.desc);
+    if (tokenMap) tokenMap.set(item, computed);
+    return computed;
+  };
+
+  for (const bucket of buckets.values()) {
+    if (bucket.length < 2) continue;
+    const visited = new Set();
+    const norms = bucket.map((item) => norm(item.desc).toUpperCase().replace(/\s+/g, ' ').trim());
+    for (let i = 0; i < bucket.length; i++) {
+      if (visited.has(i)) continue;
+      const a = bucket[i];
+      const group = [a];
+      const tokensA = getItemTokens(a);
+      for (let j = i + 1; j < bucket.length; j++) {
+        if (visited.has(j)) continue;
+        const b = bucket[j];
+        if (norms[i] === norms[j] || simTokens(tokensA, getItemTokens(b)) > 0) {
+          group.push(b);
+          visited.add(j);
+        }
+      }
+      if (group.length > 1) {
+        groups.push(group);
+        group.forEach((item) => duplicateIds.add(item.id));
+      }
     }
   }
   return { duplicateIds, groups };
@@ -165,9 +188,9 @@ function findBankDuplicates() {
   return findItemDuplicates(CB.bank).groups;
 }
 
-function showDuplicateWarnings(ignoredFitidCount = 0) {
-  const bankDups = findItemDuplicates(CB.bank).groups;
-  const ledgerDups = findItemDuplicates(CB.ledger).groups;
+function showDuplicateWarnings(ignoredFitidCount = 0, bankDupGroups = null, ledgerDupGroups = null) {
+  const bankDups = bankDupGroups ?? findItemDuplicates(CB.bank).groups;
+  const ledgerDups = ledgerDupGroups ?? findItemDuplicates(CB.ledger).groups;
   const messages = [];
   if (ignoredFitidCount > 0) {
     messages.push(`${ignoredFitidCount} transação(ões) repetida(s) pelo mesmo FITID foram ignoradas na importação do OFX.`);
@@ -218,8 +241,13 @@ function reconcile(bank, ledger, options = {}) {
   const rows = [];
   const usedBank = new Set();
   const usedLedger = new Set();
-  const { duplicateIds: dupBankIds } = findItemDuplicates(bank);
-  const { duplicateIds: dupLedgerIds } = findItemDuplicates(ledger);
+
+  const tokenMap = new Map();
+  for (const item of bank) tokenMap.set(item, tokens(item.desc));
+  for (const item of ledger) tokenMap.set(item, tokens(item.desc));
+
+  const dupBankIds = options.dupBankIds ?? findItemDuplicates(bank, tokenMap).duplicateIds;
+  const dupLedgerIds = options.dupLedgerIds ?? findItemDuplicates(ledger, tokenMap).duplicateIds;
 
   const withDuplicateNote = (obs, bankItem, ledgerItem) => {
     const hasDup = (bankItem && dupBankIds.has(bankItem.id)) || (ledgerItem && dupLedgerIds.has(ledgerItem.id));
@@ -243,12 +271,30 @@ function reconcile(bank, ledger, options = {}) {
     }
   };
 
+  const ledgerByCents = new Map();
+  for (const ledgerItem of ledger) {
+    let list = ledgerByCents.get(ledgerItem.cents);
+    if (!list) {
+      list = [];
+      ledgerByCents.set(ledgerItem.cents, list);
+    }
+    list.push(ledgerItem);
+  }
+
   const exactMatches = [];
   for (const bankItem of bank) {
-    for (const ledgerItem of ledger) {
-      if (bankItem.cents !== ledgerItem.cents) continue;
+    const sameCentsLedger = ledgerByCents.get(bankItem.cents);
+    if (!sameCentsLedger) continue;
+    const bankTokens = tokenMap.get(bankItem);
+    for (const ledgerItem of sameCentsLedger) {
       const diffDays = dayDiff(bankItem.date, ledgerItem.date);
-      if (diffDays <= tol) exactMatches.push({ bank: bankItem, ledger: ledgerItem, score: sim(bankItem.desc, ledgerItem.desc) * 10 - diffDays });
+      if (diffDays <= tol) {
+        exactMatches.push({
+          bank: bankItem,
+          ledger: ledgerItem,
+          score: simTokens(bankTokens, tokenMap.get(ledgerItem)) * 10 - diffDays
+        });
+      }
     }
   }
   assign(exactMatches, 'ok', (candidate) => {
@@ -256,26 +302,37 @@ function reconcile(bank, ledger, options = {}) {
     return diffDays ? `Valor exato; datas com ${diffDays} dia(s) de diferença.` : 'Valor e data exatos.';
   });
 
+  const ledgerBySign = new Map([[-1, []], [0, []], [1, []]]);
+  for (const ledgerItem of ledger) {
+    if (usedLedger.has(ledgerItem.id)) continue;
+    const sign = Math.sign(ledgerItem.cents);
+    ledgerBySign.get(sign)?.push(ledgerItem);
+  }
+
   const divergenceMatches = [];
   for (const bankItem of bank) {
     if (usedBank.has(bankItem.id)) continue;
-    for (const ledgerItem of ledger) {
-      if (usedLedger.has(ledgerItem.id) || Math.sign(bankItem.cents) !== Math.sign(ledgerItem.cents)) continue;
+    const candidatesBySign = ledgerBySign.get(Math.sign(bankItem.cents)) || [];
+    const bankTokens = tokenMap.get(bankItem);
+    for (const ledgerItem of candidatesBySign) {
       const diffDays = dayDiff(bankItem.date, ledgerItem.date);
-      const similarity = sim(bankItem.desc, ledgerItem.desc);
+      if (diffDays > divDays) continue;
       const diff = Math.abs(bankItem.cents - ledgerItem.cents);
       const ratio = diff / Math.max(Math.abs(ledgerItem.cents), 1);
-      if (diffDays <= divDays && similarity > 0 && (ratio <= 0.25 || diff <= 100)) {
-        divergenceMatches.push({ bank: bankItem, ledger: ledgerItem, similarity, score: similarity * 10 - diffDays - ratio * 10 });
+      if (!(ratio <= 0.25 || diff <= 100)) continue;
+      const similarity = simTokens(bankTokens, tokenMap.get(ledgerItem));
+      if (similarity > 0) {
+        divergenceMatches.push({ bank: bankItem, ledger: ledgerItem, score: similarity * 10 - diffDays - ratio * 10 });
       }
     }
   }
   assign(divergenceMatches, 'div', (candidate) => {
     const difference = (candidate.bank.cents - candidate.ledger.cents) / 100;
     const magnitude = Math.abs(difference);
-    const lowConf = candidate.similarity === 0 ? ' (baixa confiança — confira manualmente)' : '';
-    if (magnitude < 1) return `Diferença de centavos (arredondamento/digitação).${lowConf}`;
-    return (candidate.bank.cents > candidate.ledger.cents ? `Extrato maior que o razão: possível juros ou multa de ${brl(magnitude)}.` : `Extrato menor que o razão: possível desconto ou abatimento de ${brl(magnitude)}.`) + lowConf;
+    if (magnitude < 1) return 'Diferença de centavos (arredondamento/digitação).';
+    return candidate.bank.cents > candidate.ledger.cents
+      ? `Extrato maior que o razão: possível juros ou multa de ${brl(magnitude)}.`
+      : `Extrato menor que o razão: possível desconto ou abatimento de ${brl(magnitude)}.`;
   });
 
   for (const bankItem of bank) {
@@ -419,10 +476,16 @@ function renderCB() {
   </tr>`).join('');
 }
 
-function runCB() {
+async function runCB() {
   if (!CB.bank.length && !CB.ledger.length) {
     toast(getModo() === 'guiado' ? 'Carregue o extrato do banco e suas anotações primeiro.' : 'Carregue extrato e razão primeiro.', 'warn');
     return;
+  }
+
+  const totalCount = CB.bank.length + CB.ledger.length;
+  if (totalCount > 1000) {
+    toast(`Conciliando ${totalCount} lançamentos…`, 'ok');
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }
 
   const tol = Math.max(0, +$('#cb-tol').value || 0);
@@ -437,12 +500,19 @@ function runCB() {
     const ledger = ledgerById.get(ledgerId);
     return { status: 'manual', b: bank, l: ledger, diff: bank.cents - ledger.cents, obs: 'Vínculo confirmado manualmente pelo usuário.' };
   });
-  CB.rows = reconcile(CB.bank, CB.ledger, { tol, divDays })
+  const bankDups = findItemDuplicates(CB.bank);
+  const ledgerDups = findItemDuplicates(CB.ledger);
+  CB.rows = reconcile(CB.bank, CB.ledger, {
+    tol,
+    divDays,
+    dupBankIds: bankDups.duplicateIds,
+    dupLedgerIds: ledgerDups.duplicateIds
+  })
     .filter((row) => !manuallyMatchedBank.has(row.b?.id) && !manuallyMatchedLedger.has(row.l?.id))
     .concat(manualRows);
   CB.rows.sort((a, b) => STATUS[a.status].order - STATUS[b.status].order || ((a.b || a.l).date).localeCompare((b.b || b.l).date));
   CB.filter = 'all';
-  showDuplicateWarnings();
+  showDuplicateWarnings(0, bankDups.groups, ledgerDups.groups);
   saveCBData();
   renderCB();
   toast('Conciliação concluída.', 'ok');
@@ -604,4 +674,4 @@ function initConciliadorModule() {
   renderCB();
 }
 
-export { initConciliadorModule, CB, reconcile, loadTxFile, renderCB, parseOFX, parseTxCSV };
+export { initConciliadorModule, CB, reconcile, loadTxFile, renderCB, parseOFX, parseTxCSV, sim };
