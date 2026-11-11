@@ -11,6 +11,7 @@ import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
 import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
 import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
+import { inspectWhatsappLinks } from '../scripts/verificar-links-wa.mjs';
 
 test('parseMoney interpreta formatos brasileiros, americanos, negativos e preserva hifens internos', () => {
   assert.equal(parseMoney('1.234,56'), 1234.56);
@@ -533,4 +534,29 @@ test('contato.html e pro.html possuem CSP estatico e nenhum arquivo altera meta 
       || /cspMeta\s*\.\s*setAttribute\s*\(\s*['"]content['"]/i.test(content);
     assert.equal(altersCspMeta, false, `${rel} nao deve alterar meta CSP em tempo de execucao via setAttribute('content')`);
   }
+});
+
+test('todos os links wa.me nos arquivos HTML usam NEGOCIO.whatsapp com origem e elementos data-wa-origem batem com buildWhatsappLink', () => {
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const { links, errors } = inspectWhatsappLinks(rootDir, NEGOCIO.whatsapp);
+
+  assert.ok(links.length >= 25, `Esperados pelo menos 25 links wa.me no projeto, encontrados ${links.length}`);
+  assert.deepEqual(errors, [], `Erros encontrados nos links wa.me:\n${errors.join('\n')}`);
+
+  const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
+  const dataWaTags = [...indexHtml.matchAll(/<a\b[^>]*\bdata-wa-origem=["']([^"']+)["'][^>]*>/gi)];
+  assert.ok(dataWaTags.length >= 6, 'index.html deve ter pelo menos 6 links com data-wa-origem');
+
+  for (const match of dataWaTags) {
+    const tag = match[0];
+    const origem = match[1];
+    const servicoMatch = /\bdata-wa-servico=["']([^"']+)["']/i.exec(tag);
+    const hrefMatch = /\bhref=["']([^"']+)["']/i.exec(tag);
+    const servico = servicoMatch ? servicoMatch[1] : undefined;
+    const expectedHref = buildWhatsappLink({ origem, servico });
+    assert.equal(hrefMatch?.[1], expectedHref, `href estatico de data-wa-origem="${origem}" em index.html deve ser identico a buildWhatsappLink`);
+  }
+
+  const mismatchCheck = inspectWhatsappLinks(rootDir, '5511999999999');
+  assert.ok(mismatchCheck.errors.length > 0, 'inspectWhatsappLinks deve detectar divergencia quando o numero muda');
 });
