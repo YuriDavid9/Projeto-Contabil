@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { parseMoney, parseDateAny, csvCell, splitCSV, dayDiff } from '../js/utils.js';
 import { reconcile, parseOFX, parseTxCSV } from '../js/conciliadorModule.js';
-import { calcDV, buildDemoXML, parseNFe } from '../js/xmlModule.js';
+import { calcDV, buildDemoXML, parseNFe, computeYearSummary } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
 import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
@@ -128,6 +128,28 @@ test('calcDV, buildDemoXML e parseNFe validam chave, status e conferencia de tot
   assert.equal(parsedBad.validForKpi, false);
   assert.equal(parsedBad.totalsOk, false);
   assert.ok(parsedBad.avisoConferencia.includes('totais não conferem'));
+
+  const baseNote = {
+    cUF: 25,
+    mod: 55,
+    serie: 1,
+    nNF: 2000,
+    cNF: 11223344,
+    dt: '2026-10-05',
+    hora: '10:00',
+    icms: 0.18,
+    emit: { doc: '11222333000181', nome: 'Alfa LTDA' },
+    dest: { doc: '44555666000122', nome: 'Beta ME' },
+    itens: [{ desc: 'Item', q: 1, vu: 100 }]
+  };
+  const notes = ['100', '150', '101', '110'].map((cStat, idx) =>
+    parseNFe(buildDemoXML({ ...baseNote, nNF: 2000 + idx, cStat }), `n_${cStat}.xml`)
+  );
+  const summary = computeYearSummary(notes, '11.222.333/0001-81');
+  assert.equal(summary.validas.length, 2);
+  assert.equal(summary.desconsideradas, 2);
+  assert.equal(summary.groups.get('2026').total, 200);
+  assert.equal(summary.groups.get('2026').emitidas, 200);
 });
 
 test('guessMeta preserva fornecedores como Mar Azul e Dez Distribuidora e buildName limita a 120 chars', () => {

@@ -17,6 +17,10 @@ function classifyStatus(cStat) {
   return { key: 'outro', label: `cStat ${code}`, cls: 'bg-amber-100 text-amber-800', validForKpi: false };
 }
 
+function isValidNote(note) {
+  return classifyStatus(note?.cStat).validForKpi;
+}
+
 function calcDV(value) {
   let weight = 2;
   let sum = 0;
@@ -283,7 +287,7 @@ function renderNF() {
     cfopSelect.value = cfops.includes(NF.cfop) ? NF.cfop : '';
     if (!cfopSelect.value) NF.cfop = '';
   }
-  const validKpiNotes = NF.notas.filter((note) => note.validForKpi !== false && note.status !== 'cancelada' && note.status !== 'denegada');
+  const validKpiNotes = NF.notas.filter(isValidNote);
   const sum = (key) => r2(validKpiNotes.reduce((total, note) => total + note[key], 0));
 
   renderYearSummary();
@@ -337,12 +341,10 @@ function renderNF() {
   $('#xml-pager').innerHTML = `<span>Mostrando ${from}–${to} de ${list.length}</span><div class="flex gap-1">${pageButton(NF.page - 1, '‹', NF.page <= 1)}${pageNumbers}${pageButton(NF.page + 1, '›', NF.page >= pages)}</div>`;
 }
 
-function renderYearSummary() {
-  const root = $('#xml-resumo-conteudo');
-  if (!root || getModo() !== 'guiado') return;
-  const cnpj = normalizeCNPJ($('#xml-cnpj-proprio')?.value || '');
-  const validas = NF.notas.filter((note) => !note.cStat || note.cStat === '100');
-  const desconsideradas = NF.notas.length - validas.length;
+function computeYearSummary(notas = [], rawCnpj = '') {
+  const cnpj = normalizeCNPJ(rawCnpj || '');
+  const validas = notas.filter(isValidNote);
+  const desconsideradas = notas.length - validas.length;
   const groups = new Map();
   validas.forEach((note) => {
     const date = parseDateAny(note.emissao);
@@ -350,12 +352,19 @@ function renderYearSummary() {
     const year = date.slice(0, 4);
     const month = date.slice(0, 7);
     const group = groups.get(year) || { meses: new Map(), emitidas: 0, recebidas: 0, total: 0 };
-    group.total += note.vNF;
-    group.meses.set(month, (group.meses.get(month) || 0) + note.vNF);
-    if (cnpj && normalizeCNPJ(note.emit.doc) === cnpj) group.emitidas += note.vNF;
-    if (cnpj && normalizeCNPJ(note.dest.doc) === cnpj) group.recebidas += note.vNF;
+    group.total = r2(group.total + note.vNF);
+    group.meses.set(month, r2((group.meses.get(month) || 0) + note.vNF));
+    if (cnpj && normalizeCNPJ(note.emit.doc) === cnpj) group.emitidas = r2(group.emitidas + note.vNF);
+    if (cnpj && normalizeCNPJ(note.dest.doc) === cnpj) group.recebidas = r2(group.recebidas + note.vNF);
     groups.set(year, group);
   });
+  return { validas, desconsideradas, groups, cnpj };
+}
+
+function renderYearSummary() {
+  const root = $('#xml-resumo-conteudo');
+  if (!root || getModo() !== 'guiado') return;
+  const { desconsideradas, groups, cnpj } = computeYearSummary(NF.notas, $('#xml-cnpj-proprio')?.value || '');
   if (!NF.notas.length) {
     root.innerHTML = '<p class="text-sm text-slate-600">Carregue notas XML para ver os valores encontrados nos arquivos.</p>';
     return;
@@ -402,7 +411,7 @@ function exportNF() {
   const filteredNotes = nfFiltered();
   const head = ['Modelo', 'Número NF', 'Série', 'Data/Hora Emissão', 'Chave de Acesso', 'Status', 'Aviso de conferência', 'Emitente - Razão Social', 'Emitente - CNPJ/CPF', 'Destinatário - Razão Social', 'Destinatário - CNPJ/CPF', 'Valor Produtos (vProd)', 'Valor Total NF (vNF)', 'ICMS (vICMS)', 'PIS (vPIS)', 'COFINS (vCOFINS)', 'Arquivo'];
   const rows = filteredNotes.map((note) => [note.mod === '65' ? '65 - NFC-e' : '55 - NF-e', note.nNF, note.serie, fmtDateTime(note.emissao), note.chave, note.statusLabel || 'Autorizada', note.avisoConferencia || '', note.emit.nome, fmtDoc(note.emit.doc), note.dest.nome, fmtDoc(note.dest.doc), n2(note.vProd), n2(note.vNF), n2(note.vICMS), n2(note.vPIS), n2(note.vCOFINS), note.arquivo]);
-  const validFiltered = filteredNotes.filter((note) => note.validForKpi !== false && note.status !== 'cancelada' && note.status !== 'denegada');
+  const validFiltered = filteredNotes.filter(isValidNote);
   const totals = validFiltered.reduce((accumulator, note) => ({
     vProd: accumulator.vProd + note.vProd,
     vNF: accumulator.vNF + note.vNF,
@@ -483,4 +492,4 @@ function initXmlModule() {
   renderNF();
 }
 
-export { initXmlModule, buildDemoXML, parseNFe, calcDV, NF, renderNF, showNFModal };
+export { initXmlModule, buildDemoXML, parseNFe, calcDV, classifyStatus, isValidNote, computeYearSummary, NF, renderNF, showNFModal };
