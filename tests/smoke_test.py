@@ -21,6 +21,7 @@ MOJIBAKE_RE = re.compile(
 TOOL_PAGES = [
     "index.html",
     "ferramentas.html",
+    "servicos.html",
     "extrator-xml-nfe.html",
     "conciliador-bancario-ofx.html",
     "organizador-fiscal.html",

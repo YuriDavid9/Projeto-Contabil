@@ -369,6 +369,7 @@ test('sw.js CORE_ASSETS contem todos os modulos locais importados por index.html
   const toolPages = [
     'index.html',
     'ferramentas.html',
+    'servicos.html',
     'extrator-xml-nfe.html',
     'conciliador-bancario-ofx.html',
     'organizador-fiscal.html',
@@ -423,4 +424,12 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
     decoded,
     'Olá Yuri! Vim pelo Extrator de XML do AutoContábil Hub e quero falar sobre consolidação de lotes de XML\nVolume: 300 notas/mês.'
   );
+
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const servicosHtml = fs.readFileSync(path.join(rootDir, 'servicos.html'), 'utf8');
+  assert.ok(servicosHtml.includes('"@type": "ProfessionalService"'), 'servicos.html deve ter JSON-LD ProfessionalService');
+  assert.ok(servicosHtml.includes('Solicitar orçamento'), 'servicos.html deve exibir Solicitar orçamento quando precoAPartirDe e null');
+  assert.equal(servicosHtml.includes('mailto:null'), false, 'servicos.html nunca deve exibir e-mail nulo');
+  const sitemapXml = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
+  assert.ok(sitemapXml.includes('/servicos.html'), 'servicos.html deve constar no sitemap.xml');
 });
