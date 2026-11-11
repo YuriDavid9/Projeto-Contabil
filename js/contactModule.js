@@ -1,8 +1,11 @@
 import { $, esc, toast } from './utils.js';
 import { FAIXAS_PRO, buildWhatsappLink } from './negocio.js';
 
-// Configure these values before enabling contact submissions in production.
-const CONTACT_ENDPOINT = 'COLOQUE_AQUI_O_ENDPOINT';
+// Provedor escolhido: Web3Forms (plano gratuito com 250 envios/mês, feito para envio direto do navegador).
+// Para ativar: gere a access key em https://web3forms.com com o e-mail que deve receber as mensagens
+// e cole em CONTACT_ACCESS_KEY. A access key é pública por definição do provedor (não é segredo).
+// Enquanto CONTACT_ACCESS_KEY estiver vazia, contato.html e pro.html mostram o aviso com o WhatsApp.
+const CONTACT_ENDPOINT = 'https://api.web3forms.com/submit';
 const CONTACT_ACCESS_KEY = '';
 const CONTACT_EMAIL = 'SEU_EMAIL@EXEMPLO.COM';
 const WHATSAPP_URL = buildWhatsappLink({ origem: 'Formulário de Contato' });
@@ -202,6 +205,7 @@ function initProWaitlistModule() {
     try {
       const payload = {
         tipo: 'lista_espera_pro',
+        subject: 'Lista de espera AutoContábil Pro',
         name: String(data.get('name') || '').trim(),
         email: String(data.get('email') || '').trim(),
         sistema_contabil: String(data.get('sistema_contabil') || '').trim(),

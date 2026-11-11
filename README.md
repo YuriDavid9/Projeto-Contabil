@@ -28,14 +28,15 @@ Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e fi
 
 1. **Dados do negócio e preços dos serviços (`js/negocio.js`):**
    - Edite `NEGOCIO` para atualizar dados de contato ou preencher `email` e `dominio` (enquanto `email: null`, nenhum link de e-mail é exibido em `servicos.html`).
-   - Em `SERVICOS`, cada oferta tem `precoAPartirDe: null` por padrão (exibindo `"Solicitar orçamento"` em `servicos.html`). Para exibir um valor inicial real, basta preencher `precoAPartirDe` (ex.: `350` ou `'R$ 350,00'`).
+   - Em `SERVICOS`, cada oferta tem `precoAPartirDe` (hoje com valores de referência provisórios, exibidos como `"A partir de R$ ..."` em `servicos.html`). Para voltar a `"Solicitar orçamento"`, use `null`. Ao mudar um valor, atualize também o selo correspondente no HTML estático de `servicos.html` (o teste confere).
    - Em `FAIXAS_PRO`, revise as faixas de pesquisa de demanda antes de divulgar `pro.html`.
 2. **Como trocar o número de WhatsApp em todo o site:**
    - Altere `NEGOCIO.whatsapp` em `js/negocio.js` (apenas dígitos com DDI + DDD, ex.: `'5583986398472'`).
    - Rode `node scripts/verificar-links-wa.mjs --atualizar` para atualizar todos os atributos `href="https://wa.me/..."` estáticos nos arquivos `.html` e `node scripts/verificar-links-wa.mjs` para validar que todos os links usam o mesmo número e identificam a origem.
 3. **Como ativar os formulários de contato e lista de espera (`contato.html` e `pro.html`):**
-   - Em `js/contactModule.js`, preencha `CONTACT_ENDPOINT` (com a URL `https://...` do seu provedor, ex.: Formspree ou Web3Forms), `CONTACT_ACCESS_KEY` (se exigido pelo provedor) e `CONTACT_EMAIL`.
-   - Em `contato.html` e em `pro.html` (e **somente** nesses dois arquivos), edite a meta tag `<meta http-equiv="Content-Security-Policy" ...>` trocando `connect-src 'self'` por `connect-src 'self' https://SEU-PROVEDOR` (ex.: `connect-src 'self' https://formspree.io` ou `connect-src 'self' https://api.web3forms.com`). Nunca altere o `connect-src 'self'` de `index.html` ou das páginas de ferramentas.
+   - O provedor já está escolhido e liberado no CSP dessas duas páginas: **Web3Forms** (`https://api.web3forms.com/submit`).
+   - Gere a access key gratuita em https://web3forms.com com o e-mail que deve receber as mensagens e cole em `CONTACT_ACCESS_KEY` (`js/contactModule.js`). A chave é pública por definição do provedor. Opcionalmente, preencha `CONTACT_EMAIL` para exibir o link de e-mail como alternativa.
+   - Para trocar de provedor, altere `CONTACT_ENDPOINT` e troque `https://api.web3forms.com` no `connect-src` de `contato.html` e `pro.html` (e **somente** nesses dois arquivos). Nunca altere o `connect-src 'self'` de `index.html` ou das páginas de ferramentas.
 
 ## Executar localmente
 

@@ -8,7 +8,7 @@ import { parseMoney, parseDateAny, csvCell, splitCSV, dayDiff } from '../js/util
 import { reconcile, parseOFX, parseTxCSV, sim } from '../js/conciliadorModule.js';
 import { calcDV, buildDemoXML, parseNFe, computeYearSummary } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
-import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
+import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml, CONTACT_ENDPOINT } from '../js/contactModule.js';
 import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
 import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
 import { inspectWhatsappLinks } from '../scripts/verificar-links-wa.mjs';
@@ -431,9 +431,15 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   assert.ok(Array.isArray(FAIXAS_PRO) && FAIXAS_PRO.length >= 4);
 
   for (const servico of SERVICOS) {
-    assert.equal(servico.precoAPartirDe, null, `Servico ${servico.slug} deve ter precoAPartirDe null por padrao`);
-    assert.equal(formatPrecoServico(servico.precoAPartirDe), 'Solicitar orçamento');
+    const preco = servico.precoAPartirDe;
+    const valido = preco === null
+      || (typeof preco === 'number' && Number.isFinite(preco) && preco > 0)
+      || (typeof preco === 'string' && /^R\$\s?\d/.test(preco.trim()));
+    assert.ok(valido, `Servico ${servico.slug} deve ter precoAPartirDe null, numero positivo ou texto iniciando com R$`);
+    if (preco === null) assert.equal(formatPrecoServico(preco), 'Solicitar orçamento');
+    else assert.ok(formatPrecoServico(preco).startsWith('A partir de R$'));
   }
+  assert.equal(formatPrecoServico(null), 'Solicitar orçamento');
   assert.equal(formatPrecoServico(350), 'A partir de R$ 350,00');
 
   const linkXml = buildWhatsappLink({
@@ -454,7 +460,10 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const servicosHtml = fs.readFileSync(path.join(rootDir, 'servicos.html'), 'utf8');
   assert.ok(servicosHtml.includes('"@type": "ProfessionalService"'), 'servicos.html deve ter JSON-LD ProfessionalService');
-  assert.ok(servicosHtml.includes('Solicitar orçamento'), 'servicos.html deve exibir Solicitar orçamento quando precoAPartirDe e null');
+  assert.ok(servicosHtml.includes('Solicitar orçamento'), 'servicos.html deve manter o CTA Solicitar orçamento');
+  for (const servico of SERVICOS) {
+    assert.ok(servicosHtml.includes(formatPrecoServico(servico.precoAPartirDe)), `servicos.html deve exibir no HTML estatico o preco de ${servico.slug}`);
+  }
   assert.equal(servicosHtml.includes('mailto:null'), false, 'servicos.html nunca deve exibir e-mail nulo');
   const sitemapXml = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
   assert.ok(sitemapXml.includes('/servicos.html'), 'servicos.html deve constar no sitemap.xml');
@@ -495,17 +504,19 @@ test('contato.html e pro.html possuem CSP estatico e nenhum arquivo altera meta 
   assert.ok(sitemapXml.includes('/contato.html'), 'contato.html deve constar no sitemap.xml');
   assert.ok(swText.includes('./contato.html'), 'contato.html deve constar em CORE_ASSETS do sw.js');
 
+  const providerOrigin = new URL(CONTACT_ENDPOINT).origin;
+  assert.equal(providerOrigin, 'https://api.web3forms.com', 'Provedor de formulario configurado deve ser o Web3Forms');
   for (const formPage of ['contato.html', 'pro.html']) {
     const html = fs.readFileSync(path.join(rootDir, formPage), 'utf8');
     assert.ok(
-      html.includes("Para ativar o formulário, troque connect-src 'self' por connect-src 'self' https://SEU-PROVEDOR"),
-      `${formPage} deve ter comentario explicando como liberar o provedor no connect-src estatico`
+      html.includes('Provedor do formulário: Web3Forms'),
+      `${formPage} deve ter comentario explicando o provedor liberado no connect-src estatico`
     );
     const cspMatch = /<meta\s+http-equiv=["']Content-Security-Policy["']\s+content="([^"]+)"/i.exec(html);
     assert.ok(cspMatch, `CSP estatico ausente em ${formPage}`);
     const connectMatch = /connect-src\s+([^;]+)/i.exec(cspMatch[1]);
     assert.ok(connectMatch, `connect-src ausente em ${formPage}`);
-    assert.equal(connectMatch[1].trim(), "'self'", `connect-src padrao deve ser 'self' em ${formPage}`);
+    assert.equal(connectMatch[1].trim(), `'self' ${providerOrigin}`, `connect-src de ${formPage} deve liberar apenas 'self' e a origem do provedor`);
   }
 
   const allFilesToCheck = [];

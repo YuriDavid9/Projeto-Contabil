@@ -33,7 +33,7 @@
 4. **Content-Security-Policy (CSP) por perfil de página e formulário em `contato.html`:**
    - O formulário de contato ficou em `contato.html` (fora do `index.html`) por causa do CSP (no navegador, alterar `<meta http-equiv="Content-Security-Policy">` via JavaScript não libera novas origens) e para preservar intacta a garantia de privacidade `connect-src 'self'` das páginas de ferramentas.
    - Páginas de ferramentas locais, serviços e guias (`index.html`, `ferramentas.html`, `servicos.html`, `extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`, `guias/*.html`, `privacidade.html`, `termos.html`, `404.html`) mantêm `connect-src 'self'` estrito e não possuem `<form` que envie dados para fora.
-   - `contato.html` e `pro.html` possuem CSP estático no próprio HTML (`connect-src 'self'` por padrão, com instrução comentada logo acima para trocar por `connect-src 'self' https://SEU-PROVEDOR` quando o formulário for ativado).
+   - `contato.html` e `pro.html` possuem CSP estático no próprio HTML com `connect-src 'self' https://api.web3forms.com` (provedor escolhido: Web3Forms, plano gratuito de 250 envios/mês, feito para envio direto do navegador). Nenhuma outra página libera esse domínio.
    - Páginas do portal (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`) utilizam `connect-src 'self' https://trnkzwserimzkftbwuge.supabase.co https://cdn.jsdelivr.net`.
 5. **PWA e Service Worker (`sw.js`):**
    - `CORE_ASSETS` inclui todas as páginas estáticas (`servicos.html`, `pro.html`, `contato.html`, `guias/*.html`) e todos os módulos locais importados por `index.html`, `contato.html` e `pro.html`, com cache versionado em `autocontabil-shell-v15`.
@@ -48,8 +48,9 @@
 
 ## Pendências do dono
 
-- Escolher provedor de formulário, configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js` e trocar `connect-src 'self'` pela origem do provedor apenas em `contato.html` e `pro.html`.
-- Definir preços iniciais (`precoAPartirDe`) e, se desejar exibir, o `email` e `dominio` em `js/negocio.js`, além de revisar as opções de pesquisa de demanda em `FAIXAS_PRO` antes de divulgar `pro.html`.
+- Gerar a access key gratuita em https://web3forms.com (com o e-mail que deve receber as mensagens), colar em `CONTACT_ACCESS_KEY` de `js/contactModule.js` e enviar uma mensagem de teste por `contato.html` e por `pro.html`. Enquanto a chave estiver vazia, as duas páginas mostram o aviso com o WhatsApp.
+- Preencher `CONTACT_EMAIL` (`js/contactModule.js`) e `NEGOCIO.email` (`js/negocio.js`) com um e-mail real, se quiser exibir o link de e-mail.
+- Revisar os preços de referência provisórios em `SERVICOS` (`js/negocio.js`): R$ 250 por lote (XML), R$ 350/mês (conciliação) e R$ 400 por projeto (planilhas). Foram escolhidos pelo assistente, a pedido do dono, com base em pesquisa de mercado de BPO financeiro (planos de entrada a partir de R$ 500-800/mês para o pacote completo). Revisar também as opções de pesquisa em `FAIXAS_PRO` antes de divulgar `pro.html`.
 - Rodar `sql/migrations/2026-11-11_hardening.sql` no SQL Editor do Supabase.
 - Confirmar enquadramento fiscal/CNAE e emissão de nota fiscal de serviço (NFS-e) com o contador.
 - Avaliar registro de domínio próprio `.com.br`.

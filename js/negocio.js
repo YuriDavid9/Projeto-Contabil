@@ -15,7 +15,8 @@ export const SERVICOS = [
     problema: 'Conferir chaves, protocolos, CFOPs, itens e totais de impostos manualmente consome horas da equipe no fechamento mensal.',
     entrega: 'Planilha organizada (CSV/XLSX) com cabeçalho das notas, itens detalhados, resumo por CFOP e apontamento de notas canceladas, denegadas ou com divergência de soma.',
     prazoTipico: 'Combinado conforme o volume de arquivos e a rotina do escritório.',
-    precoAPartirDe: null,
+    // Valor de referência provisório (pesquisa de mercado de nov/2026); revisar antes de divulgar.
+    precoAPartirDe: 'R$ 250 por lote',
     ferramentaRelacionada: {
       nome: 'Extrator de XML (NF-e/NFC-e)',
       url: 'extrator-xml-nfe.html',
@@ -29,7 +30,8 @@ export const SERVICOS = [
     problema: 'Tarifas bancárias esquecidas, lançamentos duplicados e diferenças de centavos atrasam o fechamento contábil e geram retrabalho.',
     entrega: 'Papel de trabalho estruturado separando lançamentos conciliados, divergências de valor, pendências bancárias, pendências internas e possíveis duplicidades.',
     prazoTipico: 'Definido na proposta conforme a quantidade de contas bancárias e lançamentos mensais.',
-    precoAPartirDe: null,
+    // Valor de referência provisório: BPO financeiro completo começa em R$ 500-800/mês; só a conciliação fica abaixo.
+    precoAPartirDe: 'R$ 350/mês',
     ferramentaRelacionada: {
       nome: 'Conciliador Bancário (OFX/CSV)',
       url: 'conciliador-bancario-ofx.html',
@@ -43,7 +45,8 @@ export const SERVICOS = [
     problema: 'Processos manuais repetitivos em planilhas aumentam o risco de erro de digitação e tomam tempo que poderia ser dedicado à análise.',
     entrega: 'Planilha inteligente, conversor ou ferramenta local sob medida adaptada ao layout e à necessidade específica da sua operação, com instruções de uso.',
     prazoTipico: 'Combinado após análise inicial do fluxo atual e definição do escopo.',
-    precoAPartirDe: null,
+    // Valor de referência provisório; revisar antes de divulgar.
+    precoAPartirDe: 'R$ 400 por projeto',
     ferramentaRelacionada: {
       nome: 'Catálogo de Ferramentas',
       url: 'ferramentas.html',
