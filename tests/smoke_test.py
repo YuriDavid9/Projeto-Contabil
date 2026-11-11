@@ -72,7 +72,7 @@ def check_privacy_guard(project_root=ROOT):
         assert page_path.is_file(), f"Missing tool page: {page_name}"
         page_text = page_path.read_text(encoding="utf-8")
         csp_match = re.search(
-            r'<meta\s+http-equiv=["\']Content-Security-Policy["\']\s+content=["\']([^"\']+)["\']',
+            r'<meta\s+http-equiv=["\']Content-Security-Policy["\']\s+content="([^"]+)"',
             page_text,
             re.IGNORECASE,
         )

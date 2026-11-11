@@ -206,10 +206,31 @@ test('isHttpUrl e funcoes puras do portal validam URLs HTTP/HTTPS, slugs e tradu
   assert.equal(isHttpUrl(''), false);
 
   assert.equal(slugify('Reforma Tributária 2026: O que muda no Simples?'), 'reforma-tributaria-2026-o-que-muda-no-simples');
+  assert.equal(slugify('   ---NFC-e & NF-e: Guia Prático!---   '), 'nfc-e-nf-e-guia-pratico');
+  assert.equal(slugify('a'.repeat(150)).length, 120);
+  assert.equal(slugify(''), '');
+
+  assert.equal(translatePostError(new Error('duplicate key value violates unique constraint "posts_slug_key"')), 'Já existe uma notícia com este slug (endereço). Escolha outro slug.');
+  assert.equal(translatePostError(new Error('violates check constraint "posts_slug_check"')), 'O slug deve conter apenas letras minúsculas, números e hífens (ex.: minha-noticia-1).');
+  assert.equal(translatePostError(new Error('violates check constraint "posts_title_check"')), 'O título deve ter entre 5 e 160 caracteres.');
+  assert.equal(translatePostError(new Error('violates check constraint "posts_summary_check"')), 'O resumo deve ter no máximo 300 caracteres.');
   assert.equal(translatePostError(new Error('violates check constraint "posts_source_url_check"')), 'O link da fonte deve começar com http:// ou https://.');
   assert.equal(translatePostError(new Error('violates check constraint "posts_cover_url_check"')), 'A URL da imagem de capa deve começar com http:// ou https://.');
+  assert.equal(translatePostError(new Error('new row violates row-level security policy')), 'Acesso negado pelo banco de dados. Apenas administradores podem salvar notícias.');
+  assert.equal(translatePostError(''), 'Não foi possível salvar a notícia.');
+
   assert.equal(translateCommentError(new Error('Aguarde alguns segundos antes de comentar novamente.')), 'Aguarde 20 segundos antes de enviar outro comentário.');
+  assert.equal(translateCommentError(new Error('violates check constraint "comments_body_check"')), 'O comentário deve ter entre 2 e 1000 caracteres.');
+  assert.equal(translateCommentError(new Error('permission denied for table comments')), 'Você não tem permissão para realizar esta ação. Faça login novamente.');
+  assert.equal(translateCommentError(''), 'Não foi possível concluir a operação nos comentários.');
+
+  assert.equal(translateAuthError(new Error('User already registered')), 'Este e-mail já está cadastrado. Tente fazer login ou recuperar sua senha.');
   assert.equal(translateAuthError(new Error('Invalid login credentials')), 'E-mail ou senha incorretos. Confira os dados e tente novamente.');
+  assert.equal(translateAuthError(new Error('Email not confirmed')), 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada (e a pasta de spam) e clique no link de confirmação.');
+  assert.equal(translateAuthError(new Error('Password should be at least 8 characters')), 'A senha deve ter pelo menos 8 caracteres.');
+  assert.equal(translateAuthError(new Error('over_email_send_rate_limit')), 'Muitas tentativas seguidas ou limite de envio de e-mails atingido. Aguarde alguns minutos e tente novamente.');
+  assert.equal(translateAuthError(new Error('Unable to validate email address: invalid format')), 'Digite um endereço de e-mail válido.');
+  assert.equal(translateAuthError({}), 'Ocorreu um erro inesperado. Tente novamente.');
 });
 
 test('reconcile mantem paridade exata com implementacao de referencia (300x300) e processa 3000x3000 em menos de 3s', () => {
