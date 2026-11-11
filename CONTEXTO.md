@@ -1,42 +1,48 @@
 # Contexto do projeto
 
+- **Data de atualização:** 2026-11-11
 - **Projeto:** AutoContábil Hub (Ferramentas Fiscais Locais + Catálogo de Ferramentas + Portal de Notícias).
 - **Autor e mantenedor:** Yuri David (Yuri Monteiro).
 - **Arquitetura:** Aplicação web estática, modular (ES Modules), 100% client-side para as ferramentas contábeis/fiscais, sem build nem bundler, estilizada com Tailwind CSS via CDN.
 - **Execução local:** `python3 -m http.server 8080` na raiz do repositório.
-- **Testes automatizados:** `npm test` (testes unitários em `tests/hub.test.js` via `node:test`, sem dependências externas) e `python tests/smoke_test.py` (smoke test E2E + guarda de privacidade e codificação UTF-8).
+- **Testes automatizados:** `npm test` (testes unitários em `tests/hub.test.js` via `node:test`, sem dependências externas) e `python tests/smoke_test.py` (smoke test E2E + guarda de privacidade, `CORE_ASSETS` do Service Worker, CSP e codificação UTF-8).
 
-## Estado atual e decisões registradas
+## Decisões
 
-1. **Estrutura e Publicação (Fase 1):**
-   - Todos os arquivos da aplicação residem na raiz (`index.html`, `styles.css`, `README.md`, `js/`), deixando apenas `.vscode/settings.json` na pasta `.vscode/`.
-   - O **Catálogo de Ferramentas** é a tela principal de `index.html` (sem o botão "Abrir App" no cabeçalho), e a barra de ferramentas interna (`#tool-back-bar`) permite alternar entre os módulos com suporte completo a teclado e ARIA (`role="tablist"`, `role="tab"`, `aria-controls`, `tabindex`).
-2. **Utilitários e Lógica (`js/utils.js` — Fase 2):**
-   - `parseMoney`: considera negativo apenas hífen no início (`^\s*-`), no fim (`-\s*$`), parênteses `(100,00)` ou sufixo `D` (débito), evitando transformar strings como `"12-03"` em valores negativos.
-   - `csvCell`: prefixa apóstrofo (`'`) apenas quando o primeiro caractere é `=`, `+`, `-`, `@`, `\t` ou `\r` em células não numéricas, preservando números negativos e textos com hífen interno (`"Pgto Beta - NF 7712"`).
-3. **Conciliador Bancário (`js/conciliadorModule.js` — Fase 3):**
-   - Substituídos cálculos repetidos de `Date` por `dayDiff()` de `js/utils.js`.
-   - Tolerância padrão em `index.html` (`#cb-tol`) ajustada para `2` dias.
-   - Fase de divergência exige `similarity > 0` mesmo quando a diferença é `<= R$ 1,00`.
-   - Detecção de possíveis duplicidades no extrato e no razão (mesma data, mesmo valor e descrição igual/similar), sinalizando `"possível duplicidade"` na coluna `obs` e exibindo contagem/aviso sem remover automaticamente.
-   - `parseOFX`: desduplica transações pelo `FITID` dentro do mesmo arquivo (informando quantas foram ignoradas) e lê `TRNAMT` com ponto decimal padrão (tratando vírgula apenas quando não há ponto).
-4. **Extrator de XML (`js/xmlModule.js` — Fase 4):**
-   - Classificação explícita de `cStat` (`100`/`150` = Autorizada; `101`/`151`/`135` = Cancelada; `110`/`301`/`302` = Denegada), exibindo selo na tabela e no modal e excluindo canceladas/denegadas dos KPIs de faturamento e impostos.
-   - Conferência de totais lendo `vSeg` e `vOutro` (`vProd + vFrete + vSeg + vOutro + vST + vIPI - vDesc` vs `vNF` e soma dos itens vs `vProd`, tolerância `0.05`), gerando aviso `"totais não conferem"`.
-   - Busca de `nProt`, `cStat` e `chNFe` restrita a `protNFe/infProt`, e leitura dos itens restrita a `det`.
-   - CSV exportado inclui as colunas `"Status"` e `"Aviso de conferência"`.
-5. **Organizador Fiscal (`js/organizadorModule.js` — Fase 5):**
-   - Regex `NOISE` enxuta apenas para ruídos reais de arquivo (`final`, `scan`, `whatsapp`, `copia`, `image` etc.), preservando nomes como `"Mar Azul"` e `"Dez Distribuidora"`.
-   - Nome base limitado a 120 caracteres sem extensão (incluindo sufixos de desduplicação `_2`, `_3`).
-   - Progresso exibido no botão `#og-zip` e aviso quando o lote ultrapassa 300 MB.
-6. **Qualidade, Acessibilidade, Testes e CI (Fases 6 e 7):**
-   - Módulo dedicado `js/modal.js` com gerenciamento de foco (focus trap com `Tab`/`Shift+Tab` e devolução do foco ao fechar).
-   - Contêiner `#toasts` com `role="status"` e `aria-live="polite"`.
-   - Nota transparente sobre privacidade e carregamento de bibliotecas visuais via CDN no rodapé e no `README.md`.
-   - **Suíte `tests/hub.test.js` (`node --test`)** e workflow `.github/workflows/test.yml` ativos ao lado de `.github/workflows/static-smoke.yml`.
+1. **Portal Supabase isolado e segurança do banco (`js/portal/` e `sql/`):**
+   - Nenhum script de `js/portal/` nem SDK do Supabase é carregado em `index.html` ou nas páginas das ferramentas locais.
+   - A versão do SDK `@supabase/supabase-js` em `js/portal/supabase.js` é fixada em `2.119.0`.
+   - As funções puras de validação, geração de slug e tradução de erros do portal residem em `js/portal/pure.js` (reexportadas em `admin.js`, `comments.js` e `auth.js`), permitindo que `npm test` rode 100% offline.
+   - Em `public.comments`, usuários `authenticated` possuem `GRANT INSERT (post_id, user_id, body)` restrito às colunas seguras, o trigger `comments_rate_limit()` força `new.created_at := now()` e `new.hidden := false`, e a policy `comments_insert` exige que o post alvo exista e esteja com `status = 'published'`.
+   - Em `public.posts`, constraints `posts_source_url_check` e `posts_cover_url_check` e validações no cliente exigem URLs `http://` ou `https://`.
+2. **Content-Security-Policy (CSP) por perfil de página:**
+   - Páginas de ferramentas locais (`index.html`, `ferramentas.html`, `extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`, `privacidade.html`, `termos.html`, `404.html`) utilizam `connect-src 'self'` (bloqueando conexões de dados externas).
+   - Páginas do portal (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`) utilizam `connect-src 'self' https://trnkzwserimzkftbwuge.supabase.co https://cdn.jsdelivr.net`.
+3. **PWA e Service Worker (`sw.js`):**
+   - `CORE_ASSETS` inclui todos os módulos locais importados pela árvore de `index.html` (incluindo `./js/modal.js`), verificado automaticamente em `tests/hub.test.js` e `tests/smoke_test.py`.
+   - Cache versionado em `autocontabil-shell-v11`.
+4. **Catálogo principal, Modo Guiado e Acessibilidade (`index.html`, `js/app.js`, `js/modal.js`):**
+   - O **Catálogo de Ferramentas** é a tela inicial de `index.html`, com suporte a modo guiado (passo a passo educativo em linguagem simples) e modo contador/compacto.
+   - A barra interna (`#tool-back-bar`), os modais (`js/modal.js` com focus trap) e os toasts (`role="status"`, `aria-live="polite"`) seguem boas práticas de acessibilidade por teclado e leitores de tela.
+5. **Regra única de "nota válida" no Extrator de XML (`js/xmlModule.js`):**
+   - A função `isValidNote(note)` centraliza a regra de validade baseada em `classifyStatus(note?.cStat).validForKpi` (`100` e `150` = válidas; `101`, `151`, `135` = canceladas; `110`, `301`, `302` = denegadas; qualquer outro `cStat` preenchido é tratado como não autorizado para KPIs).
+   - `renderNF`, `computeYearSummary`/`renderYearSummary` e `exportNF` usam exclusivamente `isValidNote(note)` para somar faturamento, impostos e contagens do resumo anual.
+6. **Conciliador Bancário otimizado (`js/conciliadorModule.js`):**
+   - `reconcile` pré-calcula os tokens de descrição uma única vez por item, indexa lançamentos do razão por centavos exatos (`Map`) na fase exata e por sinal + filtro de janela de dias e razão de valor antes de calcular similaridade na fase de divergência.
+   - `findItemDuplicates` agrupa por `date|cents` e é executada uma única vez por conciliação.
+   - Em lotes com mais de 1.000 lançamentos (`extrato + razão`), `runCB` exibe aviso de processamento e cede um tick ao navegador antes de conciliar.
+7. **Formulário de contato seguro quando não configurado (`js/contactModule.js`):**
+   - Enquanto `CONTACT_ENDPOINT` ou `CONTACT_EMAIL` contiverem valores de espaço reservado (`COLOQUE_AQUI`, `SEU_EMAIL`, `EXEMPLO.COM`), o módulo exibe um aviso claro com botão direto para o WhatsApp e omite links `mailto:` inválidos.
 
 ## Pendências
 
 - Configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js`.
 - Rodar `sql/migrations/2026-11-11_hardening.sql` no SQL Editor do Supabase.
+- Publicar no GitHub Pages (ou confirmar que o deploy da branch `main` na raiz `/(root)` está ativo).
 - Migrar o Tailwind Play CDN para CSS compilado e hospedar localmente JSZip, fonte Inter e PDF.js para remover `'unsafe-inline'` e `'unsafe-eval'` do CSP.
+
+## Para depois
+
+- Suporte a **CT-e** e **NFS-e** no Extrator de XML.
+- **Conciliação um-para-muitos (1:N e N:1)** no Conciliador Bancário.
+- **OCR de PDF escaneado** no Organizador Fiscal de Documentos.
