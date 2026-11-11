@@ -70,10 +70,48 @@ def check_privacy_guard(project_root=ROOT):
     for page_name in TOOL_PAGES:
         page_path = project_root / page_name
         assert page_path.is_file(), f"Missing tool page: {page_name}"
+        page_text = page_path.read_text(encoding="utf-8")
+        csp_match = re.search(
+            r'<meta\s+http-equiv=["\']Content-Security-Policy["\']\s+content=["\']([^"\']+)["\']',
+            page_text,
+            re.IGNORECASE,
+        )
+        assert csp_match, f"Missing Content-Security-Policy meta tag in {page_name}"
+        csp_value = csp_match.group(1)
+        assert "connect-src 'self'" in csp_value, f"Expected connect-src 'self' in CSP of {page_name}"
+        assert "supabase" not in csp_value.lower(), f"CSP of {page_name} must not include Supabase domain"
         inspect_file(page_path, page_name)
 
     for js_file in sorted((project_root / "js").glob("*.js")) + sorted((project_root / "js" / "ferramentas").glob("*.js")):
         inspect_file(js_file, str(js_file.relative_to(project_root)))
+
+
+def check_sw_core_assets(project_root=ROOT):
+    sw_text = (project_root / "sw.js").read_text(encoding="utf-8")
+    core_match = re.search(r"const\s+CORE_ASSETS\s*=\s*\[(.*?)\];", sw_text, re.DOTALL)
+    assert core_match, "CORE_ASSETS list not found in sw.js"
+    core_assets = set(re.findall(r"['\"]([^'\"]+)['\"]", core_match.group(1)))
+
+    visited = set()
+
+    def walk_imports(file_path: Path):
+        resolved = file_path.resolve()
+        if resolved in visited or not resolved.is_file():
+            return
+        visited.add(resolved)
+        text = resolved.read_text(encoding="utf-8")
+        for ref in IMPORT_RE.findall(text):
+            if ref.startswith(("http://", "https://", "//")):
+                continue
+            clean_ref = ref.split("?")[0].split("#")[0]
+            if not clean_ref.endswith(".js"):
+                continue
+            target = (resolved.parent / clean_ref).resolve()
+            rel = "./" + target.relative_to(project_root).as_posix()
+            assert rel in core_assets, f"Local module {rel} imported by index.html tree is missing from sw.js CORE_ASSETS"
+            walk_imports(target)
+
+    walk_imports(project_root / "index.html")
 
 
 def check_project_text_encoding(project_root=ROOT):
@@ -104,6 +142,7 @@ class QuietHandler(SimpleHTTPRequestHandler):
 def main():
     check_project_text_encoding()
     check_privacy_guard()
+    check_sw_core_assets()
     from playwright.sync_api import sync_playwright
 
     os.chdir(ROOT)

@@ -39,3 +39,4 @@
 
 - Configurar `CONTACT_ENDPOINT` e `CONTACT_EMAIL` em `js/contactModule.js`.
 - Rodar `sql/migrations/2026-11-11_hardening.sql` no SQL Editor do Supabase.
+- Migrar o Tailwind Play CDN para CSS compilado e hospedar localmente JSZip, fonte Inter e PDF.js para remover `'unsafe-inline'` e `'unsafe-eval'` do CSP.

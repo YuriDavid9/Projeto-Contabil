@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { parseMoney, parseDateAny, csvCell, splitCSV, dayDiff } from '../js/utils.js';
 import { reconcile, parseOFX, parseTxCSV, sim } from '../js/conciliadorModule.js';
@@ -310,4 +313,50 @@ test('reconcile mantem paridade exata com implementacao de referencia (300x300) 
   const elapsedMs = performance.now() - start;
   assert.ok(largeRows.length >= 3000);
   assert.ok(elapsedMs < 3000, `Esperado < 3000ms para 3000x3000, levou ${elapsedMs.toFixed(1)}ms`);
+});
+
+test('sw.js CORE_ASSETS contem todos os modulos locais importados por index.html e CSP das ferramentas isola connect-src', () => {
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const swText = fs.readFileSync(path.join(rootDir, 'sw.js'), 'utf8');
+  const coreMatch = /const\s+CORE_ASSETS\s*=\s*\[([\s\S]*?)\];/.exec(swText);
+  assert.ok(coreMatch, 'CORE_ASSETS deve existir em sw.js');
+  const coreAssets = new Set([...coreMatch[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1]));
+
+  const importRe = /(?:import\s+[^'"]*?from\s+|import\s*\(\s*|<script[^>]+src=["'])\s*['"]?([^'"\s>]+)/gi;
+  const visited = new Set();
+
+  function walk(filePath) {
+    const resolved = path.resolve(filePath);
+    if (visited.has(resolved) || !fs.existsSync(resolved)) return;
+    visited.add(resolved);
+    const content = fs.readFileSync(resolved, 'utf8');
+    for (const match of content.matchAll(importRe)) {
+      const ref = match[1];
+      if (/^(https?:)?\/\//i.test(ref)) continue;
+      const cleanRef = ref.split('?')[0].split('#')[0];
+      if (!cleanRef.endsWith('.js')) continue;
+      const target = path.resolve(path.dirname(resolved), cleanRef);
+      const rel = './' + path.relative(rootDir, target).replace(/\\/g, '/');
+      assert.ok(coreAssets.has(rel), `Modulo local ${rel} ausente de CORE_ASSETS em sw.js`);
+      walk(target);
+    }
+  }
+
+  walk(path.join(rootDir, 'index.html'));
+
+  const toolPages = [
+    'index.html',
+    'ferramentas.html',
+    'extrator-xml-nfe.html',
+    'conciliador-bancario-ofx.html',
+    'organizador-fiscal.html',
+    'validador-cnpj.html'
+  ];
+  for (const page of toolPages) {
+    const html = fs.readFileSync(path.join(rootDir, page), 'utf8');
+    const cspMatch = /<meta\s+http-equiv=["']Content-Security-Policy["']\s+content="([^"]+)"/i.exec(html);
+    assert.ok(cspMatch, `CSP ausente em ${page}`);
+    assert.ok(cspMatch[1].includes("connect-src 'self'"), `connect-src 'self' ausente em ${page}`);
+    assert.equal(/supabase/i.test(cspMatch[1]), false, `CSP de ${page} nao pode conter dominio do Supabase`);
+  }
 });
