@@ -269,6 +269,16 @@ def main():
                     assert "SoftwareApplication" in types, f"Missing SoftwareApplication in {page_file}"
                     assert "FAQPage" in types, f"Missing FAQPage in {page_file}"
 
+                # Testes de servicos.html e pro.html
+                page.goto("http://127.0.0.1:8765/servicos.html", wait_until="domcontentloaded")
+                assert page.locator("h1").is_visible()
+                assert page.locator("#servicos-grid article").count() >= 3
+                assert page.get_by_text("Solicitar orçamento").first.is_visible()
+
+                page.goto("http://127.0.0.1:8765/pro.html", wait_until="domcontentloaded")
+                assert page.locator("h1").is_visible()
+                assert page.locator("#pro-unconfigured-notice").is_visible()
+
                 assert not errors, "Browser errors: " + " | ".join(errors)
             finally:
                 browser.close()

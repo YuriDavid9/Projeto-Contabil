@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Ao configurar CONTACT_ENDPOINT em js/contactModule.js, adicione apenas o domínio do provedor em connect-src (ex.: connect-src 'self' https://formspree.io) -->
+  <meta id="pro-csp" http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>AutoContábil Pro — Lista de Espera (Em Validação) | AutoContábil Hub</title>
+  <meta name="description" content="Lista de espera do AutoContábil Pro (em validação): exportação no layout do seu sistema contábil, regras salvas de conciliação e relatórios personalizados.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/pro.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="AutoContábil Pro — Lista de Espera (Em Validação) | AutoContábil Hub">
+  <meta property="og:description" content="Conheça os recursos planejados do AutoContábil Pro e registre seu interesse na lista de espera.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/pro.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="index.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">🧰 Catálogo de Ferramentas</a>
+        <a href="servicos.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">💼 Serviços</a>
+        <a href="pro.html" aria-current="page" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">🚀 Lista Pro</a>
+        <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+    <!-- Aviso de transparência -->
+    <div class="bg-amber-50 border border-amber-200 text-amber-950 rounded-xl px-4 py-3 text-sm mb-6">
+      <strong>Status atual: em validação, ainda não disponível.</strong> Estamos ouvindo contadores e analistas fiscais antes de desenvolver uma versão Pro por assinatura. Não há nenhuma cobrança nesta página.
+    </div>
+
+    <!-- Cabeçalho -->
+    <section class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-bold mb-3">
+        <span class="bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-md">Em validação • Ainda não disponível</span>
+        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-md">Ferramentas atuais continuam 100% gratuitas</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">AutoContábil Pro — Lista de espera</h1>
+      <p class="mt-3 text-base text-slate-600 leading-relaxed">
+        As ferramentas atuais do AutoContábil Hub continuarão gratuitas e 100% locais no navegador. Estamos avaliando a criação do <strong>AutoContábil Pro</strong> para escritórios de contabilidade e equipes de BPO financeiro que precisam de recursos avançados de produtividade.
+      </p>
+    </section>
+
+    <!-- Funções planejadas -->
+    <section aria-labelledby="planejadas-heading" class="mb-8">
+      <h2 id="planejadas-heading" class="text-xl font-extrabold text-slate-900 mb-4">Funções planejadas (em validação, ainda não disponíveis)</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span class="inline-block text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded mb-2">Planejado • Em validação</span>
+          <h3 class="font-extrabold text-slate-900 text-base">1. Layouts para sistemas contábeis</h3>
+          <p class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Exportação direta nos layouts de importação utilizados por sistemas contábeis populares no Brasil, reduzindo o retrabalho de formatar colunas manualmente.
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span class="inline-block text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded mb-2">Planejado • Em validação</span>
+          <h3 class="font-extrabold text-slate-900 text-base">2. Regras salvas de conciliação</h3>
+          <p class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Histórico de regras de conciliação por cliente com sugestão automática de conta débito/crédito e histórico contábil padronizado a partir da descrição do extrato.
+          </p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <span class="inline-block text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded mb-2">Planejado • Em validação</span>
+          <h3 class="font-extrabold text-slate-900 text-base">3. Lotes maiores e relatórios com sua marca</h3>
+          <p class="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Processamento otimizado para grandes volumes mensais e emissão de relatórios de conferência com o nome e identificação do seu escritório contábil.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Formulário da lista de espera -->
+    <section aria-labelledby="form-pro-heading" class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8">
+      <h2 id="form-pro-heading" class="text-xl font-extrabold text-slate-900">Participe da validação e entre na lista de espera</h2>
+      <p class="mt-1.5 text-sm text-slate-600">
+        Conte o que seria mais útil para o seu escritório. Seus dados são usados exclusivamente para entender a demanda e avisar caso o plano seja lançado.
+      </p>
+
+      <form id="pro-waitlist-form" class="mt-5 space-y-4">
+        <div id="pro-unconfigured-notice" class="hidden rounded-xl border border-amber-200 bg-amber-50 p-5 space-y-3 text-sm text-slate-800">
+          <p class="font-bold text-slate-900">O formulário está em configuração. Fale conosco pelo WhatsApp.</p>
+          <p class="text-xs sm:text-sm text-slate-700">
+            Enquanto o envio automático por formulário não está ativo, você pode registrar seu interesse no AutoContábil Pro ou solicitar uma automação sob medida diretamente pelo WhatsApp:
+          </p>
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <a data-pro-wa href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Lista%20de%20Espera%20AutoCont%C3%A1bil%20Pro%20do%20AutoCont%C3%A1bil%20Hub%20e%20quero%20falar%20sobre%20interesse%20no%20AutoCont%C3%A1bil%20Pro%20(em%20valida%C3%A7%C3%A3o)." target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition">💬 Registrar interesse pelo WhatsApp</a>
+            <a href="servicos.html" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 transition">Precisa para agora? Ver serviços sob medida →</a>
+          </div>
+        </div>
+
+        <div id="pro-form-fields" class="space-y-4">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="block text-sm font-medium text-slate-700">Nome <span class="text-slate-400 font-normal">(opcional)</span>
+              <input id="pro-name" name="name" type="text" autocomplete="name" maxlength="120" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+            </label>
+            <label class="block text-sm font-medium text-slate-700">E-mail <span class="text-rose-600">*</span>
+              <input id="pro-email" name="email" type="email" autocomplete="email" required maxlength="254" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+            </label>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="block text-sm font-medium text-slate-700">Qual sistema contábil você usa? <span class="text-rose-600">*</span>
+              <input id="pro-sistema" name="sistema_contabil" type="text" required maxlength="120" placeholder="Ex.: Domínio, Alterdata, Fortes, Calima, planilha..." class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+            </label>
+            <label class="block text-sm font-medium text-slate-700">Quantos clientes/CNPJs você atende? <span class="text-rose-600">*</span>
+              <select id="pro-clientes" name="quantidade_clientes" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+                <option value="">Selecione uma faixa</option>
+                <option value="1 (apenas minha própria empresa)">1 (apenas minha própria empresa)</option>
+                <option value="2 a 10 clientes/CNPJs">2 a 10 clientes/CNPJs</option>
+                <option value="11 a 50 clientes/CNPJs">11 a 50 clientes/CNPJs</option>
+                <option value="Mais de 50 clientes/CNPJs">Mais de 50 clientes/CNPJs</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="block text-sm font-medium text-slate-700">Qual faixa mensal faria sentido para você? <span class="text-rose-600">*</span>
+            <select id="pro-faixa" name="faixa_mensal" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+              <option value="">Selecione uma faixa de valor</option>
+              <option value="Até R$ 49/mês">Até R$ 49/mês</option>
+              <option value="Entre R$ 50 e R$ 99/mês">Entre R$ 50 e R$ 99/mês</option>
+              <option value="Entre R$ 100 e R$ 199/mês">Entre R$ 100 e R$ 199/mês</option>
+              <option value="Acima de R$ 200/mês (uso em equipe/escritório)">Acima de R$ 200/mês (uso em equipe/escritório)</option>
+              <option value="Prefiro contratar apenas serviço avulso sob medida">Prefiro contratar apenas serviço avulso sob medida</option>
+            </select>
+          </label>
+
+          <label class="flex items-start gap-2 text-sm text-slate-700">
+            <input id="pro-consent" name="consent" type="checkbox" required class="mt-1 rounded border-slate-300 text-indigo-600">
+            <span>Concordo com o envio destes dados para pesquisa de demanda e aviso sobre o AutoContábil Pro, conforme a <a class="font-semibold text-indigo-700 underline" href="privacidade.html">Política de Privacidade</a>.</span>
+          </label>
+
+          <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+            <label for="pro-website">Deixe este campo vazio</label>
+            <input id="pro-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div id="pro-status" class="empty:hidden" aria-live="polite" aria-atomic="true"></div>
+
+          <button id="pro-submit" type="submit" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-sm font-bold text-white transition disabled:opacity-50">Entrar na lista de espera</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Precisa resolver uma demanda imediatamente? Conheça nossos <a href="servicos.html" class="font-semibold text-indigo-700 underline">serviços sob medida</a>.
+    </div>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="font-extrabold text-white text-base">AutoContábil <span class="text-emerald-400">Hub</span></p>
+        <p class="text-slate-400 mt-1">As ferramentas gratuitas processam seus arquivos localmente no navegador. A lista de espera coleta apenas as respostas deste formulário.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Precisa de automação contábil sob medida?</p>
+        <p class="text-slate-400">Rotinas fiscais, integrações, planilhas inteligentes, BPO financeiro e contábil.</p>
+        <a class="inline-block mt-2 text-emerald-400 hover:text-emerald-300 font-semibold underline" href="servicos.html">Ver serviços sob medida →</a>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Yuri David</p>
+        <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Lista%20de%20Espera%20AutoCont%C3%A1bil%20Pro%20do%20AutoCont%C3%A1bil%20Hub%20e%20quero%20falar%20sobre%20interesse%20no%20AutoCont%C3%A1bil%20Pro%20(em%20valida%C3%A7%C3%A3o).">💬 WhatsApp: (83) 98639-8472</a>
+        <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="termos.html">Termos</a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initProWaitlistModule, getEndpointOrigin, CONTACT_ENDPOINT } from './js/contactModule.js';
+
+    const endpointOrigin = getEndpointOrigin(CONTACT_ENDPOINT);
+    const cspMeta = document.getElementById('pro-csp');
+    if (endpointOrigin && cspMeta) {
+      cspMeta.setAttribute(
+        'content',
+        `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' ${endpointOrigin}; base-uri 'self'; form-action 'self'`
+      );
+    }
+
+    initProWaitlistModule();
+  </script>
+</body>
+</html>

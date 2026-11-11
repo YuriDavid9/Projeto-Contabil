@@ -1,11 +1,22 @@
 import { $, esc, toast } from './utils.js';
+import { FAIXAS_PRO, buildWhatsappLink } from './negocio.js';
 
 // Configure these values before enabling contact submissions in production.
 const CONTACT_ENDPOINT = 'COLOQUE_AQUI_O_ENDPOINT';
 const CONTACT_ACCESS_KEY = '';
 const CONTACT_EMAIL = 'SEU_EMAIL@EXEMPLO.COM';
-const WHATSAPP_URL = 'https://wa.me/5583986398472';
+const WHATSAPP_URL = buildWhatsappLink({ origem: 'Formulário de Contato' });
 let lastAttemptAt = 0;
+
+function getEndpointOrigin(endpoint = CONTACT_ENDPOINT) {
+  if (!isContactEndpointConfigured(endpoint, ' placeholder ')) return null;
+  try {
+    const parsed = new URL(String(endpoint).trim());
+    return parsed.origin;
+  } catch {
+    return null;
+  }
+}
 
 function isContactEmailConfigured(email = CONTACT_EMAIL) {
   const value = String(email || '').trim();
@@ -132,4 +143,124 @@ function initContactModule() {
   });
 }
 
-export { initContactModule, isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml };
+function initProWaitlistModule() {
+  const form = $('#pro-waitlist-form');
+  if (!form) return;
+
+  const faixaSelect = $('#pro-faixa');
+  if (faixaSelect && Array.isArray(FAIXAS_PRO)) {
+    faixaSelect.innerHTML = '<option value="">Selecione uma faixa de valor</option>' +
+      FAIXAS_PRO.map((faixa) => `<option value="${esc(faixa)}">${esc(faixa)}</option>`).join('');
+  }
+
+  const proWaUrl = buildWhatsappLink({
+    origem: 'Lista de Espera AutoContábil Pro',
+    servico: 'interesse no AutoContábil Pro (em validação)'
+  });
+
+  if (!isContactEndpointConfigured(CONTACT_ENDPOINT, CONTACT_ACCESS_KEY)) {
+    const notice = $('#pro-unconfigured-notice');
+    if (notice) {
+      notice.classList.remove('hidden');
+      const waLink = notice.querySelector('[data-pro-wa]');
+      if (waLink) waLink.href = proWaUrl;
+    }
+    const fields = $('#pro-form-fields');
+    if (fields) fields.classList.add('hidden');
+    return;
+  }
+
+  const button = $('#pro-submit');
+  const submitLabel = button ? button.textContent : 'Entrar na lista de espera';
+  const honeypot = $('#pro-website');
+  const statusBox = $('#pro-status');
+
+  const showProStatus = (msg, kind = 'info', showAlt = false) => {
+    if (!statusBox) return;
+    const styles = {
+      info: 'bg-sky-50 border-sky-200 text-sky-800',
+      ok: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+      err: 'bg-rose-50 border-rose-200 text-rose-800'
+    };
+    const alternatives = showAlt ? buildContactAlternativesHtml(CONTACT_EMAIL, proWaUrl) : '';
+    statusBox.innerHTML = `<div class="border rounded-xl px-4 py-3 text-sm ${styles[kind] || styles.info}">${esc(msg)}${alternatives}</div>`;
+  };
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+
+    if (honeypot?.value) {
+      showProStatus('Interesse registrado na lista de espera. Obrigado!', 'ok');
+      form.reset();
+      return;
+    }
+
+    const remaining = 30000 - (Date.now() - lastAttemptAt);
+    if (remaining > 0) {
+      showProStatus(`Aguarde ${Math.ceil(remaining / 1000)} segundos antes de tentar novamente.`, 'err', true);
+      return;
+    }
+
+    const data = new FormData(form);
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Enviando…';
+    }
+    showProStatus('Registrando seu interesse…', 'info');
+
+    try {
+      const payload = {
+        tipo: 'lista_espera_pro',
+        name: String(data.get('name') || '').trim(),
+        email: String(data.get('email') || '').trim(),
+        sistema_contabil: String(data.get('sistema_contabil') || '').trim(),
+        quantidade_clientes: String(data.get('quantidade_clientes') || '').trim(),
+        faixa_mensal: String(data.get('faixa_mensal') || '').trim(),
+        consent: data.get('consent') === 'on',
+        botcheck: ''
+      };
+      if (CONTACT_ACCESS_KEY) payload.access_key = CONTACT_ACCESS_KEY;
+      lastAttemptAt = Date.now();
+      const response = await fetch(CONTACT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || 'O serviço não aceitou o envio.');
+      }
+      showProStatus('Cadastro recebido! Avisaremos você por e-mail se o AutoContábil Pro for lançado.', 'ok');
+      form.reset();
+    } catch (error) {
+      console.warn('Pro waitlist submission failed:', error);
+      showProStatus('Não foi possível enviar pelo formulário agora. Registre seu interesse pelo WhatsApp abaixo.', 'err', true);
+    } finally {
+      const wait = Math.max(0, 30000 - (Date.now() - lastAttemptAt));
+      if (button) {
+        if (wait) {
+          button.textContent = `Tente novamente em ${Math.ceil(wait / 1000)}s`;
+          setTimeout(() => {
+            button.disabled = false;
+            button.textContent = submitLabel;
+          }, wait);
+        } else {
+          button.disabled = false;
+          button.textContent = submitLabel;
+        }
+      }
+    }
+  });
+}
+
+export {
+  initContactModule,
+  initProWaitlistModule,
+  isContactConfigured,
+  isContactEmailConfigured,
+  isContactEndpointConfigured,
+  buildContactAlternativesHtml,
+  getEndpointOrigin,
+  CONTACT_ENDPOINT
+};

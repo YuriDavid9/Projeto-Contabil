@@ -432,4 +432,9 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   assert.equal(servicosHtml.includes('mailto:null'), false, 'servicos.html nunca deve exibir e-mail nulo');
   const sitemapXml = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
   assert.ok(sitemapXml.includes('/servicos.html'), 'servicos.html deve constar no sitemap.xml');
+  assert.ok(sitemapXml.includes('/pro.html'), 'pro.html deve constar no sitemap.xml');
+
+  const proHtml = fs.readFileSync(path.join(rootDir, 'pro.html'), 'utf8');
+  assert.ok(proHtml.includes('em validação, ainda não disponível'), 'pro.html deve deixar claro que esta em validacao');
+  assert.ok(proHtml.includes('pro-unconfigured-notice'), 'pro.html deve ter aviso para estado nao configurado');
 });
