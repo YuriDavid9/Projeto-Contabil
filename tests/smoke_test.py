@@ -78,7 +78,20 @@ def check_privacy_guard(project_root=ROOT):
         )
         assert csp_match, f"Missing Content-Security-Policy meta tag in {page_name}"
         csp_value = csp_match.group(1)
-        assert "connect-src 'self'" in csp_value, f"Expected connect-src 'self' in CSP of {page_name}"
+        connect_match = re.search(r"connect-src\s+([^;]+)", csp_value)
+        assert connect_match and connect_match.group(1).strip() == "'self'", (
+            f"Expected connect-src strictly 'self' in CSP of {page_name}, got: {connect_match.group(1) if connect_match else None}"
+        )
+        allowed_csp_hosts = {
+            "cdn.tailwindcss.com",
+            "cdnjs.cloudflare.com",
+            "cdn.jsdelivr.net",
+            "fonts.googleapis.com",
+            "fonts.gstatic.com",
+        }
+        csp_hosts = set(re.findall(r"https://([^\s;/\"']+)", csp_value))
+        unexpected_hosts = csp_hosts - allowed_csp_hosts
+        assert not unexpected_hosts, f"Unexpected external domains in CSP of {page_name}: {unexpected_hosts}"
         assert "supabase" not in csp_value.lower(), f"CSP of {page_name} must not include Supabase domain"
         inspect_file(page_path, page_name)
 

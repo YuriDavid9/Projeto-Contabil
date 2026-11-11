@@ -9,6 +9,7 @@ import { getModo, setModo, modoSalvo } from './modo.js';
 import { ajuda } from './ajuda.js';
 import { AJUDA_GUIADO, TERMOS_GUIADOS } from './glossario.js';
 import { initModal } from './modal.js';
+import { buildWhatsappLink } from './negocio.js';
 
 const TAB_METADATA = {
   catalogo: ['Catálogo de Ferramentas', 'Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.'],
@@ -368,6 +369,13 @@ document.querySelectorAll('#xml-demo, #cb-demo, #og-demo').forEach((button) => {
       button.closest('.mb-4, .bg-white')?.prepend(note);
     }
     if (note) note.hidden = false;
+  });
+});
+
+$$('[data-wa-origem]').forEach((anchor) => {
+  anchor.href = buildWhatsappLink({
+    origem: anchor.dataset.waOrigem,
+    servico: anchor.dataset.waServico
   });
 });
 

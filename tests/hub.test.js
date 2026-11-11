@@ -10,6 +10,7 @@ import { calcDV, buildDemoXML, parseNFe, computeYearSummary } from '../js/xmlMod
 import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml } from '../js/contactModule.js';
 import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
+import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
 
 test('parseMoney interpreta formatos brasileiros, americanos, negativos e preserva hifens internos', () => {
   assert.equal(parseMoney('1.234,56'), 1234.56);
@@ -373,11 +374,53 @@ test('sw.js CORE_ASSETS contem todos os modulos locais importados por index.html
     'organizador-fiscal.html',
     'validador-cnpj.html'
   ];
+  const allowedHosts = new Set([
+    'cdn.tailwindcss.com',
+    'cdnjs.cloudflare.com',
+    'cdn.jsdelivr.net',
+    'fonts.googleapis.com',
+    'fonts.gstatic.com'
+  ]);
   for (const page of toolPages) {
     const html = fs.readFileSync(path.join(rootDir, page), 'utf8');
     const cspMatch = /<meta\s+http-equiv=["']Content-Security-Policy["']\s+content="([^"]+)"/i.exec(html);
     assert.ok(cspMatch, `CSP ausente em ${page}`);
-    assert.ok(cspMatch[1].includes("connect-src 'self'"), `connect-src 'self' ausente em ${page}`);
+    const connectMatch = /connect-src\s+([^;]+)/i.exec(cspMatch[1]);
+    assert.ok(connectMatch, `connect-src ausente em ${page}`);
+    assert.equal(connectMatch[1].trim(), "'self'", `connect-src deve ser estritamente 'self' em ${page}`);
+    for (const hostMatch of cspMatch[1].matchAll(/https:\/\/([^\s;/"']+)/g)) {
+      assert.ok(allowedHosts.has(hostMatch[1]), `Dominio nao autorizado ${hostMatch[1]} no CSP de ${page}`);
+    }
     assert.equal(/supabase/i.test(cspMatch[1]), false, `CSP de ${page} nao pode conter dominio do Supabase`);
   }
+});
+
+test('negocio.js define configuracao sem precos inventados e buildWhatsappLink codifica acentos, espacos e quebras de linha', () => {
+  assert.equal(NEGOCIO.whatsapp, '5583986398472');
+  assert.equal(NEGOCIO.email, null);
+  assert.equal(isNegocioEmailConfigured(NEGOCIO.email), false);
+  assert.equal(isNegocioEmailConfigured('contato@autocontabil.com.br'), true);
+  assert.ok(Array.isArray(SERVICOS) && SERVICOS.length >= 3);
+  assert.ok(Array.isArray(FAIXAS_PRO) && FAIXAS_PRO.length >= 4);
+
+  for (const servico of SERVICOS) {
+    assert.equal(servico.precoAPartirDe, null, `Servico ${servico.slug} deve ter precoAPartirDe null por padrao`);
+    assert.equal(formatPrecoServico(servico.precoAPartirDe), 'Solicitar orçamento');
+  }
+  assert.equal(formatPrecoServico(350), 'A partir de R$ 350,00');
+
+  const linkXml = buildWhatsappLink({
+    origem: 'Extrator de XML',
+    servico: 'consolidação de lotes de XML\nVolume: 300 notas/mês'
+  });
+  assert.ok(linkXml.startsWith('https://wa.me/5583986398472?text='));
+  assert.ok(linkXml.includes('%C3%A1'), 'Deve codificar acentos em UTF-8 percent-encoded');
+  assert.ok(linkXml.includes('%20'), 'Deve codificar espacos como %20');
+  assert.ok(linkXml.includes('%0A'), 'Deve codificar quebra de linha como %0A');
+
+  const decoded = decodeURIComponent(linkXml.split('?text=')[1]);
+  assert.equal(
+    decoded,
+    'Olá Yuri! Vim pelo Extrator de XML do AutoContábil Hub e quero falar sobre consolidação de lotes de XML\nVolume: 300 notas/mês.'
+  );
 });

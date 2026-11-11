@@ -15,6 +15,7 @@ const CORE_ASSETS = [
   './404.html',
   './js/app.js',
   './js/modal.js',
+  './js/negocio.js',
   './js/modo.js',
   './js/glossario.js',
   './js/ajuda.js',

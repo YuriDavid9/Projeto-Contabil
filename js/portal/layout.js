@@ -1,4 +1,5 @@
 import { esc } from '../utils.js';
+import { buildWhatsappLink } from '../negocio.js';
 import { getSessionAndProfile, signOut } from './auth.js';
 
 export async function initPortalLayout(activePage = 'noticias') {
@@ -73,12 +74,13 @@ export async function initPortalLayout(activePage = 'noticias') {
           </div>
           <div>
             <p class="font-semibold text-white mb-1">Yuri David</p>
-            <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20AutoCont%C3%A1bil%20Hub.">💬 WhatsApp: (83) 98639-8472</a>
+            <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="${esc(buildWhatsappLink({ origem: 'Portal de Notícias', servico: 'automação contábil sob medida' }))}">💬 WhatsApp: (83) 98639-8472</a>
             <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
           </div>
         </div>
         <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
           <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+          <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="termos.html">Termos</a>
