@@ -4,6 +4,7 @@ import {
 } from './utils.js';
 import { getModo } from './modo.js';
 import { LIMITE_MEI_ANUAL } from './config.js';
+import { modal } from './modal.js';
 
 const NF = { notas: [], q: '', page: 1, size: 10, model: '', start: '', end: '', cfop: '' };
 
@@ -373,9 +374,9 @@ function showNFModal(key) {
   if (!note) return;
 
   const detailRow = (label, value) => `<div><dt class="text-xs text-slate-500">${esc(label)}</dt><dd class="font-medium break-words">${value}</dd></div>`;
-  const modal = $('#modal');
-  if (!modal) return;
-  window.modal.open(`${note.mod === '65' ? 'NFC-e' : 'NF-e'} nº ${note.nNF} • Série ${note.serie}`, `
+  const modalEl = $('#modal');
+  if (!modalEl) return;
+  modal.open(`${note.mod === '65' ? 'NFC-e' : 'NF-e'} nº ${note.nNF} • Série ${note.serie}`, `
     <dl class="grid sm:grid-cols-2 gap-3 mb-4">
       ${detailRow(getModo() === 'guiado' ? 'Chave de acesso: 44 números que identificam esta nota' : 'Chave de acesso', `<span class="font-mono text-xs">${esc(fmtChave(note.chave))}</span> <button data-act="copy" data-v="${esc(note.chave)}" class="text-indigo-600 text-xs font-semibold ml-1">copiar</button>`)}
       ${detailRow('Emissão', esc(fmtDateTime(note.emissao)))}

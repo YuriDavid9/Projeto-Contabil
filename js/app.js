@@ -8,6 +8,7 @@ import { CATALOGO_FERRAMENTAS, AREAS_FERRAMENTAS } from './ferramentas/catalogo.
 import { getModo, setModo, modoSalvo } from './modo.js';
 import { ajuda } from './ajuda.js';
 import { AJUDA_GUIADO, TERMOS_GUIADOS } from './glossario.js';
+import { initModal } from './modal.js';
 
 const TAB_METADATA = {
   catalogo: ['Catálogo de Ferramentas', 'Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.'],
@@ -236,35 +237,7 @@ function chooseMode(value) {
   renderOG();
 }
 
-const modal = {
-  open(title, html) {
-    const titleEl = $('#modal-title');
-    const bodyEl = $('#modal-body');
-    if (!titleEl || !bodyEl) return;
-    titleEl.textContent = title;
-    bodyEl.innerHTML = html;
-    const modalEl = $('#modal');
-    if (modalEl) {
-      modalEl.classList.remove('hidden');
-      modalEl.setAttribute('aria-hidden', 'false');
-    }
-  },
-  close() {
-    const modalEl = $('#modal');
-    if (modalEl) {
-      modalEl.classList.add('hidden');
-      modalEl.setAttribute('aria-hidden', 'true');
-    }
-  }
-};
-
-window.modal = modal;
-
-const modalButton = $('#modal-close');
-if (modalButton) modalButton.addEventListener('click', modal.close);
-const modalEl = $('#modal');
-if (modalEl) modalEl.addEventListener('click', (event) => { if (event.target.id === 'modal') modal.close(); });
-document.addEventListener('keydown', (event) => { if (event.key === 'Escape') modal.close(); });
+initModal();
 
 $('#modo-guiado')?.addEventListener('click', () => chooseMode('guiado'));
 $('#modo-completo')?.addEventListener('click', () => chooseMode('completo'));
