@@ -1,4 +1,4 @@
-import { $, esc, brl, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, kpi, r2, stamp, downloadCSV, n2, norm, splitCSV, loadSheetJS } from './utils.js';
+import { $, esc, brl, fmtISODate, parseMoney, parseDateAny, dayDiff, readFileText, toast, showMsgs, bindDrop, kpi, r2, stamp, downloadCSV, n2, norm, splitCSV, loadSheetJS } from './utils.js';
 import { getModo } from './modo.js';
 
 const CB = { bank: [], ledger: [], rows: [], manualPairs: [], filter: 'all', seq: 1 };
@@ -40,6 +40,8 @@ function mkTx(date, description, amount, extra = {}) {
 
 function parseOFX(text) {
   const output = [];
+  const seenFitids = new Set();
+  let ignoredDuplicates = 0;
   const getField = (content, tag) => {
     const match = new RegExp(`<${tag}>\\s*([^<\\r\\n]*)`, 'i').exec(content);
     return match ? match[1].trim() : '';
@@ -49,13 +51,23 @@ function parseOFX(text) {
   let match;
   while ((match = pattern.exec(text))) {
     const body = match[1];
+    const fitid = getField(body, 'FITID');
+    if (fitid) {
+      if (seenFitids.has(fitid)) {
+        ignoredDuplicates++;
+        continue;
+      }
+      seenFitids.add(fitid);
+    }
     const date = parseDateAny(getField(body, 'DTPOSTED'));
     const raw = getField(body, 'TRNAMT');
-    const amount = raw.includes(',') ? parseMoney(raw) : parseFloat(raw);
+    // Ponto decimal por padrão do OFX; só trata vírgula se não houver ponto
+    const amount = !raw.includes('.') && raw.includes(',') ? parseMoney(raw) : parseFloat(raw);
     if (!date || Number.isNaN(amount)) continue;
     const desc = [getField(body, 'NAME'), getField(body, 'MEMO')].filter(Boolean).join(' - ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>');
-    output.push(mkTx(date, desc, amount, { fitid: getField(body, 'FITID') }));
+    output.push(mkTx(date, desc, amount, { fitid }));
   }
+  output.ignoredDuplicates = ignoredDuplicates;
   return output;
 }
 
@@ -117,24 +129,56 @@ async function loadTxFile(file, kind) {
   showMsgs('#cb-msgs', []);
   if (kind === 'bank') CB.bank = list; else CB.ledger = list;
   CB.rows = [];
-  if (kind === 'bank') showDuplicateWarnings();
+  showDuplicateWarnings(list.ignoredDuplicates || 0);
   saveCBData();
   renderCB();
   toast(`${list.length} lançamento(s) carregado(s).`, 'ok');
 }
 
-function findBankDuplicates() {
-  const groups = new Map();
-  CB.bank.forEach((item) => {
-    const key = `${item.date}|${item.cents}|${norm(item.desc).toUpperCase().replace(/\s+/g, ' ').trim()}`;
-    groups.set(key, [...(groups.get(key) || []), item]);
-  });
-  return [...groups.values()].filter((group) => group.length > 1);
+function findItemDuplicates(items = []) {
+  const duplicateIds = new Set();
+  const groups = [];
+  const visited = new Set();
+  for (let i = 0; i < items.length; i++) {
+    if (visited.has(i)) continue;
+    const a = items[i];
+    const group = [a];
+    const normA = norm(a.desc).toUpperCase().replace(/\s+/g, ' ').trim();
+    for (let j = i + 1; j < items.length; j++) {
+      const b = items[j];
+      if (a.date !== b.date || a.cents !== b.cents) continue;
+      const normB = norm(b.desc).toUpperCase().replace(/\s+/g, ' ').trim();
+      if (normA === normB || sim(a.desc, b.desc) > 0) {
+        group.push(b);
+        visited.add(j);
+      }
+    }
+    if (group.length > 1) {
+      groups.push(group);
+      group.forEach((item) => duplicateIds.add(item.id));
+    }
+  }
+  return { duplicateIds, groups };
 }
 
-function showDuplicateWarnings() {
-  const duplicates = findBankDuplicates();
-  showMsgs('#cb-msgs', duplicates.map((group) => `Possível duplicado no extrato: ${fmtISODate(group[0].date)} • ${group[0].desc} • ${brl(group[0].amount)} (${group.length} ocorrências).`));
+function findBankDuplicates() {
+  return findItemDuplicates(CB.bank).groups;
+}
+
+function showDuplicateWarnings(ignoredFitidCount = 0) {
+  const bankDups = findItemDuplicates(CB.bank).groups;
+  const ledgerDups = findItemDuplicates(CB.ledger).groups;
+  const messages = [];
+  if (ignoredFitidCount > 0) {
+    messages.push(`${ignoredFitidCount} transação(ões) repetida(s) pelo mesmo FITID foram ignoradas na importação do OFX.`);
+  }
+  bankDups.forEach((group) => {
+    messages.push(`Possível duplicidade no extrato: ${fmtISODate(group[0].date)} • ${group[0].desc} • ${brl(group[0].amount)} (${group.length} ocorrências).`);
+  });
+  ledgerDups.forEach((group) => {
+    messages.push(`Possível duplicidade no razão: ${fmtISODate(group[0].date)} • ${group[0].desc} • ${brl(group[0].amount)} (${group.length} ocorrências).`);
+  });
+  showMsgs('#cb-msgs', messages);
 }
 
 function saveCBData() {
@@ -169,11 +213,18 @@ function suggestEntry(entry) {
 }
 
 function reconcile(bank, ledger, options = {}) {
-  const tol = options.tol ?? 3;
+  const tol = options.tol ?? 2;
   const divDays = options.divDays ?? 10;
   const rows = [];
   const usedBank = new Set();
   const usedLedger = new Set();
+  const { duplicateIds: dupBankIds } = findItemDuplicates(bank);
+  const { duplicateIds: dupLedgerIds } = findItemDuplicates(ledger);
+
+  const withDuplicateNote = (obs, bankItem, ledgerItem) => {
+    const hasDup = (bankItem && dupBankIds.has(bankItem.id)) || (ledgerItem && dupLedgerIds.has(ledgerItem.id));
+    return hasDup ? `${obs} (possível duplicidade)` : obs;
+  };
 
   const assign = (candidates, status, descriptionFn) => {
     candidates.sort((a, b) => b.score - a.score);
@@ -186,7 +237,8 @@ function reconcile(bank, ledger, options = {}) {
         b: candidate.bank,
         l: candidate.ledger,
         diff: candidate.bank.cents - candidate.ledger.cents,
-        obs: descriptionFn(candidate)
+        duplicate: dupBankIds.has(candidate.bank.id) || dupLedgerIds.has(candidate.ledger.id),
+        obs: withDuplicateNote(descriptionFn(candidate), candidate.bank, candidate.ledger)
       });
     }
   };
@@ -195,12 +247,12 @@ function reconcile(bank, ledger, options = {}) {
   for (const bankItem of bank) {
     for (const ledgerItem of ledger) {
       if (bankItem.cents !== ledgerItem.cents) continue;
-      const diffDays = Math.abs(parseDateAny(bankItem.date) && parseDateAny(ledgerItem.date) ? new Date(`${bankItem.date}T00:00:00Z`).getTime() - new Date(`${ledgerItem.date}T00:00:00Z`).getTime() : 0) / 86400000;
+      const diffDays = dayDiff(bankItem.date, ledgerItem.date);
       if (diffDays <= tol) exactMatches.push({ bank: bankItem, ledger: ledgerItem, score: sim(bankItem.desc, ledgerItem.desc) * 10 - diffDays });
     }
   }
   assign(exactMatches, 'ok', (candidate) => {
-    const diffDays = Math.abs(new Date(`${candidate.bank.date}T00:00:00Z`).getTime() - new Date(`${candidate.ledger.date}T00:00:00Z`).getTime()) / 86400000;
+    const diffDays = dayDiff(candidate.bank.date, candidate.ledger.date);
     return diffDays ? `Valor exato; datas com ${diffDays} dia(s) de diferença.` : 'Valor e data exatos.';
   });
 
@@ -209,28 +261,47 @@ function reconcile(bank, ledger, options = {}) {
     if (usedBank.has(bankItem.id)) continue;
     for (const ledgerItem of ledger) {
       if (usedLedger.has(ledgerItem.id) || Math.sign(bankItem.cents) !== Math.sign(ledgerItem.cents)) continue;
-      const diffDays = Math.abs(new Date(`${bankItem.date}T00:00:00Z`).getTime() - new Date(`${ledgerItem.date}T00:00:00Z`).getTime()) / 86400000;
+      const diffDays = dayDiff(bankItem.date, ledgerItem.date);
       const similarity = sim(bankItem.desc, ledgerItem.desc);
       const diff = Math.abs(bankItem.cents - ledgerItem.cents);
       const ratio = diff / Math.max(Math.abs(ledgerItem.cents), 1);
-      if (diffDays <= divDays && ((similarity > 0 && ratio <= 0.25) || diff <= 100)) {
-        divergenceMatches.push({ bank: bankItem, ledger: ledgerItem, score: similarity * 10 - diffDays - ratio * 10 });
+      if (diffDays <= divDays && similarity > 0 && (ratio <= 0.25 || diff <= 100)) {
+        divergenceMatches.push({ bank: bankItem, ledger: ledgerItem, similarity, score: similarity * 10 - diffDays - ratio * 10 });
       }
     }
   }
   assign(divergenceMatches, 'div', (candidate) => {
     const difference = (candidate.bank.cents - candidate.ledger.cents) / 100;
     const magnitude = Math.abs(difference);
-    if (magnitude < 1) return 'Diferença de centavos (arredondamento/digitação).';
-    return candidate.bank.cents > candidate.ledger.cents ? `Extrato maior que o razão: possível juros ou multa de ${brl(magnitude)}.` : `Extrato menor que o razão: possível desconto ou abatimento de ${brl(magnitude)}.`;
+    const lowConf = candidate.similarity === 0 ? ' (baixa confiança — confira manualmente)' : '';
+    if (magnitude < 1) return `Diferença de centavos (arredondamento/digitação).${lowConf}`;
+    return (candidate.bank.cents > candidate.ledger.cents ? `Extrato maior que o razão: possível juros ou multa de ${brl(magnitude)}.` : `Extrato menor que o razão: possível desconto ou abatimento de ${brl(magnitude)}.`) + lowConf;
   });
 
   for (const bankItem of bank) {
-    if (!usedBank.has(bankItem.id)) rows.push({ status: 'pb', b: bankItem, l: null, diff: bankItem.cents, obs: suggestEntry(bankItem) });
+    if (!usedBank.has(bankItem.id)) {
+      rows.push({
+        status: 'pb',
+        b: bankItem,
+        l: null,
+        diff: bankItem.cents,
+        duplicate: dupBankIds.has(bankItem.id),
+        obs: withDuplicateNote(suggestEntry(bankItem), bankItem, null)
+      });
+    }
   }
 
   for (const ledgerItem of ledger) {
-    if (!usedLedger.has(ledgerItem.id)) rows.push({ status: 'pi', b: null, l: ledgerItem, diff: -ledgerItem.cents, obs: 'Lançado no razão e ainda não compensado no extrato (cheque em trânsito, boleto a vencer ou lançamento indevido?).' });
+    if (!usedLedger.has(ledgerItem.id)) {
+      rows.push({
+        status: 'pi',
+        b: null,
+        l: ledgerItem,
+        diff: -ledgerItem.cents,
+        duplicate: dupLedgerIds.has(ledgerItem.id),
+        obs: withDuplicateNote('Lançado no razão e ainda não compensado no extrato (cheque em trânsito, boleto a vencer ou lançamento indevido?).', null, ledgerItem)
+      });
+    }
   }
 
   rows.sort((a, b) => STATUS[a.status].order - STATUS[b.status].order || ((a.b || a.l).date).localeCompare((b.b || b.l).date));
@@ -251,7 +322,8 @@ function cbStats() {
   const pendingBankValue = pendingBank.reduce((total, row) => total + row.diff, 0) / 100;
   const pendingInternalValue = pendingInternal.reduce((total, row) => total + row.l.cents, 0) / 100;
   const manual = byStatus('manual');
-  return { ok, manual, divergence, pendingBank, pendingInternal, bankN: CB.bank.length, ledN: CB.ledger.length, pct: CB.bank.length ? ((ok.length + manual.length) / CB.bank.length) * 100 : 0, audited: audited + manual.reduce((total, row) => total + Math.abs(row.b.cents), 0) / 100, divergenceValue, pendingBankValue, pendingInternalValue, netBank: r2(bankTotal), netLedger: r2(ledgerTotal) };
+  const duplicates = rows.filter((row) => row.duplicate);
+  return { ok, manual, divergence, pendingBank, pendingInternal, duplicates, bankN: CB.bank.length, ledN: CB.ledger.length, pct: CB.bank.length ? ((ok.length + manual.length) / CB.bank.length) * 100 : 0, audited: audited + manual.reduce((total, row) => total + Math.abs(row.b.cents), 0) / 100, divergenceValue, pendingBankValue, pendingInternalValue, netBank: r2(bankTotal), netLedger: r2(ledgerTotal) };
 }
 
 function updateManualControls() {
@@ -326,7 +398,7 @@ function renderCB() {
     <div class="bg-rose-500" style="width:${width(stats.pendingBank.length)}"></div>
     <div class="bg-violet-500" style="width:${width(stats.pendingInternal.length)}"></div>
   </div>
-  <p class="text-xs text-slate-600 mt-2">Saldo líquido do extrato: <b>${brl(stats.netBank)}</b> • do razão: <b>${brl(stats.netLedger)}</b> • diferença: <b>${brl(r2(stats.netBank - stats.netLedger))}</b> (explicada por divergências e pendências abaixo).</p></div>`;
+  <p class="text-xs text-slate-600 mt-2">Saldo líquido do extrato: <b>${brl(stats.netBank)}</b> • do razão: <b>${brl(stats.netLedger)}</b> • diferença: <b>${brl(r2(stats.netBank - stats.netLedger))}</b> • possíveis duplicidades: <b>${stats.duplicates.length}</b>.</p></div>`;
 
   const chip = (key, label, count) => `<button data-act="cb-filter" data-k="${key}" class="px-3 py-1.5 rounded-full text-xs font-semibold border ${CB.filter === key ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-300 hover:bg-slate-100'}">${label} (${count})</button>`;
   $('#cb-filters').innerHTML = [chip('all', 'Todos', CB.rows.length), ...Object.entries(STATUS).map(([key]) => chip(key, statusLabel(key), CB.rows.filter((row) => row.status === key).length))].join('');
@@ -370,6 +442,7 @@ function runCB() {
     .concat(manualRows);
   CB.rows.sort((a, b) => STATUS[a.status].order - STATUS[b.status].order || ((a.b || a.l).date).localeCompare((b.b || b.l).date));
   CB.filter = 'all';
+  showDuplicateWarnings();
   saveCBData();
   renderCB();
   toast('Conciliação concluída.', 'ok');
