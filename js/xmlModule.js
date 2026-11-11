@@ -1,6 +1,6 @@
 import {
-  $, $$, esc, brl, fmtDateTime, fmtDoc, fmtChave, parseMoney, parseDateAny, readFileText, toast, showMsgs,
-  bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, toCSV, loadSheetJS, normalizeCNPJ
+  $, esc, brl, fmtDateTime, fmtDoc, fmtChave, readFileText, toast, showMsgs,
+  bindDrop, kpi, downloadCSV, n2, r2, stamp, xmlEsc, loadSheetJS, normalizeCNPJ
 } from './utils.js';
 import { getModo } from './modo.js';
 import { LIMITE_MEI_ANUAL } from './config.js';

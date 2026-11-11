@@ -1,4 +1,4 @@
-import { $, $$, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV, normalizeCNPJ } from './utils.js';
+import { $, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV, normalizeCNPJ } from './utils.js';
 import { getModo } from './modo.js';
 
 const OG = { docs: [], seq: 1 };

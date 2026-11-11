@@ -55,7 +55,7 @@ export function parseMoney(value) {
   if (typeof value === 'number') return value;
   let text = String(value ?? '').trim();
   if (!text) return NaN;
-  const negative = /^\(.*\)$/.test(text) || /-/.test(text) || /\s[D]$/i.test(text);
+  const negative = /^\(.*\)$/.test(text) || /^\s*-/.test(text) || /-\s*$/.test(text) || /(?:^|\s|\d)[D]$/i.test(text);
   text = text.replace(/[^\d.,]/g, '');
   if (!text) return NaN;
   const lastComma = text.lastIndexOf(',');
