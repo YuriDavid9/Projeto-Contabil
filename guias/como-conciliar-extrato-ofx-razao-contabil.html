@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Como conciliar extrato bancário OFX com o razão contábil | AutoContábil Hub</title>
+  <meta name="description" content="Passo a passo para conciliar extratos bancários OFX ou CSV com os lançamentos do razão contábil, identificar tarifas e divergências localmente no navegador.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/guias/como-conciliar-extrato-ofx-razao-contabil.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="Como conciliar extrato bancário OFX com o razão contábil">
+  <meta property="og:description" content="Aprenda como comparar extrato bancário OFX/CSV e razão contábil para encontrar pendências, tarifas e lançamentos duplicados.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/guias/como-conciliar-extrato-ofx-razao-contabil.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "headline": "Como conciliar extrato bancário OFX com o razão contábil",
+          "author": { "@type": "Person", "name": "Yuri David" },
+          "datePublished": "2026-11-11",
+          "dateModified": "2026-11-11",
+          "inLanguage": "pt-BR",
+          "mainEntityOfPage": "https://yuridavid9.github.io/Projeto-Contabil/guias/como-conciliar-extrato-ofx-razao-contabil.html",
+          "description": "Guia prático para cruzar extratos bancários OFX/CSV com o razão contábil, em conformidade com a ITG 2000 (R1) do CFC."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Por que a conciliação bancária é indispensável na escrituração contábil?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Segundo a ITG 2000 (R1) do Conselho Federal de Contabilidade (CFC), a escrituração contábil deve ser executada com base em documentos de origem externa ou interna que comprovem os fatos contábeis. A conciliação garante que o saldo da conta Bancos no Razão reflita fielmente o extrato bancário."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "O que é o identificador FITID dentro de um arquivo OFX?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No padrão Open Financial Exchange (OFX), o campo FITID dentro de cada bloco STMTTRN é o identificador único da transação atribuído pela instituição financeira, usado para evitar a importação duplicada de um mesmo lançamento."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Guias Práticos Contábeis e Fiscais</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="index.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">← Todos os Guias</a>
+        <a href="../index.html#conciliador" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">⚡ Abrir Conciliador</a>
+        <a href="../servicos.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">💼 Serviços</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+    <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <header class="border-b border-slate-200 pb-5">
+        <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-emerald-700 mb-2">
+          <span class="bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">Guia Contábil e BPO</span>
+          <span class="text-slate-400">•</span>
+          <time datetime="2026-11-11" class="text-slate-500 font-medium">Atualizado em 11/11/2026</time>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Como conciliar extrato bancário OFX com o razão contábil</h1>
+        <p class="mt-2 text-base text-slate-600 leading-relaxed">
+          Entenda o passo a passo para cruzar transações do extrato bancário (OFX ou CSV) com o razão contábil ou controle financeiro, localizando tarifas não lançadas, divergências de juros/multa e duplicidades.
+        </p>
+      </header>
+
+      <section class="space-y-3 text-sm sm:text-base text-slate-700 leading-relaxed">
+        <h2 class="text-xl font-extrabold text-slate-900">1. Base normativa: documentos hábeis e escrituração</h2>
+        <p>
+          De acordo com a norma <strong>ITG 2000 (R1) — Escrituração Contábil</strong>, aprovada pelo Conselho Federal de Contabilidade (CFC), toda escrituração deve ser executada em ordem cronológica e com base em documentos de origem externa ou interna que comprovem os fatos contábeis.
+        </p>
+        <p>
+          Na rotina mensal, o extrato bancário (em formato <code>.ofx</code> ou <code>.csv</code>) é o documento de origem externa utilizado para conferir se todos os recebimentos, pagamentos, tarifas e rendimentos foram devidamente registrados na conta contábil de Bancos Conta Movimento no livro Razão.
+        </p>
+      </section>
+
+      <section class="space-y-3 text-sm sm:text-base text-slate-700 leading-relaxed">
+        <h2 class="text-xl font-extrabold text-slate-900">2. Passo a passo para fazer a conciliação no navegador</h2>
+        <ol class="list-decimal pl-5 space-y-2.5">
+          <li>
+            <strong>Exporte o extrato do banco em OFX ou CSV:</strong> no internet banking da empresa, baixe o extrato do mês em formato <code>.ofx</code> (recomendado por conter tags estruturadas <code>&lt;STMTTRN&gt;</code>, data <code>DTPOSTED</code>, valor <code>TRNAMT</code> e identificador único <code>FITID</code>) ou <code>.csv</code>.
+          </li>
+          <li>
+            <strong>Exporte o razão ou planilha de controle em CSV:</strong> gere um arquivo CSV contendo ao menos as colunas de <em>Data</em>, <em>Descrição/Histórico</em> e <em>Valor</em> (ou colunas separadas de Débito e Crédito).
+          </li>
+          <li>
+            <strong>Abra o <a href="../conciliador-bancario-ofx.html" class="text-indigo-700 font-semibold underline">Conciliador Bancário do AutoContábil Hub</a>:</strong> acesse a <a href="../index.html#conciliador" class="text-indigo-700 font-semibold underline">aba do Conciliador</a> e selecione os dois arquivos. Nenhum dado sai do seu computador.
+          </li>
+          <li>
+            <strong>Defina a tolerância de compensação (em dias):</strong> boletos liquidados no fim de semana ou transferências agendadas podem apresentar diferença de 1 a 2 dias entre a data da baixa no controle interno e a efetivação no extrato.
+          </li>
+          <li>
+            <strong>Analise os 4 grupos gerados pelo cruzamento:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1 text-slate-600 text-sm">
+              <li><strong>Conciliado:</strong> mesmo valor em centavos dentro da tolerância de dias;</li>
+              <li><strong>Divergência de Valor:</strong> datas próximas e descrições com palavras em comum, mas valores diferentes (comum quando há pagamento com juros, multa ou desconto não anotado);</li>
+              <li><strong>Pendência Bancária:</strong> consta no extrato do banco, mas não foi encontrado no razão (ex.: tarifas bancárias, IOF ou PIX sem comprovante enviado);</li>
+              <li><strong>Pendência Interna:</strong> consta no razão/controle, mas não apareceu no extrato do período.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Vincule pares manualmente e exporte o papel de trabalho:</strong> se um lançamento tiver histórico diferente nos dois lados, use o recurso <em>Vincular manualmente</em> e baixe o relatório em CSV ou XLSX colorido por status.
+          </li>
+        </ol>
+      </section>
+
+      <!-- CTA Ferramenta e Serviço -->
+      <section class="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-6 space-y-3">
+        <h2 class="text-lg font-extrabold text-slate-900">Teste o Conciliador gratuito ou peça apoio sob medida</h2>
+        <p class="text-sm text-slate-700">
+          Use a ferramenta gratuita diretamente no navegador ou fale comigo se precisar estruturar uma rotina mensal de conciliação bancária e limpeza de planilhas para o seu escritório ou BPO financeiro.
+        </p>
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <a href="../index.html#conciliador" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition">⚡ Abrir Conciliador Gratuito</a>
+          <a href="../servicos.html" class="rounded-xl border border-indigo-300 bg-white hover:bg-indigo-50 px-4 py-2.5 text-xs sm:text-sm font-semibold text-indigo-800 transition">💼 Conhecer Serviços Sob Medida</a>
+          <a href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Guia%20de%20Concilia%C3%A7%C3%A3o%20Banc%C3%A1ria%20do%20AutoCont%C3%A1bil%20Hub%20e%20quero%20falar%20sobre%20concilia%C3%A7%C3%A3o%20banc%C3%A1ria%20sob%20medida." target="_blank" rel="noopener noreferrer" class="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition">💬 Falar no WhatsApp</a>
+        </div>
+      </section>
+
+      <!-- Fontes oficiais -->
+      <footer class="border-t border-slate-200 pt-5 text-xs text-slate-600 space-y-2">
+        <p class="font-bold text-slate-800">Fontes oficiais consultadas (Verificado em: 11/11/2026):</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>Conselho Federal de Contabilidade (CFC) — <a href="https://cfc.org.br/tecnica/normas-brasileiras-de-contabilidade/nbc-tg-geral/" target="_blank" rel="noopener noreferrer" class="text-indigo-700 underline">ITG 2000 (R1) — Escrituração Contábil (Resolução CFC nº 1.330/2011 e revisão R1)</a>.</li>
+          <li>Planalto — <a href="https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm" target="_blank" rel="noopener noreferrer" class="text-indigo-700 underline">Lei nº 10.406/2002 (Código Civil, arts. 1.179 a 1.195 sobre escrituração)</a>.</li>
+        </ul>
+        <p class="mt-3 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-slate-700">
+          <strong>Aviso importante:</strong> Este guia tem caráter exclusivamente informativo e operacional. A escrituração contábil é atribuição privativa de profissional da contabilidade habilitado no CRC; este material não substitui a orientação do seu contador.
+        </p>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-6 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="../index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="index.html">Guias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../termos.html">Termos</a>
+    </div>
+  </footer>
+</body>
+</html>

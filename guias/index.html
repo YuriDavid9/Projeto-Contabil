@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Guias Práticos Contábeis e Fiscais | AutoContábil Hub</title>
+  <meta name="description" content="Guias práticos passo a passo sobre consolidação de XML de NF-e no Excel, conciliação bancária OFX com o razão contábil e validação do CNPJ alfanumérico.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/guias/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="Guias Práticos Contábeis e Fiscais | AutoContábil Hub">
+  <meta property="og:description" content="Tutoriais operacionais com base em fontes oficiais sobre NF-e, conciliação bancária OFX e CNPJ alfanumérico.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/guias/">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="../index.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">🧰 Catálogo de Ferramentas</a>
+        <a href="index.html" aria-current="page" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📚 Guias</a>
+        <a href="../servicos.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">💼 Serviços</a>
+        <a href="../noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Guias Práticos Contábeis e Fiscais</h1>
+      <p class="mt-2 text-sm sm:text-base text-slate-600 max-w-3xl">
+        Passo a passo técnico e operacional com referências a normas oficiais (CONFAZ, Receita Federal e CFC) para apoiar a conferência mensal no escritório contábil, BPO financeiro ou pequena empresa.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mb-8">
+      <article class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-6 shadow-sm flex flex-col justify-between">
+        <div>
+          <span class="inline-block text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md mb-3">Fiscal • NF-e / NFC-e</span>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-snug">
+            <a href="como-consolidar-xml-nfe-excel.html" class="hover:text-indigo-600 transition">Como consolidar vários XMLs de NF-e em uma planilha Excel</a>
+          </h2>
+          <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+            Como extrair cabeçalho, impostos, itens e CFOP de múltiplos XMLs ou pacotes ZIP, conferir códigos <code>cStat</code> e preservar a guarda exigida pelo Ajuste SINIEF 07/05.
+          </p>
+        </div>
+        <div class="mt-5 pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <a href="como-consolidar-xml-nfe-excel.html" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 px-4 text-xs sm:text-sm transition">Ler guia completo →</a>
+          <a href="../index.html#xml" class="w-full text-center border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl py-2 px-3 text-xs transition">Abrir Extrator de XML</a>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-6 shadow-sm flex flex-col justify-between">
+        <div>
+          <span class="inline-block text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-md mb-3">Contábil • BPO</span>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-snug">
+            <a href="como-conciliar-extrato-ofx-razao-contabil.html" class="hover:text-indigo-600 transition">Como conciliar extrato bancário OFX com o razão contábil</a>
+          </h2>
+          <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+            Como cruzar arquivos OFX e CSV com o razão contábil sob a ótica da ITG 2000 (R1) do CFC, identificar tarifas, divergências e gerar o papel de trabalho.
+          </p>
+        </div>
+        <div class="mt-5 pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <a href="como-conciliar-extrato-ofx-razao-contabil.html" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 px-4 text-xs sm:text-sm transition">Ler guia completo →</a>
+          <a href="../index.html#conciliador" class="w-full text-center border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl py-2 px-3 text-xs transition">Abrir Conciliador Bancário</a>
+        </div>
+      </article>
+
+      <article class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-6 shadow-sm flex flex-col justify-between">
+        <div>
+          <span class="inline-block text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md mb-3">Cadastro • Receita Federal</span>
+          <h2 class="text-lg font-extrabold text-slate-900 leading-snug">
+            <a href="cnpj-alfanumerico-o-que-muda-como-validar.html" class="hover:text-indigo-600 transition">CNPJ alfanumérico: o que muda e como validar</a>
+          </h2>
+          <p class="mt-2 text-sm text-slate-600 leading-relaxed">
+            O que diz a Instrução Normativa RFB nº 2.229/2024, como funciona o cálculo do dígito verificador por código ASCII e como validar cadastros sem quebrar fórmulas.
+          </p>
+        </div>
+        <div class="mt-5 pt-3 border-t border-slate-100 flex flex-col gap-2">
+          <a href="cnpj-alfanumerico-o-que-muda-como-validar.html" class="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 px-4 text-xs sm:text-sm transition">Ler guia completo →</a>
+          <a href="../index.html#utilitarios" class="w-full text-center border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl py-2 px-3 text-xs transition">Abrir Validador de CNPJ</a>
+        </div>
+      </article>
+    </div>
+
+    <section class="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-900">Precisa automatizar alguma dessas rotinas no seu escritório?</h2>
+        <p class="text-sm text-slate-700 mt-1">Desenvolvo planilhas inteligentes, consolidações de XML e conciliações sob medida para a sua operação.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 shrink-0">
+        <a href="../servicos.html" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition">Conhecer serviços sob medida →</a>
+        <a href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pela%20P%C3%A1gina%20de%20Guias%20do%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20servi%C3%A7os%20sob%20medida." target="_blank" rel="noopener noreferrer" class="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition">💬 WhatsApp</a>
+      </div>
+    </section>
+
+    <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Conteúdo informativo. <strong>Não substitui a orientação do seu contador</strong> nem a consulta à legislação oficial.
+    </div>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-6 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="../index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="index.html">Guias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="../termos.html">Termos</a>
+    </div>
+  </footer>
+</body>
+</html>

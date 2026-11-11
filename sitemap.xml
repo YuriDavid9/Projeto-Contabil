@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/ferramentas.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/servicos.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/pro.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/noticias.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/extrator-xml-nfe.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/conciliador-bancario-ofx.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/organizador-fiscal.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/validador-cnpj.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/privacidade.html</loc></url>
-  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/termos.html</loc></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/ferramentas.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/servicos.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/pro.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/noticias.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/extrator-xml-nfe.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/conciliador-bancario-ofx.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/organizador-fiscal.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/validador-cnpj.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/guias/</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/guias/como-consolidar-xml-nfe-excel.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/guias/como-conciliar-extrato-ofx-razao-contabil.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/guias/cnpj-alfanumerico-o-que-muda-como-validar.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/privacidade.html</loc><lastmod>2026-11-11</lastmod></url>
+  <url><loc>https://yuridavid9.github.io/Projeto-Contabil/termos.html</loc><lastmod>2026-11-11</lastmod></url>
 </urlset>

@@ -6,7 +6,7 @@
   <!-- O Tailwind Play CDN exige 'unsafe-inline' e 'unsafe-eval' em script-src; connect-src 'self' garante que nenhum arquivo saia do navegador -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; worker-src 'self' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; base-uri 'self'; form-action 'self'">
   <title>Catálogo de Ferramentas | AutoContábil Hub</title>
-  <meta id="meta-description" name="description" content="Catálogo de ferramentas contábeis, fiscais e financeiras gratuitas com processamento 100% local no navegador.">
+  <meta id="meta-description" name="description" content="Ferramentas contábeis e fiscais gratuitas no navegador: extrator de XML NF-e e NFC-e para Excel, conciliador bancário OFX/CSV, organizador fiscal e validador de CNPJ alfanumérico.">
   <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AutoContábil Hub">
@@ -61,6 +61,7 @@
       </a>
       <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
         <a href="#catalogo" id="tab-catalogo" data-go="catalogo" aria-current="page" class="bg-indigo-600 text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">🧰 Catálogo de Ferramentas</a>
+        <a href="guias/index.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📚 Guias</a>
         <a href="servicos.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">💼 Serviços</a>
         <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
       </nav>
@@ -110,7 +111,24 @@
         <button id="btn-limpar-catalogo" type="button" class="mt-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl px-4 py-2 text-xs transition">Mostrar todas as ferramentas</button>
       </div>
 
-      <div id="catalogo-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite"></div>
+      <div id="catalogo-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite">
+        <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-slate-900"><a href="extrator-xml-nfe.html">Extrator de XML (NF-e/NFC-e)</a></h2>
+          <p class="text-sm text-slate-600 mt-2">Extraia e consolide dados de notas fiscais eletrônicas (modelos 55 e 65), valide chaves de 44 dígitos, filtre por CFOP e exporte para CSV ou Excel.</p>
+        </article>
+        <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-slate-900"><a href="conciliador-bancario-ofx.html">Conciliador Bancário (OFX/CSV)</a></h2>
+          <p class="text-sm text-slate-600 mt-2">Compare extratos bancários OFX ou CSV com os lançamentos do razão contábil, identifique divergências e vincule pares manualmente.</p>
+        </article>
+        <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-slate-900"><a href="organizador-fiscal.html">Organizador Fiscal de Documentos</a></h2>
+          <p class="text-sm text-slate-600 mt-2">Padronize nomes de arquivos, organize documentos por competência e gere um pacote ZIP estruturado com manifesto De/Para.</p>
+        </article>
+        <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 class="text-lg font-extrabold text-slate-900"><a href="validador-cnpj.html">Validador de CNPJ, CPF e Chave NF-e</a></h2>
+          <p class="text-sm text-slate-600 mt-2">Verifique os dígitos verificadores de CNPJ (numérico e alfanumérico), CPF e chaves de 44 dígitos de NF-e/NFC-e.</p>
+        </article>
+      </div>
 
       <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
         Conteúdo e ferramentas de caráter informativo e de apoio operacional. <strong>Não substitui a orientação do seu contador</strong> nem a conferência na legislação oficial.
@@ -505,7 +523,9 @@
     </div>
     <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
       <a class="hover:text-white underline" href="#catalogo" data-go="catalogo">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="guias/index.html">Guias</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="#contato" data-go="contato">Contato</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>

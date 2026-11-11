@@ -26,6 +26,10 @@ TOOL_PAGES = [
     "conciliador-bancario-ofx.html",
     "organizador-fiscal.html",
     "validador-cnpj.html",
+    "guias/index.html",
+    "guias/como-consolidar-xml-nfe-excel.html",
+    "guias/como-conciliar-extrato-ofx-razao-contabil.html",
+    "guias/cnpj-alfanumerico-o-que-muda-como-validar.html",
 ]
 DEDICATED_TOOL_SPECS = [
     ("extrator-xml-nfe.html", "index.html#xml"),
@@ -278,6 +282,17 @@ def main():
                 page.goto("http://127.0.0.1:8765/pro.html", wait_until="domcontentloaded")
                 assert page.locator("h1").is_visible()
                 assert page.locator("#pro-unconfigured-notice").is_visible()
+
+                # Testes dos guias estáticos
+                for guide_path in [
+                    "guias/index.html",
+                    "guias/como-consolidar-xml-nfe-excel.html",
+                    "guias/como-conciliar-extrato-ofx-razao-contabil.html",
+                    "guias/cnpj-alfanumerico-o-que-muda-como-validar.html",
+                ]:
+                    page.goto(f"http://127.0.0.1:8765/{guide_path}", wait_until="domcontentloaded")
+                    assert page.locator("h1").is_visible()
+                    assert page.get_by_text("Não substitui a orientação do seu contador").first.is_visible()
 
                 assert not errors, "Browser errors: " + " | ".join(errors)
             finally:

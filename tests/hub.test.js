@@ -373,7 +373,11 @@ test('sw.js CORE_ASSETS contem todos os modulos locais importados por index.html
     'extrator-xml-nfe.html',
     'conciliador-bancario-ofx.html',
     'organizador-fiscal.html',
-    'validador-cnpj.html'
+    'validador-cnpj.html',
+    'guias/index.html',
+    'guias/como-consolidar-xml-nfe-excel.html',
+    'guias/como-conciliar-extrato-ofx-razao-contabil.html',
+    'guias/cnpj-alfanumerico-o-que-muda-como-validar.html'
   ];
   const allowedHosts = new Set([
     'cdn.tailwindcss.com',
@@ -437,4 +441,26 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   const proHtml = fs.readFileSync(path.join(rootDir, 'pro.html'), 'utf8');
   assert.ok(proHtml.includes('em validação, ainda não disponível'), 'pro.html deve deixar claro que esta em validacao');
   assert.ok(proHtml.includes('pro-unconfigured-notice'), 'pro.html deve ter aviso para estado nao configurado');
+
+  const guideFiles = [
+    'guias/como-consolidar-xml-nfe-excel.html',
+    'guias/como-conciliar-extrato-ofx-razao-contabil.html',
+    'guias/cnpj-alfanumerico-o-que-muda-como-validar.html'
+  ];
+  const swText = fs.readFileSync(path.join(rootDir, 'sw.js'), 'utf8');
+  assert.ok(swText.includes('./servicos.html'));
+  assert.ok(swText.includes('./pro.html'));
+  assert.ok(swText.includes('./guias/index.html'));
+  for (const guide of guideFiles) {
+    assert.ok(sitemapXml.includes(`/${guide}`), `${guide} deve constar no sitemap.xml`);
+    assert.ok(swText.includes(`./${guide}`), `${guide} deve constar em CORE_ASSETS do sw.js`);
+    const gHtml = fs.readFileSync(path.join(rootDir, guide), 'utf8');
+    assert.ok(gHtml.includes('Fontes oficiais consultadas (Verificado em: 11/11/2026)'), `${guide} deve citar fontes oficiais com data de verificacao`);
+    assert.ok(gHtml.includes('"@type": "Article"'), `${guide} deve ter JSON-LD Article`);
+    assert.ok(gHtml.includes('../servicos.html'), `${guide} deve ter link para servicos.html`);
+  }
+
+  const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
+  assert.ok(indexHtml.includes('href="extrator-xml-nfe.html"'), 'index.html deve ter link estatico para extrator-xml-nfe.html');
+  assert.ok(indexHtml.includes('href="conciliador-bancario-ofx.html"'), 'index.html deve ter link estatico para conciliador-bancario-ofx.html');
 });
