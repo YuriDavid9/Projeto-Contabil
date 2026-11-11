@@ -14,10 +14,11 @@ Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e fi
 - `js/xmlModule.js` — **Extrator de XML (NF-e/NFC-e):** importa XMLs e pacotes ZIP, valida chave de 44 dígitos, protocolo (`cStat`) e conferência de totais, filtra dados e exporta CSV/XLSX. Inclui botão **"Carregar Lote de Demonstração"**.
 - `js/conciliadorModule.js` — **Conciliador Bancário:** concilia extratos OFX/CSV com o razão contábil por tolerância de dias e similaridade, detecta possíveis duplicidades e permite vínculo manual. Inclui botão **"Simulação"**.
 - `js/organizadorModule.js` — **Organizador Fiscal:** padroniza nomes de arquivos fiscais, extrai metadados de XML/PDF e gera pacote ZIP estruturado com árvore de pastas. Inclui botão **"Carregar exemplos"**.
+- `js/modal.js` controla abertura, fechamento, foco e armadilha de teclado (`Tab`) do modal de inspeção.
 - `js/utilitiesModule.js` e `js/contactModule.js` fornecem validadores (CNPJ alfanumérico, CPF, chave NF-e), conversores OFX/CSV e formulário de contato.
 - `js/ferramentas/catalogo.js` centraliza os itens do catálogo e links para as páginas explicativas (`extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`).
 
-Não há etapa de build nem bundler. Tailwind CSS, JSZip e fonte Inter são carregados via CDN; SheetJS e PDF.js são carregados sob demanda.
+Não há etapa de build nem bundler. Seus arquivos não são enviados; as bibliotecas de interface são carregadas de CDN (Tailwind CSS, JSZip e fonte Inter; SheetJS e PDF.js sob demanda).
 
 ## Executar localmente
 
@@ -30,6 +31,20 @@ python3 -m http.server 8080
 Abra no navegador:
 - http://localhost:8080 — Catálogo de Ferramentas e suíte principal (teste cada módulo clicando em **"Carregar Lote de Demonstração"**, **"Simulação"** e **"Carregar exemplos"**);
 - http://localhost:8080/noticias.html — Portal de Notícias.
+
+## Testes automatizados
+
+Para rodar os testes unitários das funções puras e módulos (Node.js nativo, sem dependências externas):
+
+```powershell
+npm test
+```
+
+Para rodar o teste de fumaça E2E e a guarda de privacidade/codificação:
+
+```powershell
+python tests/smoke_test.py
+```
 
 ## Publicação
 
