@@ -365,6 +365,27 @@ test('sw.js CORE_ASSETS contem todos os modulos locais importados por index.html
   }
 
   walk(path.join(rootDir, 'index.html'));
+  walk(path.join(rootDir, 'contato.html'));
+  walk(path.join(rootDir, 'pro.html'));
+
+  const strictToolPages = [
+    'index.html',
+    'ferramentas.html',
+    'extrator-xml-nfe.html',
+    'conciliador-bancario-ofx.html',
+    'organizador-fiscal.html',
+    'validador-cnpj.html'
+  ];
+
+  for (const page of strictToolPages) {
+    const html = fs.readFileSync(path.join(rootDir, page), 'utf8');
+    const forms = [...html.matchAll(/<form\b([^>]*)>/gi)];
+    for (const formMatch of forms) {
+      const attrs = formMatch[1] || '';
+      const isLocalLedgerForm = page === 'index.html' && /\bid=["']cb-led-form["']/i.test(attrs) && !/\baction=/i.test(attrs);
+      assert.ok(isLocalLedgerForm, `Pagina de ferramenta ${page} nao pode conter <form de envio externo (encontrado: <form${attrs}>)`);
+    }
+  }
 
   const toolPages = [
     'index.html',
@@ -463,4 +484,53 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
   assert.ok(indexHtml.includes('href="extrator-xml-nfe.html"'), 'index.html deve ter link estatico para extrator-xml-nfe.html');
   assert.ok(indexHtml.includes('href="conciliador-bancario-ofx.html"'), 'index.html deve ter link estatico para conciliador-bancario-ofx.html');
+});
+
+test('contato.html e pro.html possuem CSP estatico e nenhum arquivo altera meta CSP via JavaScript', () => {
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const sitemapXml = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
+  const swText = fs.readFileSync(path.join(rootDir, 'sw.js'), 'utf8');
+
+  assert.ok(sitemapXml.includes('/contato.html'), 'contato.html deve constar no sitemap.xml');
+  assert.ok(swText.includes('./contato.html'), 'contato.html deve constar em CORE_ASSETS do sw.js');
+
+  for (const formPage of ['contato.html', 'pro.html']) {
+    const html = fs.readFileSync(path.join(rootDir, formPage), 'utf8');
+    assert.ok(
+      html.includes("Para ativar o formulário, troque connect-src 'self' por connect-src 'self' https://SEU-PROVEDOR"),
+      `${formPage} deve ter comentario explicando como liberar o provedor no connect-src estatico`
+    );
+    const cspMatch = /<meta\s+http-equiv=["']Content-Security-Policy["']\s+content="([^"]+)"/i.exec(html);
+    assert.ok(cspMatch, `CSP estatico ausente em ${formPage}`);
+    const connectMatch = /connect-src\s+([^;]+)/i.exec(cspMatch[1]);
+    assert.ok(connectMatch, `connect-src ausente em ${formPage}`);
+    assert.equal(connectMatch[1].trim(), "'self'", `connect-src padrao deve ser 'self' em ${formPage}`);
+  }
+
+  const allFilesToCheck = [];
+  function collectFiles(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'tests') continue;
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        collectFiles(fullPath);
+      } else if (entry.name.endsWith('.html') || entry.name.endsWith('.js')) {
+        allFilesToCheck.push(fullPath);
+      }
+    }
+  }
+  collectFiles(rootDir);
+
+  for (const filePath of allFilesToCheck) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const rel = path.relative(rootDir, filePath);
+    assert.equal(
+      /pro-csp|getEndpointOrigin/i.test(content),
+      false,
+      `${rel} nao deve conter alteracao dinamica de meta CSP (pro-csp / getEndpointOrigin)`
+    );
+    const altersCspMeta = /Content-Security-Policy[\s\S]{0,200}setAttribute\s*\(\s*['"]content['"]/i.test(content)
+      || /cspMeta\s*\.\s*setAttribute\s*\(\s*['"]content['"]/i.test(content);
+    assert.equal(altersCspMeta, false, `${rel} nao deve alterar meta CSP em tempo de execucao via setAttribute('content')`);
+  }
 });

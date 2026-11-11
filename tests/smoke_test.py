@@ -130,6 +130,8 @@ def check_sw_core_assets(project_root=ROOT):
             walk_imports(target)
 
     walk_imports(project_root / "index.html")
+    walk_imports(project_root / "contato.html")
+    walk_imports(project_root / "pro.html")
 
 
 def check_project_text_encoding(project_root=ROOT):
@@ -245,9 +247,15 @@ def main():
                 assert page.locator("#utilities-root section").count() == 4
                 assert page.title() == "AutoContábil Hub | Utilitários"
 
-                # Abrir Contato pelo rodapé
-                page.locator('footer [data-go="contato"]').click()
+                # Abrir aba Contato no index.html e verificar link para contato.html
+                page.locator("#tab-contato").click()
                 assert page.locator("#panel-contato").is_visible()
+                assert page.locator('#panel-contato a[href="contato.html"]').is_visible()
+                assert page.locator("#panel-contato form").count() == 0
+
+                # Testar contato.html dedicado
+                page.goto("http://127.0.0.1:8765/contato.html", wait_until="domcontentloaded")
+                assert page.locator("h1").is_visible()
                 assert page.locator("#contact-form").is_visible()
 
                 # Testes de ferramentas.html (compatibilidade sem botão Abrir App)

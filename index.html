@@ -451,42 +451,17 @@
     <section id="panel-contato" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-contato" tabindex="-1" hidden>
       <div class="mb-4">
         <h2 id="contato" class="text-2xl font-extrabold text-slate-900">Contato</h2>
-        <p class="text-slate-500 text-sm">Envie uma mensagem para falar sobre o AutoContábil Hub.</p>
+        <p class="text-slate-500 text-sm">Fale com o desenvolvedor do AutoContábil Hub.</p>
       </div>
-      <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">O restante do site processa tudo no seu navegador. Apenas esta mensagem de contato é enviada, por um serviço de formulário, para o e-mail do desenvolvedor.</div>
-      <form id="contact-form" class="max-w-3xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
-        <div class="grid gap-4 sm:grid-cols-2">
-          <label class="block text-sm font-medium text-slate-700">Nome
-            <input id="contact-name" name="name" type="text" autocomplete="name" required maxlength="120" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
-          </label>
-          <label class="block text-sm font-medium text-slate-700">E-mail
-            <input id="contact-email" name="email" type="email" autocomplete="email" required maxlength="254" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
-          </label>
+      <div class="max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
+        <p class="text-sm text-slate-700 leading-relaxed">
+          Para preservar a garantia de privacidade de que nenhum dado sai desta página das ferramentas, o formulário de contato fica em uma página separada. Você também pode falar diretamente pelo WhatsApp:
+        </p>
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <a data-wa-origem="Aba de contato" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Aba%20de%20contato%20do%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20servi%C3%A7os%20sob%20medida." target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition">💬 Falar no WhatsApp</a>
+          <a href="contato.html" class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-300 bg-indigo-50/70 hover:bg-indigo-100 px-4 py-2.5 text-sm font-semibold text-indigo-800 transition">Abrir página de contato →</a>
         </div>
-        <label class="block text-sm font-medium text-slate-700">Assunto
-          <select id="contact-subject" name="subject" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
-            <option value="">Selecione um assunto</option>
-            <option>Dúvida</option>
-            <option>Correção/bug</option>
-            <option>Sugestão/feedback</option>
-            <option>Contratar serviço</option>
-            <option>Outro</option>
-          </select>
-        </label>
-        <label class="block text-sm font-medium text-slate-700">Mensagem
-          <textarea id="contact-message" name="message" rows="6" required minlength="10" maxlength="5000" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"></textarea>
-        </label>
-        <label class="flex items-start gap-2 text-sm text-slate-700">
-          <input id="contact-consent" name="consent" type="checkbox" required class="mt-1 rounded border-slate-300 text-indigo-600">
-          <span>Concordo em enviar estes dados para contato, conforme a <a class="font-semibold text-indigo-700 underline" href="privacidade.html">Política de Privacidade</a>.</span>
-        </label>
-        <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-          <label for="contact-website">Deixe este campo vazio</label>
-          <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
-        </div>
-        <div id="contact-status" class="empty:hidden" aria-live="polite" aria-atomic="true"></div>
-        <button id="contact-submit" type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Enviar mensagem</button>
-      </form>
+      </div>
     </section>
     <section id="panel-utilitarios" class="tab-panel fade-in hidden" role="tabpanel" aria-labelledby="tab-utilitarios" tabindex="-1" hidden>
       <div class="mb-4"><h2 class="text-2xl font-extrabold text-slate-900">Utilitários</h2><p class="text-slate-500 text-sm">Validações e conversões executadas neste navegador.</p></div>
@@ -527,7 +502,7 @@
       <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
-      <a class="hover:text-white underline" href="#contato" data-go="contato">Contato</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="contato.html">Contato</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="termos.html">Termos</a>
     </div>

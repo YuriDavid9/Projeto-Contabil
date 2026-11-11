@@ -8,16 +8,6 @@ const CONTACT_EMAIL = 'SEU_EMAIL@EXEMPLO.COM';
 const WHATSAPP_URL = buildWhatsappLink({ origem: 'Formulário de Contato' });
 let lastAttemptAt = 0;
 
-function getEndpointOrigin(endpoint = CONTACT_ENDPOINT) {
-  if (!isContactEndpointConfigured(endpoint, ' placeholder ')) return null;
-  try {
-    const parsed = new URL(String(endpoint).trim());
-    return parsed.origin;
-  } catch {
-    return null;
-  }
-}
-
 function isContactEmailConfigured(email = CONTACT_EMAIL) {
   const value = String(email || '').trim();
   if (!value || !value.includes('@')) return false;
@@ -261,6 +251,5 @@ export {
   isContactEmailConfigured,
   isContactEndpointConfigured,
   buildContactAlternativesHtml,
-  getEndpointOrigin,
   CONTACT_ENDPOINT
 };

@@ -82,6 +82,7 @@ export async function initPortalLayout(activePage = 'noticias') {
           <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+          <a class="hover:text-white underline" href="contato.html">Contato</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="termos.html">Termos</a>
         </div>

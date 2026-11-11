@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Para ativar o formulário, troque connect-src 'self' por connect-src 'self' https://SEU-PROVEDOR (ex.: https://formspree.io ou https://api.web3forms.com) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+  <title>Contato | AutoContábil Hub</title>
+  <meta name="description" content="Entre em contato com Yuri David sobre o AutoContábil Hub, dúvidas técnicas, sugestões ou contratação de serviços de automação contábil sob medida.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/contato.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub">
+  <meta property="og:title" content="Contato | AutoContábil Hub">
+  <meta property="og:description" content="Fale com o desenvolvedor do AutoContábil Hub pelo WhatsApp ou formulário de contato.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/contato.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 grid place-items-center font-extrabold text-lg shadow">AC</div>
+        <div>
+          <span class="block text-lg font-extrabold leading-tight tracking-tight">AutoContábil <span class="text-emerald-400">Hub</span></span>
+          <span class="hidden md:block text-[11px] text-slate-400 leading-tight">Suíte Web de Produtividade Contábil, Fiscal e Financeira</span>
+        </div>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação principal">
+        <a href="index.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">🧰 Catálogo de Ferramentas</a>
+        <a href="guias/index.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📚 Guias</a>
+        <a href="servicos.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">💼 Serviços</a>
+        <a href="noticias.html" class="text-slate-200 hover:bg-slate-700/70 hover:text-white px-3.5 py-2 rounded-lg text-xs lg:text-sm font-semibold transition">📰 Notícias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+    <nav aria-label="Breadcrumb" class="text-xs text-slate-500 mb-4">
+      <ol class="flex flex-wrap items-center gap-1.5">
+        <li><a href="index.html" class="hover:text-indigo-600 underline">Início</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="text-slate-700 font-semibold" aria-current="page">Contato</li>
+      </ol>
+    </nav>
+
+    <div class="mb-4">
+      <h1 id="contato" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Contato</h1>
+      <p class="text-slate-600 text-sm sm:text-base mt-1">Envie uma mensagem para falar sobre o AutoContábil Hub, tirar dúvidas ou solicitar serviços sob medida.</p>
+    </div>
+
+    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      As ferramentas do AutoContábil Hub processam seus arquivos 100% no seu navegador. Esta página de contato é isolada das ferramentas: apenas os dados preenchidos abaixo são enviados quando o formulário está ativo.
+    </div>
+
+    <form id="contact-form" class="max-w-3xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block text-sm font-medium text-slate-700">Nome
+          <input id="contact-name" name="name" type="text" autocomplete="name" required maxlength="120" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+        </label>
+        <label class="block text-sm font-medium text-slate-700">E-mail
+          <input id="contact-email" name="email" type="email" autocomplete="email" required maxlength="254" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+        </label>
+      </div>
+      <label class="block text-sm font-medium text-slate-700">Assunto
+        <select id="contact-subject" name="subject" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+          <option value="">Selecione um assunto</option>
+          <option>Dúvida</option>
+          <option>Correção/bug</option>
+          <option>Sugestão/feedback</option>
+          <option>Contratar serviço</option>
+          <option>Outro</option>
+        </select>
+      </label>
+      <label class="block text-sm font-medium text-slate-700">Mensagem
+        <textarea id="contact-message" name="message" rows="6" required minlength="10" maxlength="5000" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"></textarea>
+      </label>
+      <label class="flex items-start gap-2 text-sm text-slate-700">
+        <input id="contact-consent" name="consent" type="checkbox" required class="mt-1 rounded border-slate-300 text-indigo-600">
+        <span>Concordo em enviar estes dados para contato, conforme a <a class="font-semibold text-indigo-700 underline" href="privacidade.html">Política de Privacidade</a>.</span>
+      </label>
+      <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+        <label for="contact-website">Deixe este campo vazio</label>
+        <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <div id="contact-status" class="empty:hidden" aria-live="polite" aria-atomic="true"></div>
+      <button id="contact-submit" type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Enviar mensagem</button>
+    </form>
+
+    <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Conteúdo e ferramentas de caráter informativo e de apoio operacional. <strong>Não substitui a orientação do seu contador</strong>.
+    </div>
+  </main>
+
+  <footer class="bg-slate-900 text-slate-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="font-extrabold text-white text-base">AutoContábil <span class="text-emerald-400">Hub</span></p>
+        <p class="text-slate-400 mt-1">As ferramentas gratuitas processam seus arquivos localmente no navegador.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Precisa de automação contábil sob medida?</p>
+        <p class="text-slate-400">Rotinas fiscais, integrações, planilhas inteligentes, BPO financeiro e contábil.</p>
+        <a class="inline-block mt-2 text-emerald-400 hover:text-emerald-300 font-semibold underline" href="servicos.html">Ver serviços sob medida →</a>
+      </div>
+      <div>
+        <p class="font-semibold text-white mb-1">Yuri David</p>
+        <a class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl px-4 py-2 transition" target="_blank" rel="noopener noreferrer" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Formul%C3%A1rio%20de%20Contato%20do%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20servi%C3%A7os%20sob%20medida.">💬 WhatsApp: (83) 98639-8472</a>
+        <p class="text-slate-400 mt-2">Yuri David • João Pessoa - PB</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
+      <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="guias/index.html">Guias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="contato.html">Contato</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="termos.html">Termos</a>
+    </div>
+  </footer>
+
+  <div id="toasts" role="status" aria-live="polite" class="fixed bottom-4 right-4 z-[60] space-y-2"></div>
+
+  <script type="module">
+    import { initContactModule } from './js/contactModule.js';
+    initContactModule();
+  </script>
+</body>
+</html>

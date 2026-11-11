@@ -1,9 +1,10 @@
-const CACHE_NAME = 'autocontabil-shell-v14';
+const CACHE_NAME = 'autocontabil-shell-v15';
 const CORE_ASSETS = [
   './index.html',
   './ferramentas.html',
   './servicos.html',
   './pro.html',
+  './contato.html',
   './guias/index.html',
   './guias/como-consolidar-xml-nfe-excel.html',
   './guias/como-conciliar-extrato-ofx-razao-contabil.html',

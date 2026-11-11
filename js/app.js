@@ -2,7 +2,6 @@ import { $, $$, esc, norm, toast } from './utils.js';
 import { initXmlModule, NF, renderNF, showNFModal } from './xmlModule.js';
 import { initConciliadorModule, CB, renderCB } from './conciliadorModule.js';
 import { initOrganizadorModule, OG, renderOG } from './organizadorModule.js';
-import { initContactModule } from './contactModule.js';
 import { initUtilitiesModule } from './utilitiesModule.js';
 import { CATALOGO_FERRAMENTAS, AREAS_FERRAMENTAS } from './ferramentas/catalogo.js';
 import { getModo, setModo, modoSalvo } from './modo.js';
@@ -318,7 +317,6 @@ initCatalogo();
 initXmlModule();
 initConciliadorModule();
 initOrganizadorModule();
-initContactModule();
 initUtilitiesModule();
 
 const contextualHelp = { 'panel-xml': AJUDA_GUIADO.notas, 'panel-conciliador': AJUDA_GUIADO.banco, 'panel-organizador': AJUDA_GUIADO.documentos };

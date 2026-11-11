@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Ao configurar CONTACT_ENDPOINT em js/contactModule.js, adicione apenas o domínio do provedor em connect-src (ex.: connect-src 'self' https://formspree.io) -->
-  <meta id="pro-csp" http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
+  <!-- Para ativar o formulário, troque connect-src 'self' por connect-src 'self' https://SEU-PROVEDOR (ex.: https://formspree.io ou https://api.web3forms.com) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'">
   <title>AutoContábil Pro — Lista de Espera (Em Validação) | AutoContábil Hub</title>
   <meta name="description" content="Lista de espera do AutoContábil Pro (em validação): exportação no layout do seu sistema contábil, regras salvas de conciliação e relatórios personalizados.">
   <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/pro.html">
@@ -186,26 +186,20 @@
     </div>
     <div class="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-400">
       <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="guias/index.html">Guias</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="contato.html">Contato</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="termos.html">Termos</a>
     </div>
   </footer>
 
+  <div id="toasts" role="status" aria-live="polite" class="fixed bottom-4 right-4 z-[60] space-y-2"></div>
+
   <script type="module">
-    import { initProWaitlistModule, getEndpointOrigin, CONTACT_ENDPOINT } from './js/contactModule.js';
-
-    const endpointOrigin = getEndpointOrigin(CONTACT_ENDPOINT);
-    const cspMeta = document.getElementById('pro-csp');
-    if (endpointOrigin && cspMeta) {
-      cspMeta.setAttribute(
-        'content',
-        `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' ${endpointOrigin}; base-uri 'self'; form-action 'self'`
-      );
-    }
-
+    import { initProWaitlistModule } from './js/contactModule.js';
     initProWaitlistModule();
   </script>
 </body>
