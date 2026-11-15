@@ -1,6 +1,6 @@
 # Diretrizes de Desenvolvimento e Segurança (CLAUDE.md)
 
-Este documento reúne as regras inegociáveis do projeto **AutoContábil Hub** que devem ser seguidas em qualquer manutenção futura:
+Este documento reúne as regras inegociáveis do projeto **AutoContábil Hub** que devem ser seguidas em qualquer manutenção futura:a 
 
 ## 1. Privacidade Absoluta nas Ferramentas Locais
 - **NUNCA carregue o Supabase** (nem qualquer script de `js/portal/`) dentro do `index.html` ou dos módulos de ferramentas (`js/xmlModule.js`, `js/conciliadorModule.js`, `js/organizadorModule.js`, `js/utilitiesModule.js`).

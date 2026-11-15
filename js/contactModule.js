@@ -6,7 +6,7 @@ import { FAIXAS_PRO, buildWhatsappLink } from './negocio.js';
 // e cole em CONTACT_ACCESS_KEY. A access key é pública por definição do provedor (não é segredo).
 // Enquanto CONTACT_ACCESS_KEY estiver vazia, contato.html e pro.html mostram o aviso com o WhatsApp.
 const CONTACT_ENDPOINT = 'https://api.web3forms.com/submit';
-const CONTACT_ACCESS_KEY = '';
+const CONTACT_ACCESS_KEY = 'f3c06757-3556-431b-96dc-1168091dd109';
 const CONTACT_EMAIL = 'SEU_EMAIL@EXEMPLO.COM';
 const WHATSAPP_URL = buildWhatsappLink({ origem: 'Formulário de Contato' });
 let lastAttemptAt = 0;

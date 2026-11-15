@@ -289,7 +289,9 @@ def main():
 
                 page.goto("http://127.0.0.1:8765/pro.html", wait_until="domcontentloaded")
                 assert page.locator("h1").is_visible()
-                assert page.locator("#pro-unconfigured-notice").is_visible()
+                # Com a access key do Web3Forms preenchida, o formulário fica ativo e o aviso some
+                assert page.locator("#pro-form-fields").is_visible()
+                assert not page.locator("#pro-unconfigured-notice").is_visible()
 
                 # Testes dos guias estáticos
                 for guide_path in [
