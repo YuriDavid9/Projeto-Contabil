@@ -5,6 +5,7 @@ import {
 import { getModo } from './modo.js';
 import { LIMITE_MEI_ANUAL } from './config.js';
 import { modal } from './modal.js';
+import { renderCTACard } from './cta.js';
 
 const NF = { notas: [], q: '', page: 1, size: 10, model: '', start: '', end: '', cfop: '' };
 
@@ -306,6 +307,7 @@ function renderNF() {
 
   $('#xml-export').disabled = !NF.notas.length;
   $('#xml-xlsx').disabled = !NF.notas.length;
+  renderCTACard($('#xml-cta'), 'xml', NF.notas.length);
 
   const list = nfFiltered();
   const pages = Math.max(1, Math.ceil(list.length / NF.size));

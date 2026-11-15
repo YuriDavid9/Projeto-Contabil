@@ -11,6 +11,7 @@ import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml, CONTACT_ENDPOINT } from '../js/contactModule.js';
 import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
 import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
+import { montarLinkCTA, shouldShowCTA, buildCTAHtml, dismissCTA, resetCTADismissals } from '../js/cta.js';
 import { inspectWhatsappLinks } from '../scripts/verificar-links-wa.mjs';
 
 test('parseMoney interpreta formatos brasileiros, americanos, negativos e preserva hifens internos', () => {
@@ -598,4 +599,68 @@ test('privacidade.html nomeia Web3Forms (LGPD) e paginas de ferramentas mantem c
     assert.equal(connectMatch[1].trim(), "'self'", `${page} deve manter connect-src 'self'`);
     assert.equal(/api\.web3forms\.com/i.test(html), false, `${page} nao pode conter api.web3forms.com`);
   }
+});
+
+test('cta.js monta links wa.me apenas com contagens agregadas e exibe blocos nos limiares corretos', () => {
+  resetCTADismissals();
+
+  const linkXml = montarLinkCTA('xml', 42);
+  assert.ok(linkXml && linkXml.startsWith(`https://wa.me/${NEGOCIO.whatsapp}?text=`));
+  const rawQueryXml = linkXml.split('?text=')[1];
+  assert.equal(/[ \n\r]/.test(rawQueryXml), false, 'Query ?text= nao pode conter espacos ou quebras de linha soltos');
+  const decodedXml = decodeURIComponent(rawQueryXml);
+  assert.ok(decodedXml.includes('42 notas'));
+  assert.ok(decodedXml.includes('Extrator de XML'));
+
+  const linkConc = montarLinkCTA('conciliador', 3);
+  assert.ok(linkConc && linkConc.startsWith(`https://wa.me/${NEGOCIO.whatsapp}?text=`));
+  assert.ok(decodeURIComponent(linkConc.split('?text=')[1]).includes('3 pendências ou divergências'));
+
+  const linkOrg = montarLinkCTA('organizador', 6);
+  assert.ok(linkOrg && linkOrg.startsWith(`https://wa.me/${NEGOCIO.whatsapp}?text=`));
+  assert.ok(decodeURIComponent(linkOrg.split('?text=')[1]).includes('6 documentos'));
+
+  // Tipos e contagens invalidos devem retornar null
+  assert.equal(montarLinkCTA('invalido', 10), null);
+  assert.equal(montarLinkCTA('', 10), null);
+  assert.equal(montarLinkCTA(null, 10), null);
+  assert.equal(montarLinkCTA('xml', -1), null);
+  assert.equal(montarLinkCTA('xml', NaN), null);
+  assert.equal(montarLinkCTA('xml', Infinity), null);
+  assert.equal(montarLinkCTA('xml', 10.5), null);
+  assert.equal(montarLinkCTA('xml', '10'), null);
+
+  // Limiares de exibicao
+  assert.equal(shouldShowCTA('xml', 0), false);
+  assert.equal(shouldShowCTA('xml', 9), false);
+  assert.equal(buildCTAHtml('xml', 0), '');
+  assert.equal(buildCTAHtml('xml', 9), '');
+  assert.equal(shouldShowCTA('xml', 10), true);
+
+  const xmlHtml = buildCTAHtml('xml', 10);
+  assert.ok(xmlHtml.includes('R$ 250 por lote'));
+  assert.ok(xmlHtml.includes('href="servicos.html"'));
+  assert.ok(xmlHtml.includes('href="pro.html"'));
+  assert.ok(xmlHtml.includes('rel="noopener noreferrer"'));
+  assert.ok(xmlHtml.includes('aria-label="Fechar convite de serviço"'));
+
+  assert.equal(shouldShowCTA('conciliador', 0), false);
+  assert.equal(shouldShowCTA('conciliador', 1), true);
+  assert.ok(buildCTAHtml('conciliador', 1).includes('R$ 350/mês'));
+
+  assert.equal(shouldShowCTA('organizador', 0), false);
+  assert.equal(shouldShowCTA('organizador', 1), true);
+  assert.ok(buildCTAHtml('organizador', 1).includes('R$ 400 por projeto'));
+
+  // Dispensa em memoria (sem localStorage)
+  dismissCTA('xml');
+  assert.equal(shouldShowCTA('xml', 25), false);
+  assert.equal(buildCTAHtml('xml', 25), '');
+  resetCTADismissals();
+  assert.equal(shouldShowCTA('xml', 25), true);
+
+  // Garante que js/cta.js nao usa localStorage nem fetch/rede
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const ctaSource = fs.readFileSync(path.join(rootDir, 'js/cta.js'), 'utf8');
+  assert.equal(/localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest/i.test(ctaSource), false);
 });

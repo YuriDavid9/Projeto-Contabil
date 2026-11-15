@@ -1,5 +1,6 @@
 import { $, esc, brl, fmtISODate, parseMoney, parseDateAny, dayDiff, readFileText, toast, showMsgs, bindDrop, kpi, r2, stamp, downloadCSV, n2, norm, splitCSV, loadSheetJS } from './utils.js';
 import { getModo } from './modo.js';
+import { renderCTACard } from './cta.js';
 
 const CB = { bank: [], ledger: [], rows: [], manualPairs: [], filter: 'all', seq: 1 };
 const STATUS = {
@@ -430,6 +431,7 @@ function renderCB() {
     $('#cb-kpis').innerHTML = '';
     $('#cb-bar').innerHTML = '';
     $('#cb-filters').innerHTML = '';
+    renderCTACard($('#cb-cta'), 'conciliador', 0);
     $('#cb-tbody').innerHTML = `<tr><td colspan="9" class="px-4 py-10 text-center text-slate-500">${getModo() === 'guiado' ? 'Carregue seu extrato bancário e suas anotações (ou use a simulação) para comparar os movimentos.' : 'Carregue o extrato e o razão (ou use a simulação) e clique em “Executar Conciliação”.'}</td></tr>`;
     return;
   }
@@ -459,6 +461,7 @@ function renderCB() {
 
   const chip = (key, label, count) => `<button data-act="cb-filter" data-k="${key}" class="px-3 py-1.5 rounded-full text-xs font-semibold border ${CB.filter === key ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-300 hover:bg-slate-100'}">${label} (${count})</button>`;
   $('#cb-filters').innerHTML = [chip('all', 'Todos', CB.rows.length), ...Object.entries(STATUS).map(([key]) => chip(key, statusLabel(key), CB.rows.filter((row) => row.status === key).length))].join('');
+  renderCTACard($('#cb-cta'), 'conciliador', stats.divergence.length + stats.pendingBank.length + stats.pendingInternal.length);
 
   const visibleRows = CB.rows.filter((row) => CB.filter === 'all' || row.status === CB.filter);
   const valueCell = (entry) => entry ? `<td class="px-3 py-2 text-right whitespace-nowrap font-semibold ${entry.cents < 0 ? 'text-rose-600' : 'text-emerald-700'}">${brl(entry.amount)}</td>` : '<td class="px-3 py-2 text-right text-slate-300">—</td>';

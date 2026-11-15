@@ -14,6 +14,7 @@ Suíte web modular 100% client-side para apoiar rotinas contábeis, fiscais e fi
 - `contato.html` hospeda o formulário de contato isolado das páginas de ferramentas, reutilizando `js/contactModule.js`.
 - `guias/` reúne os guias estáticos para SEO com referências a fontes oficiais (`guias/index.html`, `guias/como-consolidar-xml-nfe-excel.html`, `guias/como-conciliar-extrato-ofx-razao-contabil.html`, `guias/cnpj-alfanumerico-o-que-muda-como-validar.html`).
 - `js/negocio.js` centraliza os dados do negócio (`NEGOCIO`), a lista de serviços (`SERVICOS`), as faixas de preço para validação (`FAIXAS_PRO`) e a função pura `buildWhatsappLink({ origem, servico })`.
+- `js/cta.js` monta os convites contextuais de serviço (`montarLinkCTA` e `renderCTACard`) exibidos após resultados nas ferramentas, usando apenas contagens agregadas em memória.
 - `js/app.js` coordena a navegação entre o catálogo e as abas das ferramentas, atalhos de teclado e modos de visualização.
 - `js/utils.js` reúne funções utilitárias puras (moeda, datas, CSV com BOM UTF-8 e separador `;`, similaridade, normalização) e helpers de interface.
 - `js/xmlModule.js` — **Extrator de XML (NF-e/NFC-e):** importa XMLs e pacotes ZIP, valida chave de 44 dígitos, protocolo (`cStat` unificado via `isValidNote`) e conferência de totais, filtra dados, gera resumo anual para MEI e exporta CSV/XLSX. Inclui botão **"Carregar Lote de Demonstração"**.

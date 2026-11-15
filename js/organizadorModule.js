@@ -1,5 +1,6 @@
 import { $, esc, fmtISODate, parseMoney, parseDateAny, readFileText, toast, showMsgs, bindDrop, n2, stamp, downloadCSV, norm, toCSV, normalizeCNPJ } from './utils.js';
 import { getModo } from './modo.js';
+import { renderCTACard } from './cta.js';
 
 const OG = { docs: [], seq: 1 };
 const RULES_KEY = 'autocontabil-organizador-rules-v1';
@@ -368,6 +369,7 @@ async function zipOG() {
     toast('ZIP gerado com manifesto De/Para.', 'ok');
     const next = $('#og-next-step');
     if (next) next.hidden = false;
+    renderCTACard($('#og-cta'), 'organizador', plan.length);
   } catch (error) {
     toast('Falha ao gerar ZIP: ' + error.message, 'err');
   } finally {
@@ -441,8 +443,13 @@ function initOrganizadorModule() {
   $('#og-load-rule').addEventListener('click', loadOGRule);
   $('#og-delete-rule').addEventListener('click', deleteOGRule);
   $('#og-demo').addEventListener('click', loadOGDemo);
-  $('#og-clear').addEventListener('click', () => { OG.docs = []; renderOG(); });
-  $('#og-manifest').addEventListener('click', () => { downloadCSV(manifestRows(ogPlan()), `manifesto_de_para_${stamp()}.csv`); toast('Manifesto exportado.', 'ok'); });
+  $('#og-clear').addEventListener('click', () => { OG.docs = []; renderOG(); renderCTACard($('#og-cta'), 'organizador', 0); });
+  $('#og-manifest').addEventListener('click', () => {
+    const plan = ogPlan();
+    downloadCSV(manifestRows(plan), `manifesto_de_para_${stamp()}.csv`);
+    toast('Manifesto exportado.', 'ok');
+    renderCTACard($('#og-cta'), 'organizador', plan.length);
+  });
   $('#og-zip').addEventListener('click', zipOG);
   $('#og-rule').addEventListener('change', () => {
     $('#og-custom').classList.toggle('hidden', $('#og-rule').value !== 'custom');
