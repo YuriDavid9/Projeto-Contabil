@@ -50,6 +50,39 @@ function showContactMessage(message, kind = 'info', showAlternatives = false) {
   box.innerHTML = `<div class="border rounded-xl px-4 py-3 text-sm ${styles[kind] || styles.info}">${esc(message)}${alternatives}</div>`;
 }
 
+function resolveContactPrefill(searchString = '') {
+  const raw = String(searchString || '').replace(/^\?/, '');
+  const params = new URLSearchParams(raw);
+  const assunto = (params.get('assunto') || '').trim().toLowerCase();
+  const modelo = (params.get('modelo') || '').trim().toLowerCase();
+
+  if (assunto === 'parceria' || assunto === 'parceiro') {
+    const modeloLabels = {
+      colunista: 'Colunista / Parceiro de Conteúdo',
+      vitrine: 'Vitrine de Soluções Recomendadas',
+      tecnica: 'Parceria Técnica para Escritório Contábil'
+    };
+    const detalheModelo = modeloLabels[modelo] ? ` (${modeloLabels[modelo]})` : '';
+    return {
+      subject: 'Quero ser parceiro',
+      messagePlaceholder: `Conte sobre sua empresa ou escritório, qual formato de parceria tem interesse${detalheModelo} e deixe seu site ou WhatsApp para retorno.`
+    };
+  }
+  if (assunto === 'sugestao' || assunto === 'feedback') {
+    return {
+      subject: 'Sugestão/feedback',
+      messagePlaceholder: 'Conte sua sugestão de melhoria, pauta de notícia ou recurso para a Central Financeira...'
+    };
+  }
+  if (assunto === 'servico') {
+    return {
+      subject: 'Contratar serviço',
+      messagePlaceholder: 'Descreva brevemente sua rotina (lotes de XML, conciliação OFX ou planilha sob medida)...'
+    };
+  }
+  return { subject: '', messagePlaceholder: '' };
+}
+
 function initContactModule() {
   const form = $('#contact-form');
   if (!form) return;
@@ -63,6 +96,18 @@ function initContactModule() {
         </div>
       </div>`;
     return;
+  }
+
+  if (typeof window !== 'undefined' && window.location?.search) {
+    const prefill = resolveContactPrefill(window.location.search);
+    const subjectEl = $('#contact-subject');
+    const messageEl = $('#contact-message');
+    if (prefill.subject && subjectEl) {
+      subjectEl.value = prefill.subject;
+    }
+    if (prefill.messagePlaceholder && messageEl) {
+      messageEl.setAttribute('placeholder', prefill.messagePlaceholder);
+    }
   }
 
   const button = $('#contact-submit');
@@ -251,6 +296,7 @@ function initProWaitlistModule() {
 export {
   initContactModule,
   initProWaitlistModule,
+  resolveContactPrefill,
   isContactConfigured,
   isContactEmailConfigured,
   isContactEndpointConfigured,

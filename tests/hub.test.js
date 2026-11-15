@@ -8,7 +8,7 @@ import { parseMoney, parseDateAny, csvCell, splitCSV, dayDiff } from '../js/util
 import { reconcile, parseOFX, parseTxCSV, sim } from '../js/conciliadorModule.js';
 import { calcDV, buildDemoXML, parseNFe, computeYearSummary } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
-import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml, CONTACT_ENDPOINT } from '../js/contactModule.js';
+import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml, resolveContactPrefill, CONTACT_ENDPOINT } from '../js/contactModule.js';
 import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
 import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
 import { montarLinkCTA, shouldShowCTA, buildCTAHtml, dismissCTA, resetCTADismissals } from '../js/cta.js';
@@ -198,6 +198,14 @@ test('contactModule valida configuracao de endpoint e e-mail e omite mailto quan
   const configuredHtml = buildContactAlternativesHtml('contato@autocontabil.com.br', 'https://wa.me/5583986398472');
   assert.equal(configuredHtml.includes('mailto:contato@autocontabil.com.br'), true);
   assert.equal(configuredHtml.includes('https://wa.me/5583986398472'), true);
+
+  assert.equal(resolveContactPrefill('?assunto=parceria').subject, 'Quero ser parceiro');
+  assert.ok(resolveContactPrefill('?assunto=parceria&modelo=colunista').messagePlaceholder.includes('Colunista'));
+  assert.ok(resolveContactPrefill('?assunto=parceria&modelo=vitrine').messagePlaceholder.includes('Vitrine'));
+  assert.ok(resolveContactPrefill('?assunto=parceria&modelo=tecnica').messagePlaceholder.includes('Escritório Contábil'));
+  assert.equal(resolveContactPrefill('?assunto=sugestao').subject, 'Sugestão/feedback');
+  assert.equal(resolveContactPrefill('?assunto=servico').subject, 'Contratar serviço');
+  assert.equal(resolveContactPrefill('').subject, '');
 });
 
 test('isHttpUrl e funcoes puras do portal validam URLs HTTP/HTTPS, slugs e traduzem erros de constraints', () => {
@@ -393,6 +401,7 @@ test('sw.js CORE_ASSETS contem todos os modulos locais importados por index.html
     'index.html',
     'ferramentas.html',
     'servicos.html',
+    'parceiros.html',
     'extrator-xml-nfe.html',
     'conciliador-bancario-ofx.html',
     'organizador-fiscal.html',
@@ -468,6 +477,7 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   assert.equal(servicosHtml.includes('mailto:null'), false, 'servicos.html nunca deve exibir e-mail nulo');
   const sitemapXml = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
   assert.ok(sitemapXml.includes('/servicos.html'), 'servicos.html deve constar no sitemap.xml');
+  assert.ok(sitemapXml.includes('/parceiros.html'), 'parceiros.html deve constar no sitemap.xml');
   assert.ok(sitemapXml.includes('/pro.html'), 'pro.html deve constar no sitemap.xml');
 
   const proHtml = fs.readFileSync(path.join(rootDir, 'pro.html'), 'utf8');
@@ -481,6 +491,7 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   ];
   const swText = fs.readFileSync(path.join(rootDir, 'sw.js'), 'utf8');
   assert.ok(swText.includes('./servicos.html'));
+  assert.ok(swText.includes('./parceiros.html'));
   assert.ok(swText.includes('./pro.html'));
   assert.ok(swText.includes('./guias/index.html'));
   for (const guide of guideFiles) {
@@ -579,7 +590,8 @@ test('privacidade.html nomeia Web3Forms (LGPD) e paginas de ferramentas mantem c
 
   assert.ok(privacidadeHtml.includes('Web3Forms'), 'privacidade.html deve nomear Web3Forms como operador');
   assert.ok(privacidadeHtml.includes('api.web3forms.com'), 'privacidade.html deve citar api.web3forms.com');
-  assert.ok(privacidadeHtml.includes('[A DEFINIR PELO DONO]'), 'privacidade.html deve marcar campos pendentes do dono');
+  assert.ok(privacidadeHtml.includes('12 meses'), 'privacidade.html deve informar prazo de retencao definido');
+  assert.equal(privacidadeHtml.includes('[A DEFINIR PELO DONO]'), false, 'privacidade.html nao deve manter marcador [A DEFINIR PELO DONO]');
 
   const toolPages = [
     'index.html',

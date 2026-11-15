@@ -1,8 +1,9 @@
-const CACHE_NAME = 'autocontabil-shell-v16';
+const CACHE_NAME = 'autocontabil-shell-v17';
 const CORE_ASSETS = [
   './index.html',
   './ferramentas.html',
   './servicos.html',
+  './parceiros.html',
   './pro.html',
   './contato.html',
   './guias/index.html',

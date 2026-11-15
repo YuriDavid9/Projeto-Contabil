@@ -86,9 +86,30 @@
       <button id="modo-toggle" class="rounded-lg border border-slate-300 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition" type="button">Modo: Completo ⇄ Guiado</button>
     </div>
 
-    <section id="panel-catalogo" class="tab-panel fade-in" aria-labelledby="catalogo-heading">
+    <section id="panel-catalogo" class="tab-panel fade-in" aria-labelledby="central-heading">
+      <!-- Hero da Central Financeira -->
+      <div class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
+        <div class="flex flex-wrap items-center gap-2 text-xs font-bold mb-3">
+          <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2.5 py-0.5 rounded-md">Central Financeira e Contábil</span>
+          <span class="bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 px-2.5 py-0.5 rounded-md">Para Autônomos, MEIs e Contadores</span>
+        </div>
+        <h1 id="central-heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          Ferramentas gratuitas, conteúdo prático e comunidade em um só lugar
+        </h1>
+        <p class="mt-2.5 text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+          Processe notas fiscais, concilie extratos e organize documentos 100% no seu navegador. Acompanhe também resumos de notícias com fontes oficiais, guias práticos e serviços sob medida.
+        </p>
+        <div class="mt-5 flex flex-wrap items-center gap-2.5">
+          <a href="#catalogo-heading" class="rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition">🧰 Explorar Ferramentas</a>
+          <a href="noticias.html" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 transition">📰 Comunidade &amp; Notícias</a>
+          <a href="guias/index.html" class="rounded-xl border border-slate-600 hover:border-slate-400 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white transition">📚 Guias Práticos</a>
+          <a href="servicos.html" class="rounded-xl border border-slate-600 hover:border-slate-400 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white transition">💼 Serviços Sob Medida</a>
+          <a href="parceiros.html" class="rounded-xl border border-emerald-500/50 hover:border-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-semibold text-emerald-300 hover:text-white transition">🤝 Seja Parceiro</a>
+        </div>
+      </div>
+
       <div class="mb-6">
-        <h1 id="catalogo-heading" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Catálogo de Ferramentas</h1>
+        <h2 id="catalogo-heading" class="text-2xl sm:text-3xl font-extrabold text-slate-900">Catálogo de Ferramentas</h2>
         <p class="text-sm sm:text-base text-slate-600 mt-1.5 max-w-3xl">
           Explore nossas ferramentas gratuitas para conferência de notas fiscais, conciliação bancária, organização de documentos e validação de cadastros. Escolha uma ferramenta abaixo para ver detalhes ou abri-la diretamente no navegador.
         </p>
@@ -129,6 +150,78 @@
           <p class="text-sm text-slate-600 mt-2">Verifique os dígitos verificadores de CNPJ (numérico e alfanumérico), CPF e chaves de 44 dígitos de NF-e/NFC-e.</p>
         </article>
       </div>
+
+      <!-- Ecossistema da Central Financeira -->
+      <section aria-labelledby="ecossistema-heading" class="mt-10">
+        <div class="mb-4">
+          <h2 id="ecossistema-heading" class="text-xl sm:text-2xl font-extrabold text-slate-900">Mais na Central Financeira</h2>
+          <p class="text-sm text-slate-600 mt-1">Comunidade, educação fiscal, serviços sob medida e canais diretos para sugestões.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-5">
+          <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="inline-block text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md mb-3">Comunidade &amp; Blog</span>
+              <h3 class="text-lg font-extrabold text-slate-900">Notícias resumidas e comentários</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Resumos objetivos sobre CNPJ, MEI, notas fiscais e finanças com fontes oficiais citadas e espaço para comentários da comunidade.</p>
+            </div>
+            <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+              <a href="noticias.html" class="flex-1 text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2 px-3 text-xs sm:text-sm transition">Abrir Notícias →</a>
+              <a href="entrar.html" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-2 px-3 text-xs sm:text-sm transition">Entrar</a>
+            </div>
+          </article>
+
+          <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="inline-block text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-md mb-3">Educação Prática</span>
+              <h3 class="text-lg font-extrabold text-slate-900">Guias passo a passo</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Artigos práticos sobre consolidação de XML, conciliação bancária OFX e CNPJ alfanumérico, baseados em normas da Receita Federal, CONFAZ e CFC.</p>
+            </div>
+            <div class="mt-5 pt-3 border-t border-slate-100 flex flex-col gap-2">
+              <a href="guias/index.html" class="w-full text-center bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl py-2 px-3 text-xs sm:text-sm transition">Ver todos os guias →</a>
+            </div>
+          </article>
+
+          <article class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="inline-block text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-md mb-3">Sob Medida &amp; Pro</span>
+              <h3 class="text-lg font-extrabold text-slate-900">Automação e Lista de Espera</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Precisa automatizar planilhas, lotes de XML ou conciliação mensal? Conheça os serviços sob medida ou participe da validação do Plano Pro.</p>
+            </div>
+            <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+              <a href="servicos.html" class="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-2 px-3 text-xs sm:text-sm transition">Ver Serviços</a>
+              <a href="pro.html" class="rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-semibold py-2 px-3 text-xs sm:text-sm transition">Lista Pro</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Feedbacks, Sugestões e Parceiros -->
+      <section aria-label="Sugestões, feedbacks e parcerias" class="mt-8 grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Sugestões e Feedbacks</h2>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Sentiu falta de alguma calculadora, simulador para MEI/autônomo ou melhoria nas ferramentas atuais? Envie sua sugestão diretamente para ajudar a priorizar os próximos recursos.
+            </p>
+          </div>
+          <div class="mt-4">
+            <a href="contato.html?assunto=sugestao" class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 text-xs sm:text-sm transition">✉️ Enviar feedback ou sugestão →</a>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Links Oficiais &amp; Espaço para Parceiros</h2>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Fontes oficiais úteis: <a href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor" target="_blank" rel="noopener noreferrer" class="text-indigo-700 underline font-medium">Portal do Empreendedor (MEI)</a>, <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer" class="text-indigo-700 underline font-medium">Banco Central</a> e <a href="https://www.gov.br/receitafederal/" target="_blank" rel="noopener noreferrer" class="text-indigo-700 underline font-medium">Receita Federal</a>. Quer divulgar uma empresa ou solução parceira voltada a MEIs e contadores?
+            </p>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href="parceiros.html" class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 text-xs sm:text-sm transition">🤝 Ver página Seja Nosso Parceiro →</a>
+            <a data-wa-origem="Espaço de Parceiros" data-wa-servico="parceria no AutoContábil Hub" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Espa%C3%A7o%20de%20Parceiros%20do%20AutoCont%C3%A1bil%20Hub%20e%20quero%20falar%20sobre%20parceria%20no%20AutoCont%C3%A1bil%20Hub." target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 text-xs sm:text-sm transition">🤝 Propor parceria no WhatsApp</a>
+          </div>
+        </div>
+      </section>
 
       <div class="mt-8 bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
         Conteúdo e ferramentas de caráter informativo e de apoio operacional. <strong>Não substitui a orientação do seu contador</strong> nem a conferência na legislação oficial.
@@ -505,6 +598,7 @@
       <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="pro.html">AutoContábil Pro</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+      <a class="hover:text-white underline" href="parceiros.html">Seja Parceiro</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="contato.html">Contato</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>
       <a class="hover:text-white underline" href="termos.html">Termos</a>
