@@ -29,8 +29,8 @@
     <p class="mt-2 text-sm text-slate-500">Versão inicial para revisão jurídica. Atualizada em 26 de outubro de 2026.</p>
     <div class="mt-8 space-y-7 rounded-2xl border border-slate-200 bg-white p-6 leading-7 shadow-sm">
       <section>
-        <h2 class="text-xl font-bold text-slate-900">1. Ferramentas Fiscais (Processamento 100% Local)</h2>
-        <p class="mt-2">Os arquivos escolhidos para o Extrator de XML, Conciliador Bancário e Organizador Fiscal são processados exclusivamente no seu computador (navegador). O AutoContábil Hub não envia nem armazena esses documentos em servidores externos. As páginas das ferramentas não carregam scripts de banco de dados.</p>
+        <h2 class="text-xl font-bold text-slate-900">1. Ferramentas Fiscais e Utilitários (Processamento 100% Local)</h2>
+        <p class="mt-2">Os arquivos e dados informados no <strong>Extrator de XML</strong>, no <strong>Conciliador Bancário</strong>, no <strong>Organizador Fiscal</strong> e no <strong>Validador de CNPJ/CPF/Chave NF-e</strong> são processados exclusivamente no seu computador (navegador). O AutoContábil Hub <strong>não envia nem armazena</strong> esses arquivos ou conteúdos em nenhum servidor externo. As páginas das ferramentas não carregam scripts de banco de dados nem de rastreamento.</p>
       </section>
       <section>
         <h2 class="text-xl font-bold text-slate-900">2. Portal de Notícias (Conta e Comentários)</h2>
@@ -44,28 +44,39 @@
       </section>
       <section>
         <h2 class="text-xl font-bold text-slate-900">3. Dados de Contato e Lista de Espera (AutoContábil Pro)</h2>
-        <p class="mt-2">Se você preencher e enviar o formulário da página de <a class="font-semibold text-indigo-700 underline" href="contato.html">Contato</a> (<code>contato.html</code>), serão tratados o nome, e-mail, assunto, mensagem e o registro de consentimento, com a finalidade exclusiva de responder à sua solicitação.</p>
-        <p class="mt-2">Na página da lista de espera do <strong>AutoContábil Pro</strong> (<code>pro.html</code>), caso o formulário esteja ativo e você decida participar, coletamos nome (opcional), e-mail, sistema contábil utilizado, faixa de quantidade de clientes/CNPJs atendidos, faixa mensal de interesse e o registro de consentimento. A finalidade é exclusivamente avaliar a viabilidade de recursos futuros e comunicar eventual lançamento. Essa coleta ocorre em página separada e é totalmente independente do processamento 100% local das ferramentas gratuitas. Você pode solicitar a exclusão imediata dos seus dados da lista de espera a qualquer momento pelos canais de contato informados abaixo.</p>
+        <p class="mt-2">Os formulários ficam em páginas separadas das ferramentas e utilizam o operador <strong>Web3Forms</strong> (<code>api.web3forms.com</code>) apenas para receber e encaminhar o envio ao responsável:</p>
+        <ul class="mt-2 list-disc pl-6 space-y-1 text-slate-700">
+          <li><strong>Página de <a class="font-semibold text-indigo-700 underline" href="contato.html">Contato</a> (<code>contato.html</code>):</strong> envia os campos informados por você — <strong>nome</strong>, <strong>e-mail</strong>, <strong>assunto</strong>, <strong>mensagem</strong> e o registro de <strong>consentimento</strong> — com a finalidade exclusiva de responder à sua solicitação.</li>
+          <li><strong>Lista de espera do AutoContábil Pro (<code>pro.html</code>):</strong> envia os campos informados por você — <strong>nome</strong> (opcional), <strong>e-mail</strong>, <strong>sistema contábil utilizado</strong>, <strong>faixa de quantidade de clientes/CNPJs</strong>, <strong>faixa mensal de interesse</strong> e o registro de <strong>consentimento</strong> (além da identificação técnica de assunto/tipo do formulário) — com a finalidade exclusiva de avaliar demanda e avisar sobre eventual lançamento.</li>
+        </ul>
+        <p class="mt-2"><strong>Prazo de retenção:</strong> <code>[A DEFINIR PELO DONO]</code> (o site em si não armazena essas mensagens em banco de dados próprio; elas são encaminhadas pelo Web3Forms ao e-mail configurado). Você pode solicitar a exclusão dos seus dados a qualquer momento pelos canais de contato informados abaixo.</p>
       </section>
       <section>
         <h2 class="text-xl font-bold text-slate-900">4. Armazenamento Local no Navegador</h2>
         <p class="mt-2">Se você ativar a opção “Lembrar dados neste navegador” no conciliador ou salvar regras no organizador, essas preferências ficam salvas apenas no armazenamento local (<code>localStorage</code>) do seu próprio navegador. Quando você faz login no Portal de Notícias, o token de sessão do Supabase também é mantido localmente no navegador até que você clique em “Sair”.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">5. Serviços de Terceiros e CDNs</h2>
-        <p class="mt-2">O navegador baixa bibliotecas visuais e de segurança via CDNs públicas (Tailwind CSS, Google Fonts, JSZip, SheetJS, PDF.js, Supabase JS, Marked e DOMPurify). Esses provedores podem receber dados técnicos padrão de conexão (como endereço IP e navegador utilizado).</p>
+        <h2 class="text-xl font-bold text-slate-900">5. Serviços de Terceiros, Operadores e CDNs</h2>
+        <p class="mt-2">Para o envio dos formulários de <code>contato.html</code> e <code>pro.html</code>, os dados preenchidos são recebidos e encaminhados pelo operador <strong>Web3Forms</strong> (<code>api.web3forms.com</code>). As páginas das ferramentas locais não se conectam ao Web3Forms e mantêm <code>connect-src 'self'</code>.</p>
+        <p class="mt-2">O navegador também baixa bibliotecas visuais e de segurança via CDNs públicas (Tailwind CSS, Google Fonts, JSZip, SheetJS, PDF.js, Supabase JS, Marked e DOMPurify). Esses provedores podem receber dados técnicos padrão de conexão (como endereço IP e navegador utilizado).</p>
       </section>
       <section>
         <h2 class="text-xl font-bold text-slate-900">6. Exclusão de Conta e Direitos do Titular (LGPD)</h2>
-        <p class="mt-2">Nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode apagar seus próprios comentários diretamente na página da notícia e pode solicitar a qualquer momento o acesso, a correção ou a <strong>exclusão completa da sua conta e de todos os seus dados</strong> no Portal de Notícias.</p>
-        <p class="mt-2">Para solicitar a exclusão da conta ou exercer qualquer direito previsto na LGPD, entre em contato diretamente com o controlador pelos canais abaixo.</p>
+        <p class="mt-2">Nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode apagar seus próprios comentários diretamente na página da notícia e pode solicitar a qualquer momento o acesso, a correção ou a <strong>exclusão completa da sua conta e de todos os seus dados</strong> no Portal de Notícias, bem como a exclusão de mensagens enviadas por formulário.</p>
+        <p class="mt-2">Para exercer qualquer direito previsto na LGPD, entre em contato diretamente com o controlador pelos canais abaixo.</p>
       </section>
       <section>
-        <h2 class="text-xl font-bold text-slate-900">7. Controlador e Contato</h2>
-        <p class="mt-2">Responsável pelo projeto e controlador dos dados do portal: <strong>Yuri David (Yuri Monteiro)</strong> • João Pessoa - PB.<br>
-        Contato para solicitações de privacidade e exclusão de conta: página de <a class="font-semibold text-indigo-700 underline" href="contato.html">Contato</a> ou <a class="font-semibold text-indigo-700 underline" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Pol%C3%ADtica%20de%20Privacidade%20do%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20servi%C3%A7os%20sob%20medida." target="_blank" rel="noopener noreferrer">WhatsApp (83) 98639-8472</a>.</p>
+        <h2 class="text-xl font-bold text-slate-900">7. Controlador e Contato do Titular</h2>
+        <p class="mt-2">Responsável pelo projeto e controlador dos dados: <strong>Yuri David (Yuri Monteiro)</strong> • João Pessoa - PB.<br>
+        Canal de atendimento ao titular (solicitações de privacidade, acesso e exclusão): página de <a class="font-semibold text-indigo-700 underline" href="contato.html">Contato</a>, <a class="font-semibold text-indigo-700 underline" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Pol%C3%ADtica%20de%20Privacidade%20do%20AutoCont%C3%A1bil%20Hub%20e%20gostaria%20de%20falar%20sobre%20servi%C3%A7os%20sob%20medida." target="_blank" rel="noopener noreferrer">WhatsApp (83) 98639-8472</a> ou e-mail dedicado <code>[A DEFINIR PELO DONO]</code>.</p>
       </section>
     </div>
   </main>
+  <!--
+    ITENS PENDENTES PARA O DONO DEFINIR NA POLÍTICA DE PRIVACIDADE (LGPD):
+    1. Prazo de retenção das mensagens recebidas pelo Web3Forms e inscrições na lista de espera do Pro (seção 3).
+    2. E-mail dedicado para atendimento ao titular / encarregado (seção 7) e atualização da data no topo da página.
+    3. Revisão jurídica final antes da divulgação ampla.
+  -->
 </body>
 </html>

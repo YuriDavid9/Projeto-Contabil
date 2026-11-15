@@ -571,3 +571,31 @@ test('todos os links wa.me nos arquivos HTML usam NEGOCIO.whatsapp com origem e 
   const mismatchCheck = inspectWhatsappLinks(rootDir, '5511999999999');
   assert.ok(mismatchCheck.errors.length > 0, 'inspectWhatsappLinks deve detectar divergencia quando o numero muda');
 });
+
+test('privacidade.html nomeia Web3Forms (LGPD) e paginas de ferramentas mantem connect-src self sem api.web3forms.com', () => {
+  const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const privacidadeHtml = fs.readFileSync(path.join(rootDir, 'privacidade.html'), 'utf8');
+
+  assert.ok(privacidadeHtml.includes('Web3Forms'), 'privacidade.html deve nomear Web3Forms como operador');
+  assert.ok(privacidadeHtml.includes('api.web3forms.com'), 'privacidade.html deve citar api.web3forms.com');
+  assert.ok(privacidadeHtml.includes('[A DEFINIR PELO DONO]'), 'privacidade.html deve marcar campos pendentes do dono');
+
+  const toolPages = [
+    'index.html',
+    'ferramentas.html',
+    'extrator-xml-nfe.html',
+    'conciliador-bancario-ofx.html',
+    'organizador-fiscal.html',
+    'validador-cnpj.html'
+  ];
+
+  for (const page of toolPages) {
+    const html = fs.readFileSync(path.join(rootDir, page), 'utf8');
+    const cspMatch = /<meta\s+http-equiv=["']Content-Security-Policy["']\s+content="([^"]+)"/i.exec(html);
+    assert.ok(cspMatch, `CSP ausente em ${page}`);
+    const connectMatch = /connect-src\s+([^;]+)/i.exec(cspMatch[1]);
+    assert.ok(connectMatch, `connect-src ausente em ${page}`);
+    assert.equal(connectMatch[1].trim(), "'self'", `${page} deve manter connect-src 'self'`);
+    assert.equal(/api\.web3forms\.com/i.test(html), false, `${page} nao pode conter api.web3forms.com`);
+  }
+});
