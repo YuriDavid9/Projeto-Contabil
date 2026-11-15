@@ -1,3 +1,37 @@
+export const COMMUNITY_PROFILES = [
+  'Membro da Comunidade',
+  'Contador(a)',
+  'Contador(a) Iniciante',
+  'MEI / Autônomo',
+  'Pequena Empresa'
+];
+
+export function formatCommentWithProfileBadge(body, profileBadge = '') {
+  const cleanBody = String(body || '').trim();
+  const cleanBadge = String(profileBadge || '').trim();
+  if (!cleanBody) return '';
+  if (!cleanBadge || cleanBadge === 'Membro da Comunidade' || !COMMUNITY_PROFILES.includes(cleanBadge)) {
+    return cleanBody;
+  }
+  const prefix = `[Perfil: ${cleanBadge}] `;
+  const combined = `${prefix}${cleanBody}`;
+  return combined.length <= 1000 ? combined : cleanBody;
+}
+
+export function parseCommentProfileBadge(rawBody) {
+  const text = String(rawBody || '');
+  const match = /^\[Perfil:\s*([^\]]+)\]\s*([\s\S]*)$/.exec(text);
+  if (!match) {
+    return { profileBadge: null, cleanBody: text };
+  }
+  const candidate = match[1].trim();
+  const rest = match[2].trim();
+  if (!COMMUNITY_PROFILES.includes(candidate) || !rest) {
+    return { profileBadge: null, cleanBody: text };
+  }
+  return { profileBadge: candidate, cleanBody: rest };
+}
+
 export function isHttpUrl(value) {
   const clean = String(value ?? '').trim();
   if (!clean) return false;

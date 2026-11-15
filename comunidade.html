@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://trnkzwserimzkftbwuge.supabase.co https://cdn.jsdelivr.net; base-uri 'self'; form-action 'self'">
+  <title>Comunidade Contábil &amp; Financeira | AutoContábil Hub</title>
+  <meta name="description" content="Trilhas de discussão, dúvidas práticas, envio de artigos convidados e votação de prioridades para contadores iniciantes, MEIs, autônomos e pequenas empresas.">
+  <link rel="canonical" href="https://yuridavid9.github.io/Projeto-Contabil/comunidade.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AutoContábil Hub — Comunidade">
+  <meta property="og:title" content="Comunidade Contábil &amp; Financeira | AutoContábil Hub">
+  <meta property="og:description" content="Espaço de troca prática, pautas da comunidade e votação de novos recursos no AutoContábil Hub.">
+  <meta property="og:url" content="https://yuridavid9.github.io/Projeto-Contabil/comunidade.html">
+  <meta property="og:image" content="https://yuridavid9.github.io/Projeto-Contabil/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+  <div id="portal-header"></div>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+    <nav aria-label="Breadcrumb" class="text-xs text-slate-500 mb-5">
+      <ol class="flex flex-wrap items-center gap-1.5">
+        <li><a href="index.html" class="hover:text-indigo-600 underline">Início</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="text-slate-700 font-semibold" aria-current="page">Comunidade</li>
+      </ol>
+    </nav>
+
+    <!-- Hero da Comunidade -->
+    <section aria-labelledby="comunidade-hero-heading" class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-6 sm:p-10 shadow-xl mb-10">
+      <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-3 py-1 rounded-full">
+        Espaço Colaborativo • AutoContábil Hub
+      </span>
+      <h1 id="comunidade-hero-heading" class="mt-4 text-2xl sm:text-4xl font-extrabold leading-tight max-w-3xl">
+        Comunidade Contábil &amp; Financeira
+      </h1>
+      <p class="mt-3 text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+        Um ponto de encontro sem jargões para <strong class="text-white">contadores iniciantes, MEIs, autônomos e pequenas empresas</strong> tirarem dúvidas do dia a dia, sugerirem pautas de notícias, acompanharem discussões e escolherem o que construiremos juntos na Central.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <a href="#trilhas-comunidade" class="rounded-xl bg-indigo-600 hover:bg-indigo-500 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow transition">
+          Explorar trilhas de discussão ↓
+        </a>
+        <a href="#votacao-comunidade" class="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-5 py-3 text-xs sm:text-sm font-bold text-slate-900 shadow transition">
+          Votar nos próximos conteúdos →
+        </a>
+        <a href="contato.html?assunto=comunidade" class="rounded-xl border border-slate-600 hover:border-slate-400 px-4 py-3 text-xs sm:text-sm font-semibold text-slate-200 hover:text-white transition">
+          ✉️ Enviar dúvida ou pauta
+        </a>
+        <a data-wa-origem="Canal da Comunidade" data-wa-servico="dúvida ou pauta para a Comunidade" href="https://wa.me/5583986398472?text=Ol%C3%A1%20Yuri!%20Vim%20pelo%20Canal%20da%20Comunidade%20do%20AutoCont%C3%A1bil%20Hub%20e%20quero%20falar%20sobre%20d%C3%BAvida%20ou%20pauta%20para%20a%20Comunidade." target="_blank" rel="noopener noreferrer" class="rounded-xl border border-emerald-500/50 hover:border-emerald-400 px-4 py-3 text-xs sm:text-sm font-semibold text-emerald-300 hover:text-white transition">
+          💬 WhatsApp da Comunidade
+        </a>
+      </div>
+    </section>
+
+    <!-- 4 Trilhas de Discussão -->
+    <section id="trilhas-comunidade" aria-labelledby="trilhas-heading" class="mb-10">
+      <div class="mb-5">
+        <h2 id="trilhas-heading" class="text-xl sm:text-2xl font-extrabold text-slate-900">Trilhas da Comunidade</h2>
+        <p class="text-sm text-slate-600 mt-1">Escolha o tema que faz parte da sua rotina para ler os conteúdos, comentar ou sugerir um caso prático.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-5">
+        <article class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md mb-3">Trilha 1 • Carreira</span>
+            <h3 class="text-lg font-extrabold text-slate-900">Início de Carreira Contábil &amp; Prática de Escritório</h3>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Dúvidas sobre conferência fiscal, fechamento mensal, conciliação OFX com razão contábil, organização de documentos e primeiros clientes.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+            <a href="guias/index.html" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 text-xs transition">Ler guias práticos →</a>
+            <a href="contato.html?assunto=comunidade&amp;trilha=iniciante" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition">Enviar dúvida dessa trilha</a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-2xl border border-slate-200 hover:border-emerald-400 transition p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-md mb-3">Trilha 2 • Negócios</span>
+            <h3 class="text-lg font-extrabold text-slate-900">Dia a Dia do MEI, Autônomo e Pequena Empresa</h3>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Trocas práticas sobre emissão de notas fiscais (NFS-e/NF-e), controle de faturamento, DAS mensal, Pix PJ e separação entre contas pessoais e da empresa.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+            <a href="noticias.html" class="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 text-xs transition">Ver notícias e prazos →</a>
+            <a href="contato.html?assunto=comunidade&amp;trilha=mei" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition">Enviar dúvida de MEI/PJ</a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 transition p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-md mb-3">Trilha 3 • Tecnologia</span>
+            <h3 class="text-lg font-extrabold text-slate-900">Planilhas, XML, OFX e Automação</h3>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Compartilhe gargalos com planilhas pesadas, leitura de lotes XML, conversão de extratos e ideias de pequenas automações para ganhar horas no mês.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+            <a href="index.html" class="rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-2 text-xs transition">Explorar ferramentas →</a>
+            <a href="contato.html?assunto=comunidade&amp;trilha=automacao" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition">Sugerir melhoria ou planilha</a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-2xl border border-slate-200 hover:border-amber-400 transition p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-md mb-3">Trilha 4 • Colaboração</span>
+            <h3 class="text-lg font-extrabold text-slate-900">Mural de Sugestões e Artigos Convidados</h3>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Quer escrever um artigo educativo assinado para o Portal ou indicar uma empresa parceira séria para MEIs e escritórios? Este é o caminho direto.
+            </p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+            <a href="parceiros.html" class="rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold px-3.5 py-2 text-xs transition">Conhecer parcerias →</a>
+            <a href="contato.html?assunto=comunidade&amp;trilha=artigo" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition">Enviar proposta de artigo</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Mural de Discussões Recentes & Tópicos Permanentes -->
+    <section id="discussoes-recentes" aria-labelledby="discussoes-heading" class="mb-10">
+      <div class="mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div>
+          <h2 id="discussoes-heading" class="text-xl sm:text-2xl font-extrabold text-slate-900">Mural de Discussões &amp; Comentários Recentes</h2>
+          <p class="text-sm text-slate-600 mt-1">Acompanhe os comentários mais recentes da comunidade nas notícias (com selo de perfil) ou comece pelos tópicos fixados.</p>
+        </div>
+        <a href="noticias.html" class="text-xs sm:text-sm font-bold text-indigo-600 hover:text-indigo-800 underline shrink-0">Participar comentando nas notícias →</a>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-6">
+        <!-- Comentários do Portal (Supabase) -->
+        <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <h3 class="text-base font-extrabold text-slate-900">Últimas participações no Portal</h3>
+            <span class="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">Atualizado do Portal</span>
+          </div>
+
+          <div id="community-comments-loading" class="text-xs text-slate-500 py-6 text-center">
+            Carregando discussões recentes da comunidade...
+          </div>
+
+          <div id="community-comments-empty" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-5 text-center">
+            <p class="text-sm font-bold text-slate-800">Ainda não há comentários públicos exibidos aqui.</p>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Entre no Portal de Notícias para deixar o primeiro comentário com seu selo de perfil (Contador, MEI ou Pequena Empresa).
+            </p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+              <a href="noticias.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-4 py-2 text-xs transition">Ler notícias e comentar →</a>
+              <a href="entrar.html?next=noticias.html" class="border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl px-4 py-2 text-xs transition">Entrar / Criar conta</a>
+            </div>
+          </div>
+
+          <div id="community-comments-list" class="space-y-3 hidden"></div>
+        </div>
+
+        <!-- Tópicos Permanentes / Fixados -->
+        <aside class="lg:col-span-2 space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <span class="inline-block text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded mb-2">Tópico Fixado #1</span>
+            <h3 class="text-sm font-extrabold text-slate-900">Como você confere XMLs de NF-e/NFC-e no fechamento?</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              Veja nosso guia passo a passo de consolidação em Excel sem perder os arquivos originais exigidos pelo Ajuste SINIEF 07/05.
+            </p>
+            <a href="guias/como-consolidar-xml-nfe-excel.html" class="inline-block mt-3 text-xs font-bold text-indigo-600 hover:text-indigo-800">Abrir guia e conferir passo a passo →</a>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <span class="inline-block text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded mb-2">Tópico Fixado #2</span>
+            <h3 class="text-sm font-extrabold text-slate-900">Conciliação bancária OFX x Razão para iniciantes</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              Entenda como identificar tarifas não lançadas e gerar papéis de trabalho alinhados à ITG 2000 (R1) do CFC.
+            </p>
+            <a href="guias/como-conciliar-extrato-ofx-razao-contabil.html" class="inline-block mt-3 text-xs font-bold text-emerald-700 hover:text-emerald-900">Abrir guia de conciliação →</a>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <span class="inline-block text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded mb-2">Tópico Fixado #3</span>
+            <h3 class="text-sm font-extrabold text-slate-900">CNPJ alfanumérico: seus cadastros já estão preparados?</h3>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              Saiba o que prevê a IN RFB nº 2.229/2024 e como testar formatos alfanuméricos sem quebrar planilhas.
+            </p>
+            <a href="guias/cnpj-alfanumerico-o-que-muda-como-validar.html" class="inline-block mt-3 text-xs font-bold text-amber-800 hover:text-amber-950">Ler guia do CNPJ alfanumérico →</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Votação de Próximos Conteúdos e Recursos -->
+    <section id="votacao-comunidade" aria-labelledby="votacao-heading" class="mb-10 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+      <div class="mb-5">
+        <span class="inline-block text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md mb-2">Decida o Próximo Passo</span>
+        <h2 id="votacao-heading" class="text-xl sm:text-2xl font-extrabold text-slate-900">O que você mais quer ver por aqui?</h2>
+        <p class="text-sm text-slate-600 mt-1">
+          Marque sua prioridade abaixo para salvar sua preferência neste navegador e, se quiser detalhar sua necessidade, envie em 1 clique pelo formulário.
+        </p>
+      </div>
+
+      <div id="vote-grid" class="grid sm:grid-cols-2 gap-4">
+        <article data-vote-id="mei-simuladores" class="vote-card rounded-2xl border border-slate-200 p-5 transition flex flex-col justify-between bg-slate-50/50">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-bold text-indigo-700">MEI &amp; Autônomos</span>
+              <span class="vote-badge hidden text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">✓ Seu voto atual</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Simuladores simples para MEI e Autônomos</h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5">
+              Acompanhamento de teto anual do MEI, estimativa educativa de transição para ME e simuladores com premissas transparentes.
+            </p>
+          </div>
+          <div class="mt-4">
+            <button type="button" data-vote-btn="mei-simuladores" class="vote-btn w-full rounded-xl border border-indigo-300 bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold py-2 px-3 text-xs transition">
+              Votar nesta prioridade
+            </button>
+          </div>
+        </article>
+
+        <article data-vote-id="calendario-fiscal" class="vote-card rounded-2xl border border-slate-200 p-5 transition flex flex-col justify-between bg-slate-50/50">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-bold text-emerald-700">Rotina &amp; Prazos</span>
+              <span class="vote-badge hidden text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">✓ Seu voto atual</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Calendário de Prazos e Obrigações do Mês</h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5">
+              Agenda visual com lembretes recorrentes (DAS, Simples, declarações) e links diretos para fontes oficiais da Receita e Portal do Empreendedor.
+            </p>
+          </div>
+          <div class="mt-4">
+            <button type="button" data-vote-btn="calendario-fiscal" class="vote-btn w-full rounded-xl border border-indigo-300 bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold py-2 px-3 text-xs transition">
+              Votar nesta prioridade
+            </button>
+          </div>
+        </article>
+
+        <article data-vote-id="planilhas-caixa" class="vote-card rounded-2xl border border-slate-200 p-5 transition flex flex-col justify-between bg-slate-50/50">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-bold text-amber-800">Gestão Financeira</span>
+              <span class="vote-badge hidden text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">✓ Seu voto atual</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Modelos Prontos de Planilhas e Fluxo de Caixa</h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5">
+              Planilhas didáticas gratuitas para controle diário de entradas, saídas, Pix e preparação do material para o contador.
+            </p>
+          </div>
+          <div class="mt-4">
+            <button type="button" data-vote-btn="planilhas-caixa" class="vote-btn w-full rounded-xl border border-indigo-300 bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold py-2 px-3 text-xs transition">
+              Votar nesta prioridade
+            </button>
+          </div>
+        </article>
+
+        <article data-vote-id="reforma-tributaria" class="vote-card rounded-2xl border border-slate-200 p-5 transition flex flex-col justify-between bg-slate-50/50">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-bold text-sky-700">Atualizações</span>
+              <span class="vote-badge hidden text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">✓ Seu voto atual</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900">Guias práticos sobre Reforma Tributária (IBS/CBS)</h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1.5">
+              Explicações passo a passo, sem juridiquês, sobre o cronograma de transição e impactos práticos para pequenas empresas e escritórios.
+            </p>
+          </div>
+          <div class="mt-4">
+            <button type="button" data-vote-btn="reforma-tributaria" class="vote-btn w-full rounded-xl border border-indigo-300 bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold py-2 px-3 text-xs transition">
+              Votar nesta prioridade
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <div id="vote-confirmation" class="hidden mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p id="vote-confirmation-text" class="text-xs sm:text-sm text-emerald-900 font-medium"></p>
+        <a id="vote-detail-link" href="contato.html?assunto=sugestao" class="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 text-xs text-center shrink-0 transition">
+          Detalhar pedido no formulário →
+        </a>
+      </div>
+    </section>
+
+    <!-- Caixa Envie sua Dúvida / Caso Prático + Regras -->
+    <section id="enviar-pauta" aria-labelledby="pauta-heading" class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+        <div>
+          <span class="inline-block text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-0.5 rounded-md mb-2">Sua Pergunta Pode Virar Guia</span>
+          <h2 id="pauta-heading" class="text-lg font-extrabold text-slate-900">Envie sua Dúvida, Caso Prático ou Artigo</h2>
+          <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+            Tem uma dúvida recorrente do estágio, do primeiro escritório ou do seu MEI? Envie como pauta educativa. Respondemos em formato de guia ou resumo no Portal citando fontes oficiais (Receita Federal, Banco Central e CFC).
+          </p>
+        </div>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a href="contato.html?assunto=comunidade" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 text-xs sm:text-sm transition">
+            ✉️ Enviar dúvida ou pauta →
+          </a>
+          <a href="parceiros.html" class="rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-4 py-2.5 text-xs sm:text-sm transition">
+            Publicar como colunista
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-slate-900">Regras de Convivência &amp; Privacidade</h2>
+        <ul class="mt-3 space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <li class="flex items-start gap-2"><span aria-hidden="true">•</span><span><strong>Proteja dados de terceiros (LGPD):</strong> nunca publique CPF, CNPJ real de clientes, extratos ou senhas em comentários ou mensagens.</span></li>
+          <li class="flex items-start gap-2"><span aria-hidden="true">•</span><span><strong>Conteúdo educativo:</strong> não fazemos recomendação personalizada de compra/venda de ativos nem promessas de retorno financeiro (regras CVM).</span></li>
+          <li class="flex items-start gap-2"><span aria-hidden="true">•</span><span><strong>Respeito a quem está começando:</strong> dúvida básica não é motivo de vergonha — o espaço existe justamente para ajudar quem está aprendendo.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+      Discussões e conteúdos de caráter educativo. <strong>Não substitui a orientação individualizada do seu contador</strong> ou advogado.
+    </div>
+  </main>
+
+  <div id="portal-footer"></div>
+
+  <script type="module">
+    import { fmtDateTime } from './js/utils.js';
+    import { initPortalLayout } from './js/portal/layout.js';
+    import { listRecentCommunityComments, parseCommentProfileBadge } from './js/portal/comments.js';
+
+    await initPortalLayout('comunidade');
+
+    const loadingEl = document.getElementById('community-comments-loading');
+    const emptyEl = document.getElementById('community-comments-empty');
+    const listEl = document.getElementById('community-comments-list');
+
+    async function loadRecentDiscussions() {
+      try {
+        const items = await listRecentCommunityComments(6);
+        loadingEl.classList.add('hidden');
+
+        if (!items.length) {
+          emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        items.forEach((c) => {
+          const { profileBadge, cleanBody } = parseCommentProfileBadge(c.body);
+
+          const card = document.createElement('article');
+          card.className = 'rounded-xl border border-slate-200 bg-slate-50 p-4';
+
+          const meta = document.createElement('div');
+          meta.className = 'flex flex-wrap items-center gap-1.5 text-xs text-slate-500 mb-1.5';
+
+          const author = document.createElement('strong');
+          author.className = 'text-slate-900 font-bold';
+          author.textContent = c.author?.display_name || 'Membro';
+          meta.appendChild(author);
+
+          if (c.author?.role === 'admin') {
+            const adminBadge = document.createElement('span');
+            adminBadge.className = 'bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase';
+            adminBadge.textContent = 'Admin';
+            meta.appendChild(adminBadge);
+          }
+
+          if (profileBadge) {
+            const roleBadge = document.createElement('span');
+            roleBadge.className = 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded text-[10px]';
+            roleBadge.textContent = profileBadge;
+            meta.appendChild(roleBadge);
+          }
+
+          const dateSpan = document.createElement('span');
+          dateSpan.textContent = `• ${fmtDateTime(c.created_at)}`;
+          meta.appendChild(dateSpan);
+
+          const bodyP = document.createElement('p');
+          bodyP.className = 'text-sm text-slate-700 leading-relaxed break-words';
+          bodyP.textContent = cleanBody.length > 220 ? `${cleanBody.slice(0, 220)}…` : cleanBody;
+
+          card.appendChild(meta);
+          card.appendChild(bodyP);
+
+          if (c.post?.slug && c.post?.title) {
+            const postWrap = document.createElement('div');
+            postWrap.className = 'mt-2.5 pt-2 border-t border-slate-200/80 text-xs';
+            const link = document.createElement('a');
+            link.href = `noticia.html?slug=${encodeURIComponent(c.post.slug)}`;
+            link.className = 'font-bold text-indigo-600 hover:text-indigo-800';
+            link.textContent = `Em: ${c.post.title} →`;
+            postWrap.appendChild(link);
+            card.appendChild(postWrap);
+          }
+
+          listEl.appendChild(card);
+        });
+
+        listEl.classList.remove('hidden');
+      } catch {
+        loadingEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+      }
+    }
+
+    const VOTE_STORAGE_KEY = 'ac_community_vote';
+    const VOTE_TITLES = {
+      'mei-simuladores': 'Simuladores simples para MEI e Autônomos',
+      'calendario-fiscal': 'Calendário de Prazos e Obrigações do Mês',
+      'planilhas-caixa': 'Modelos Prontos de Planilhas e Fluxo de Caixa',
+      'reforma-tributaria': 'Guias práticos sobre Reforma Tributária (IBS/CBS)'
+    };
+
+    function readSavedVote() {
+      try {
+        return localStorage.getItem(VOTE_STORAGE_KEY) || '';
+      } catch {
+        return '';
+      }
+    }
+
+    function saveVote(voteId) {
+      try {
+        localStorage.setItem(VOTE_STORAGE_KEY, voteId);
+      } catch {
+        // Ignora se localStorage não estiver disponível
+      }
+    }
+
+    function renderVoteState(selectedId) {
+      document.querySelectorAll('.vote-card').forEach((card) => {
+        const id = card.getAttribute('data-vote-id');
+        const badge = card.querySelector('.vote-badge');
+        const btn = card.querySelector('.vote-btn');
+        const isSelected = Boolean(selectedId) && id === selectedId;
+
+        card.classList.toggle('border-emerald-500', isSelected);
+        card.classList.toggle('bg-emerald-50/40', isSelected);
+        card.classList.toggle('border-slate-200', !isSelected);
+        card.classList.toggle('bg-slate-50/50', !isSelected);
+
+        if (badge) badge.classList.toggle('hidden', !isSelected);
+        if (btn) {
+          btn.textContent = isSelected ? '✓ Prioridade selecionada' : 'Votar nesta prioridade';
+          btn.classList.toggle('bg-emerald-600', isSelected);
+          btn.classList.toggle('text-white', isSelected);
+          btn.classList.toggle('border-emerald-600', isSelected);
+          btn.classList.toggle('bg-white', !isSelected);
+          btn.classList.toggle('text-indigo-700', !isSelected);
+          btn.classList.toggle('border-indigo-300', !isSelected);
+        }
+      });
+
+      const confirmBox = document.getElementById('vote-confirmation');
+      const confirmText = document.getElementById('vote-confirmation-text');
+      const detailLink = document.getElementById('vote-detail-link');
+
+      if (selectedId && VOTE_TITLES[selectedId]) {
+        confirmText.textContent = `Sua prioridade salva neste navegador: "${VOTE_TITLES[selectedId]}". Quer enviar sua sugestão para nossa fila oficial?`;
+        detailLink.href = `contato.html?assunto=sugestao&prioridade=${encodeURIComponent(selectedId)}`;
+        confirmBox.classList.remove('hidden');
+      } else {
+        confirmBox.classList.add('hidden');
+      }
+    }
+
+    document.querySelectorAll('[data-vote-btn]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const voteId = btn.getAttribute('data-vote-btn');
+        if (!VOTE_TITLES[voteId]) return;
+        saveVote(voteId);
+        renderVoteState(voteId);
+      });
+    });
+
+    renderVoteState(readSavedVote());
+    await loadRecentDiscussions();
+  </script>
+</body>
+</html>

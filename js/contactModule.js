@@ -55,6 +55,8 @@ function resolveContactPrefill(searchString = '') {
   const params = new URLSearchParams(raw);
   const assunto = (params.get('assunto') || '').trim().toLowerCase();
   const modelo = (params.get('modelo') || '').trim().toLowerCase();
+  const trilha = (params.get('trilha') || '').trim().toLowerCase();
+  const prioridade = (params.get('prioridade') || '').trim().toLowerCase();
 
   if (assunto === 'parceria' || assunto === 'parceiro') {
     const modeloLabels = {
@@ -68,10 +70,32 @@ function resolveContactPrefill(searchString = '') {
       messagePlaceholder: `Conte sobre sua empresa ou escritório, qual formato de parceria tem interesse${detalheModelo} e deixe seu site ou WhatsApp para retorno.`
     };
   }
+  if (assunto === 'comunidade' || assunto === 'pauta') {
+    const trilhaLabels = {
+      iniciante: 'Início de Carreira Contábil',
+      mei: 'Dia a Dia do MEI e Autônomo',
+      automacao: 'Planilhas e Automação',
+      artigo: 'Artigo Convidado ou Relato Prático'
+    };
+    const detalheTrilha = trilhaLabels[trilha] ? ` na trilha "${trilhaLabels[trilha]}"` : '';
+    return {
+      subject: 'Dúvida / Pauta para a Comunidade',
+      messagePlaceholder: `Compartilhe sua dúvida, caso prático ou sugestão de artigo${detalheTrilha}. Importante: não inclua CPF, CNPJ ou dados pessoais de clientes.`
+    };
+  }
   if (assunto === 'sugestao' || assunto === 'feedback') {
+    const prioridadeLabels = {
+      'mei-simuladores': 'Simuladores simples para MEI e Autônomos',
+      'calendario-fiscal': 'Calendário de Prazos e Obrigações do Mês',
+      'planilhas-caixa': 'Modelos Prontos de Planilhas e Fluxo de Caixa',
+      'reforma-tributaria': 'Guias práticos sobre Reforma Tributária (IBS/CBS)'
+    };
+    const detalhePrioridade = prioridadeLabels[prioridade]
+      ? ` Prioridade votada: ${prioridadeLabels[prioridade]}.`
+      : '';
     return {
       subject: 'Sugestão/feedback',
-      messagePlaceholder: 'Conte sua sugestão de melhoria, pauta de notícia ou recurso para a Central Financeira...'
+      messagePlaceholder: `Conte sua sugestão de melhoria, pauta de notícia ou recurso para a Central Financeira.${detalhePrioridade}`
     };
   }
   if (assunto === 'servico') {

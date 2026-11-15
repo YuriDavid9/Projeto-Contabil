@@ -30,6 +30,7 @@ export async function initPortalLayout(activePage = 'noticias') {
             <nav class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl" aria-label="Navegação do portal">
               <a href="index.html" class="${linkClass('ferramentas')}">🧰 Catálogo de Ferramentas</a>
               <a href="noticias.html" class="${linkClass('noticias')}">📰 Notícias</a>
+              <a href="comunidade.html" class="${linkClass('comunidade')}">💬 Comunidade</a>
               ${isAdmin ? `<a href="admin.html" class="${linkClass('admin')}">⚙️ Painel</a>` : ''}
             </nav>
             <div class="flex items-center gap-2 ml-auto sm:ml-2 text-xs lg:text-sm">
@@ -82,6 +83,7 @@ export async function initPortalLayout(activePage = 'noticias') {
           <a class="hover:text-white underline" href="index.html">Ferramentas</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="servicos.html">Serviços</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="noticias.html">Notícias</a><span class="mx-2" aria-hidden="true">·</span>
+          <a class="hover:text-white underline" href="comunidade.html">Comunidade</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="parceiros.html">Seja Parceiro</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="contato.html">Contato</a><span class="mx-2" aria-hidden="true">·</span>
           <a class="hover:text-white underline" href="privacidade.html">Privacidade</a><span class="mx-2" aria-hidden="true">·</span>

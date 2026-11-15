@@ -97,6 +97,16 @@
       <!-- Formulário para usuário logado -->
       <form id="comment-form" class="hidden mb-6 space-y-3">
         <div>
+          <label for="comment-profile" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Seu perfil na comunidade</label>
+          <select id="comment-profile" class="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm text-slate-800 focus:border-indigo-500 focus:outline-none">
+            <option value="Membro da Comunidade">Membro da Comunidade</option>
+            <option value="Contador(a)">Contador(a)</option>
+            <option value="Contador(a) Iniciante">Contador(a) Iniciante</option>
+            <option value="MEI / Autônomo">MEI / Autônomo</option>
+            <option value="Pequena Empresa">Pequena Empresa</option>
+          </select>
+        </div>
+        <div>
           <label for="comment-body" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Escreva seu comentário</label>
           <textarea id="comment-body" rows="3" minlength="2" maxlength="1000" required placeholder="Compartilhe sua dúvida ou experiência com respeito..." class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
           <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
@@ -121,7 +131,14 @@
     import { esc, fmtDateTime } from './js/utils.js';
     import { initPortalLayout } from './js/portal/layout.js';
     import { getPostBySlug, renderSafeMarkdown } from './js/portal/posts.js';
-    import { listCommentsByPost, createComment, deleteComment, toggleHideComment } from './js/portal/comments.js';
+    import {
+      listCommentsByPost,
+      createComment,
+      deleteComment,
+      toggleHideComment,
+      formatCommentWithProfileBadge,
+      parseCommentProfileBadge
+    } from './js/portal/comments.js';
 
     const { user, isAdmin } = await initPortalLayout('noticias');
 
@@ -211,6 +228,7 @@
       const guestBox = document.getElementById('comment-guest-box');
       const loginLink = document.getElementById('comment-login-link');
       const commentForm = document.getElementById('comment-form');
+      const commentProfile = document.getElementById('comment-profile');
       const commentBody = document.getElementById('comment-body');
       const commentCounter = document.getElementById('comment-counter');
       const commentFeedback = document.getElementById('comment-feedback');
@@ -256,6 +274,7 @@
           }
 
           items.forEach((c) => {
+            const { profileBadge, cleanBody } = parseCommentProfileBadge(c.body);
             const card = document.createElement('div');
             card.className = `rounded-xl border p-4 text-sm ${c.hidden ? 'bg-amber-50/60 border-amber-200' : 'bg-slate-50 border-slate-200'}`;
 
@@ -263,7 +282,7 @@
             header.className = 'flex flex-wrap items-center justify-between gap-2 mb-1.5 text-xs text-slate-500';
 
             const authorWrap = document.createElement('div');
-            authorWrap.className = 'flex items-center gap-1.5';
+            authorWrap.className = 'flex flex-wrap items-center gap-1.5';
 
             const authorStrong = document.createElement('strong');
             authorStrong.className = 'text-slate-800 font-bold';
@@ -275,6 +294,13 @@
               badge.className = 'bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase';
               badge.textContent = 'Admin';
               authorWrap.appendChild(badge);
+            }
+
+            if (profileBadge) {
+              const profileEl = document.createElement('span');
+              profileEl.className = 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded text-[10px]';
+              profileEl.textContent = profileBadge;
+              authorWrap.appendChild(profileEl);
             }
 
             if (c.hidden) {
@@ -335,7 +361,7 @@
             const bodyP = document.createElement('p');
             bodyP.className = 'text-slate-700 whitespace-pre-line break-words leading-relaxed';
             // Texto puro com textContent (nunca interpreta HTML)
-            bodyP.textContent = c.body;
+            bodyP.textContent = cleanBody;
 
             card.appendChild(header);
             card.appendChild(bodyP);
@@ -356,7 +382,7 @@
             await createComment({
               postId,
               userId: user.id,
-              body: commentBody.value
+              body: formatCommentWithProfileBadge(commentBody.value, commentProfile?.value)
             });
             commentBody.value = '';
             commentCounter.textContent = '0 / 1000';

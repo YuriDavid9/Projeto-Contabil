@@ -9,7 +9,16 @@ import { reconcile, parseOFX, parseTxCSV, sim } from '../js/conciliadorModule.js
 import { calcDV, buildDemoXML, parseNFe, computeYearSummary } from '../js/xmlModule.js';
 import { guessMeta, buildName } from '../js/organizadorModule.js';
 import { isContactConfigured, isContactEmailConfigured, isContactEndpointConfigured, buildContactAlternativesHtml, resolveContactPrefill, CONTACT_ENDPOINT } from '../js/contactModule.js';
-import { isHttpUrl, slugify, translatePostError, translateCommentError, translateAuthError } from '../js/portal/pure.js';
+import {
+  isHttpUrl,
+  slugify,
+  translatePostError,
+  translateCommentError,
+  translateAuthError,
+  COMMUNITY_PROFILES,
+  formatCommentWithProfileBadge,
+  parseCommentProfileBadge
+} from '../js/portal/pure.js';
 import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
 import { montarLinkCTA, shouldShowCTA, buildCTAHtml, dismissCTA, resetCTADismissals } from '../js/cta.js';
 import { inspectWhatsappLinks } from '../scripts/verificar-links-wa.mjs';
@@ -204,6 +213,9 @@ test('contactModule valida configuracao de endpoint e e-mail e omite mailto quan
   assert.ok(resolveContactPrefill('?assunto=parceria&modelo=vitrine').messagePlaceholder.includes('Vitrine'));
   assert.ok(resolveContactPrefill('?assunto=parceria&modelo=tecnica').messagePlaceholder.includes('Escritório Contábil'));
   assert.equal(resolveContactPrefill('?assunto=sugestao').subject, 'Sugestão/feedback');
+  assert.ok(resolveContactPrefill('?assunto=sugestao&prioridade=calendario-fiscal').messagePlaceholder.includes('Calendário de Prazos'));
+  assert.equal(resolveContactPrefill('?assunto=comunidade&trilha=mei').subject, 'Dúvida / Pauta para a Comunidade');
+  assert.ok(resolveContactPrefill('?assunto=comunidade&trilha=mei').messagePlaceholder.includes('MEI e Autônomo'));
   assert.equal(resolveContactPrefill('?assunto=servico').subject, 'Contratar serviço');
   assert.equal(resolveContactPrefill('').subject, '');
 });
@@ -242,6 +254,23 @@ test('isHttpUrl e funcoes puras do portal validam URLs HTTP/HTTPS, slugs e tradu
   assert.equal(translateAuthError(new Error('over_email_send_rate_limit')), 'Muitas tentativas seguidas ou limite de envio de e-mails atingido. Aguarde alguns minutos e tente novamente.');
   assert.equal(translateAuthError(new Error('Unable to validate email address: invalid format')), 'Digite um endereço de e-mail válido.');
   assert.equal(translateAuthError({}), 'Ocorreu um erro inesperado. Tente novamente.');
+
+  assert.ok(COMMUNITY_PROFILES.includes('MEI / Autônomo'));
+  assert.equal(formatCommentWithProfileBadge('Texto normal', 'Membro da Comunidade'), 'Texto normal');
+  const formattedComment = formatCommentWithProfileBadge('Dúvida sobre DASN-Simei', 'MEI / Autônomo');
+  assert.equal(formattedComment, '[Perfil: MEI / Autônomo] Dúvida sobre DASN-Simei');
+  assert.deepEqual(parseCommentProfileBadge(formattedComment), {
+    profileBadge: 'MEI / Autônomo',
+    cleanBody: 'Dúvida sobre DASN-Simei'
+  });
+  assert.deepEqual(parseCommentProfileBadge('Comentário comum sem prefixo'), {
+    profileBadge: null,
+    cleanBody: 'Comentário comum sem prefixo'
+  });
+  assert.deepEqual(parseCommentProfileBadge('[Perfil: Desconhecido] Teste'), {
+    profileBadge: null,
+    cleanBody: '[Perfil: Desconhecido] Teste'
+  });
 });
 
 test('reconcile mantem paridade exata com implementacao de referencia (300x300) e processa 3000x3000 em menos de 3s', () => {
@@ -477,6 +506,7 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   assert.equal(servicosHtml.includes('mailto:null'), false, 'servicos.html nunca deve exibir e-mail nulo');
   const sitemapXml = fs.readFileSync(path.join(rootDir, 'sitemap.xml'), 'utf8');
   assert.ok(sitemapXml.includes('/servicos.html'), 'servicos.html deve constar no sitemap.xml');
+  assert.ok(sitemapXml.includes('/comunidade.html'), 'comunidade.html deve constar no sitemap.xml');
   assert.ok(sitemapXml.includes('/parceiros.html'), 'parceiros.html deve constar no sitemap.xml');
   assert.ok(sitemapXml.includes('/pro.html'), 'pro.html deve constar no sitemap.xml');
 
@@ -491,6 +521,7 @@ test('negocio.js define configuracao sem precos inventados e buildWhatsappLink c
   ];
   const swText = fs.readFileSync(path.join(rootDir, 'sw.js'), 'utf8');
   assert.ok(swText.includes('./servicos.html'));
+  assert.ok(swText.includes('./comunidade.html'));
   assert.ok(swText.includes('./parceiros.html'));
   assert.ok(swText.includes('./pro.html'));
   assert.ok(swText.includes('./guias/index.html'));

@@ -1,7 +1,17 @@
 import { supabase } from './supabase.js';
-import { translateCommentError } from './pure.js';
+import {
+  translateCommentError,
+  COMMUNITY_PROFILES,
+  formatCommentWithProfileBadge,
+  parseCommentProfileBadge
+} from './pure.js';
 
-export { translateCommentError };
+export {
+  translateCommentError,
+  COMMUNITY_PROFILES,
+  formatCommentWithProfileBadge,
+  parseCommentProfileBadge
+};
 
 export async function listCommentsByPost(postId) {
   const { data, error } = await supabase
@@ -53,5 +63,22 @@ export async function toggleHideComment(commentId, hidden) {
     .update({ hidden: Boolean(hidden) })
     .eq('id', commentId);
   if (error) throw new Error(translateCommentError(error));
+}
+
+export async function listRecentCommunityComments(limit = 6) {
+  const safeLimit = Math.min(20, Math.max(1, Number(limit) || 6));
+  const { data, error } = await supabase
+    .from('comments')
+    .select(
+      `id, post_id, user_id, body, hidden, created_at,
+       author:profiles(id, display_name, role),
+       post:posts(id, slug, title, status)`
+    )
+    .eq('hidden', false)
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+
+  if (error) throw new Error(translateCommentError(error));
+  return (data || []).filter((item) => !item.post || item.post.status === 'published');
 }
 
