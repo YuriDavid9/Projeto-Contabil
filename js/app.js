@@ -6,7 +6,7 @@ import { initUtilitiesModule } from './utilitiesModule.js';
 import { CATALOGO_FERRAMENTAS, AREAS_FERRAMENTAS } from './ferramentas/catalogo.js';
 import { getModo, setModo, modoSalvo } from './modo.js';
 import { ajuda } from './ajuda.js';
-import { AJUDA_GUIADO, TERMOS_GUIADOS } from './glossario.js';
+import { AJUDA_GUIADO, TERMOS_GUIADOS, DICIONARIO_BOLSO, filterDicionarioBolso } from './glossario.js';
 import { initModal } from './modal.js';
 import { buildWhatsappLink } from './negocio.js';
 
@@ -355,6 +355,53 @@ if (glossary) glossary.querySelector('dl').innerHTML = TERMOS_GUIADOS.map(([term
 $('#ajuda-global')?.addEventListener('click', () => glossary?.showModal());
 $('#glossario-fechar')?.addEventListener('click', () => glossary?.close());
 glossary?.addEventListener('click', (event) => { if (event.target === glossary) glossary.close(); });
+
+function initDicionarioBolso() {
+  const grid = $('#dicionario-grid');
+  if (!grid) return;
+  const searchInput = $('#dicionario-busca');
+  const emptyEl = $('#dicionario-vazio');
+  let activeArea = '';
+
+  const render = () => {
+    const query = searchInput?.value || '';
+    const items = filterDicionarioBolso(DICIONARIO_BOLSO, query, activeArea);
+    if (!items.length) {
+      grid.innerHTML = '';
+      emptyEl?.classList.remove('hidden');
+      return;
+    }
+    emptyEl?.classList.add('hidden');
+    grid.innerHTML = items.map((item) => `
+      <article class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <h3 class="text-sm font-extrabold text-slate-900">${esc(item.termo)}</h3>
+          <span class="text-[10px] font-bold uppercase tracking-wide bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded">${esc(item.area)}</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${esc(item.explicacao)}</p>
+        <p class="text-[11px] text-slate-500 mt-1.5"><strong>Na prática:</strong> ${esc(item.exemplo)}</p>
+      </article>
+    `).join('');
+  };
+
+  $$('.dict-area-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeArea = btn.getAttribute('data-dict-area') || '';
+      $$('.dict-area-btn').forEach((b) => {
+        const isCurrent = (b.getAttribute('data-dict-area') || '') === activeArea;
+        b.className = isCurrent
+          ? 'dict-area-btn bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition'
+          : 'dict-area-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition';
+      });
+      render();
+    });
+  });
+
+  searchInput?.addEventListener('input', render);
+  render();
+}
+
+initDicionarioBolso();
 
 document.querySelectorAll('#xml-demo, #cb-demo, #og-demo').forEach((button) => {
   button.addEventListener('click', () => {

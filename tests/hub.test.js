@@ -17,10 +17,17 @@ import {
   translateAuthError,
   COMMUNITY_PROFILES,
   formatCommentWithProfileBadge,
-  parseCommentProfileBadge
+  parseCommentProfileBadge,
+  estimateReadingTimeMinutes,
+  formatReadingTime,
+  parseSavedPostSlugs,
+  toggleSavedPostSlug,
+  buildNewsShareUrl,
+  extractPracticalHighlights
 } from '../js/portal/pure.js';
 import { NEGOCIO, SERVICOS, FAIXAS_PRO, buildWhatsappLink, formatPrecoServico, isNegocioEmailConfigured } from '../js/negocio.js';
 import { montarLinkCTA, shouldShowCTA, buildCTAHtml, dismissCTA, resetCTADismissals } from '../js/cta.js';
+import { DICIONARIO_BOLSO, filterDicionarioBolso } from '../js/glossario.js';
 import { inspectWhatsappLinks } from '../scripts/verificar-links-wa.mjs';
 
 test('parseMoney interpreta formatos brasileiros, americanos, negativos e preserva hifens internos', () => {
@@ -271,6 +278,41 @@ test('isHttpUrl e funcoes puras do portal validam URLs HTTP/HTTPS, slugs e tradu
     profileBadge: null,
     cleanBody: '[Perfil: Desconhecido] Teste'
   });
+
+  assert.equal(estimateReadingTimeMinutes(''), 1);
+  assert.equal(estimateReadingTimeMinutes('palavra '.repeat(360)), 2);
+  assert.equal(formatReadingTime('texto curto'), '1 min de leitura');
+
+  assert.deepEqual(parseSavedPostSlugs('["n1","n1","n2"]'), ['n1', 'n2']);
+  assert.deepEqual(parseSavedPostSlugs('invalido'), []);
+  const added = toggleSavedPostSlug(['n1'], 'n2');
+  assert.equal(added.saved, true);
+  assert.deepEqual(added.slugs, ['n2', 'n1']);
+  const removed = toggleSavedPostSlug(added.slugs, 'n2');
+  assert.equal(removed.saved, false);
+  assert.deepEqual(removed.slugs, ['n1']);
+
+  const shareUrl = buildNewsShareUrl({
+    title: 'Prazo DAS-MEI',
+    url: 'https://yuridavid9.github.io/Projeto-Contabil/noticia.html?slug=das-mei'
+  });
+  assert.ok(shareUrl.startsWith('https://api.whatsapp.com/send?text='));
+  assert.ok(decodeURIComponent(shareUrl).includes('Prazo DAS-MEI'));
+
+  const meiHighlight = extractPracticalHighlights({
+    title: 'DASN-Simei para MEI',
+    summary: 'Prazo anual de entrega.',
+    sourceName: 'Portal do Empreendedor'
+  });
+  assert.ok(meiHighlight.publico.includes('MEI'));
+  assert.ok(meiHighlight.acaoPratica.includes('Portal do Empreendedor'));
+
+  const refHighlight = extractPracticalHighlights({
+    title: 'Reforma Tributária IBS/CBS',
+    summary: 'Cronograma de transição.',
+    sourceName: 'Receita Federal'
+  });
+  assert.ok(refHighlight.publico.includes('Reforma Tributária'));
 });
 
 test('reconcile mantem paridade exata com implementacao de referencia (300x300) e processa 3000x3000 em menos de 3s', () => {
@@ -706,4 +748,23 @@ test('cta.js monta links wa.me apenas com contagens agregadas e exibe blocos nos
   const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const ctaSource = fs.readFileSync(path.join(rootDir, 'js/cta.js'), 'utf8');
   assert.equal(/localStorage|sessionStorage|fetch\s*\(|XMLHttpRequest/i.test(ctaSource), false);
+});
+
+test('glossario.js exporta dicionario de bolso e filtra por termo e area', () => {
+  assert.ok(Array.isArray(DICIONARIO_BOLSO) && DICIONARIO_BOLSO.length >= 8);
+  assert.equal(filterDicionarioBolso(DICIONARIO_BOLSO, '', '').length, DICIONARIO_BOLSO.length);
+
+  const dasn = filterDicionarioBolso(DICIONARIO_BOLSO, 'DASN', '');
+  assert.equal(dasn.length, 1);
+  assert.equal(dasn[0].area, 'MEI');
+
+  const cfop = filterDicionarioBolso(DICIONARIO_BOLSO, 'cfop', 'Fiscal');
+  assert.equal(cfop.length, 1);
+  assert.ok(cfop[0].termo.includes('CFOP'));
+
+  const fiscalOnly = filterDicionarioBolso(DICIONARIO_BOLSO, '', 'Fiscal');
+  assert.ok(fiscalOnly.length >= 3);
+  assert.ok(fiscalOnly.every((item) => item.area === 'Fiscal'));
+
+  assert.equal(filterDicionarioBolso(DICIONARIO_BOLSO, 'termo-inexistente-xyz', '').length, 0);
 });

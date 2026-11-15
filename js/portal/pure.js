@@ -113,3 +113,68 @@ export function translateAuthError(error) {
   }
   return error?.message || 'Ocorreu um erro inesperado. Tente novamente.';
 }
+
+export function estimateReadingTimeMinutes(text) {
+  const clean = String(text || '')
+    .replace(/[#>*_`~\-\[\]()!]/g, ' ')
+    .trim();
+  if (!clean) return 1;
+  const words = clean.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 180));
+}
+
+export function formatReadingTime(text) {
+  const mins = estimateReadingTimeMinutes(text);
+  return `${mins} min de leitura`;
+}
+
+export function parseSavedPostSlugs(rawJson) {
+  try {
+    const parsed = JSON.parse(String(rawJson || '[]'));
+    if (!Array.isArray(parsed)) return [];
+    return [...new Set(parsed.map((s) => String(s || '').trim()).filter(Boolean))].slice(0, 100);
+  } catch {
+    return [];
+  }
+}
+
+export function toggleSavedPostSlug(currentSlugs, slug) {
+  const cleanSlug = String(slug || '').trim();
+  const list = Array.isArray(currentSlugs) ? [...currentSlugs] : [];
+  if (!cleanSlug) return { slugs: list, saved: false };
+  const idx = list.indexOf(cleanSlug);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+    return { slugs: list, saved: false };
+  }
+  return { slugs: [cleanSlug, ...list].slice(0, 100), saved: true };
+}
+
+export function buildNewsShareUrl({ title, url }) {
+  const cleanTitle = String(title || 'Notícia do AutoContábil Hub').trim();
+  const cleanUrl = String(url || '').trim();
+  const message = cleanUrl
+    ? `Confira no AutoContábil Hub: ${cleanTitle} — ${cleanUrl}`
+    : `Confira no AutoContábil Hub: ${cleanTitle}`;
+  return `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+}
+
+export function extractPracticalHighlights({ title = '', summary = '', categoryName = '', sourceName = '' } = {}) {
+  const combined = `${title} ${summary} ${categoryName}`.toLowerCase();
+  let publico = 'Contadores iniciantes, MEIs, autônomos e pequenas empresas.';
+  if (combined.includes('mei') || combined.includes('microempreendedor') || combined.includes('dasn')) {
+    publico = 'Microempreendedores Individuais (MEIs), autônomos e escritórios que atendem MEI.';
+  } else if (combined.includes('reforma') || combined.includes('ibs') || combined.includes('cbs')) {
+    publico = 'Empresas do Simples Nacional, contadores e gestores em adaptação à Reforma Tributária.';
+  } else if (combined.includes('xml') || combined.includes('nf-e') || combined.includes('nfc-e') || combined.includes('cfop')) {
+    publico = 'Setor fiscal de escritórios contábeis, BPO financeiro e emissores de NF-e/NFC-e.';
+  } else if (combined.includes('cnpj')) {
+    publico = 'Escritórios contábeis, empresas em abertura/atualização cadastral e sistemas integrados.';
+  }
+
+  const pontoCentral = String(summary || title || 'Atualização normativa e operacional para rotina contábil e fiscal.').trim();
+  const fonteLabel = String(sourceName || 'órgão oficial competente').trim();
+  const acaoPratica = `Confira a íntegra na fonte oficial (${fonteLabel}) e valide a aplicação com o contador responsável antes de alterar rotinas.`;
+
+  return { publico, pontoCentral, acaoPratica };
+}

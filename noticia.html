@@ -63,10 +63,37 @@
         <time id="post-date"></time>
         <span>•</span>
         <span>Por <strong id="post-author" class="text-slate-700"></strong></span>
+        <span id="post-reading-time" class="bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded-md"></span>
       </div>
 
       <h1 id="post-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight"></h1>
       <p id="post-summary" class="text-base text-slate-600 mt-3 font-medium border-b border-slate-100 pb-4"></p>
+
+      <!-- Barra de ações rápidas -->
+      <div class="flex flex-wrap items-center gap-2 mt-4">
+        <button id="btn-save-post" type="button" class="rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition">📌 Salvar para ler depois</button>
+        <button id="btn-share-wa" type="button" class="rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-3.5 py-2 text-xs transition">📲 Compartilhar no WhatsApp</button>
+        <button id="btn-copy-link" type="button" class="rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition">🔗 Copiar link</button>
+      </div>
+
+      <!-- Quadro Resumo Prático (Sem Juridiquês) -->
+      <aside id="post-practical-box" class="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-4 sm:p-5">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-indigo-800 mb-2.5">Resumo Prático (Sem Juridiquês)</h2>
+        <dl class="space-y-2 text-xs sm:text-sm text-slate-700">
+          <div>
+            <dt class="inline font-bold text-slate-900">Quem deve acompanhar:</dt>
+            <dd id="practical-publico" class="inline"></dd>
+          </div>
+          <div>
+            <dt class="inline font-bold text-slate-900">O que está em jogo:</dt>
+            <dd id="practical-ponto" class="inline"></dd>
+          </div>
+          <div>
+            <dt class="inline font-bold text-slate-900">Próximo passo recomendado:</dt>
+            <dd id="practical-acao" class="inline"></dd>
+          </div>
+        </dl>
+      </aside>
 
       <img id="post-cover" src="" alt="" class="hidden w-full max-h-96 object-cover rounded-xl border border-slate-100 my-5">
 
@@ -132,6 +159,13 @@
     import { initPortalLayout } from './js/portal/layout.js';
     import { getPostBySlug, renderSafeMarkdown } from './js/portal/posts.js';
     import {
+      formatReadingTime,
+      parseSavedPostSlugs,
+      toggleSavedPostSlug,
+      buildNewsShareUrl,
+      extractPracticalHighlights
+    } from './js/portal/pure.js';
+    import {
       listCommentsByPost,
       createComment,
       deleteComment,
@@ -181,8 +215,74 @@
           dateEl.textContent = fmtDateTime(post.published_at || post.created_at);
           dateEl.setAttribute('datetime', post.published_at || post.created_at);
           document.getElementById('post-author').textContent = post.author?.display_name || 'Equipe AutoContábil';
+          document.getElementById('post-reading-time').textContent = `⏱️ ${formatReadingTime(post.content_md || post.summary)}`;
           document.getElementById('post-title').textContent = post.title;
           document.getElementById('post-summary').textContent = post.summary;
+
+          const highlights = extractPracticalHighlights({
+            title: post.title,
+            summary: post.summary,
+            categoryName: post.category?.name || '',
+            sourceName: post.source_name || ''
+          });
+          document.getElementById('practical-publico').textContent = ` ${highlights.publico}`;
+          document.getElementById('practical-ponto').textContent = ` ${highlights.pontoCentral}`;
+          document.getElementById('practical-acao').textContent = ` ${highlights.acaoPratica}`;
+
+          const SAVED_STORAGE_KEY = 'ac_saved_posts';
+          const savePostBtn = document.getElementById('btn-save-post');
+          const shareWaBtn = document.getElementById('btn-share-wa');
+          const copyLinkBtn = document.getElementById('btn-copy-link');
+
+          function readSaved() {
+            try {
+              return parseSavedPostSlugs(localStorage.getItem(SAVED_STORAGE_KEY));
+            } catch {
+              return [];
+            }
+          }
+
+          function updateSaveBtnUi(slugs) {
+            if (!savePostBtn) return;
+            const isSaved = slugs.includes(post.slug);
+            savePostBtn.textContent = isSaved ? '✓ Salva nos favoritos' : '📌 Salvar para ler depois';
+            savePostBtn.className = isSaved
+              ? 'rounded-xl border border-amber-300 bg-amber-100 text-amber-900 font-bold px-3.5 py-2 text-xs transition'
+              : 'rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold px-3.5 py-2 text-xs transition';
+          }
+
+          updateSaveBtnUi(readSaved());
+          if (savePostBtn) {
+            savePostBtn.addEventListener('click', () => {
+              const { slugs } = toggleSavedPostSlug(readSaved(), post.slug);
+              try {
+                localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(slugs));
+              } catch {
+                // Ignora caso localStorage esteja indisponível
+              }
+              updateSaveBtnUi(slugs);
+            });
+          }
+
+          if (shareWaBtn) {
+            shareWaBtn.addEventListener('click', () => {
+              window.open(buildNewsShareUrl({ title: post.title, url: canonicalUrl }), '_blank', 'noopener,noreferrer');
+            });
+          }
+
+          if (copyLinkBtn) {
+            copyLinkBtn.addEventListener('click', async () => {
+              try {
+                await navigator.clipboard.writeText(canonicalUrl);
+                copyLinkBtn.textContent = '✓ Link copiado';
+                setTimeout(() => {
+                  copyLinkBtn.textContent = '🔗 Copiar link';
+                }, 2000);
+              } catch {
+                copyLinkBtn.textContent = canonicalUrl;
+              }
+            });
+          }
 
           if (post.cover_url && /^https?:\/\//i.test(post.cover_url)) {
             const coverEl = document.getElementById('post-cover');

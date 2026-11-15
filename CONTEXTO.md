@@ -43,11 +43,14 @@
 
 ## Onde paramos (estado atual)
 
-- **Fase atual do projeto:** entre **4) Formalização e conformidade** e **5) Testes e lançamento** do MVP atual (AutoContábil Hub publicado no GitHub Pages em `https://yuridavid9.github.io/Projeto-Contabil/`).
+- **Fase atual do projeto:** em **3) Desenvolvimento** contínuo (Central Financeira e novos recursos) com conformidade básica da Fase 4 já aplicada no MVP publicado em `https://yuridavid9.github.io/Projeto-Contabil/`.
 - **Últimas entregas concluídas na `main`:**
   - `0a30835`: chave pública do Web3Forms preenchida em `js/contactModule.js` e formulários de `contato.html` e `pro.html` ativados.
   - `5997bfc`: **Fase 1 (LGPD)** — `privacidade.html` atualizada nomeando o Web3Forms (`api.web3forms.com`) como operador, detalhando os campos reais enviados e marcando pendências com `[A DEFINIR PELO DONO]`.
   - `ac97146`: **Fase 2 (CTAs contextuais)** — criado `js/cta.js` para exibir convites discretos de serviço via WhatsApp após resultados no Extrator (10+ notas), Conciliador (1+ pendência/divergência) e Organizador (após ZIP/manifesto), sem envio de dados e com dispensa só em memória.
+  - `919c27a`: **Bloco 3 (Seja Nosso Parceiro + Capa Central Financeira + LGPD)** — criada `parceiros.html` com 3 modelos de parceria e categorias para Parceiros Fundadores, atualização de `privacidade.html` (retenção e canal do titular), pré-preenchimento em `contato.html` e nova vitrine da Central Financeira em `index.html`.
+  - `d10b2fb`: **Bloco 2 (Canal da Comunidade)** — criada `comunidade.html` com trilhas de discussão, mural integrado ao Supabase, votação de prioridades e selos de perfil nos comentários em `noticia.html`.
+  - **Blocos 1 e 4 (Canal de Notícias + Visual "Escolha seu Perfil" e Dicionário de Bolso):** **Bloco 1** (Destaque da Semana, filtros rápidos por tema/salvos, Radar de Prazos em `noticias.html`, tempo de leitura, quadro "Resumo Prático" e compartilhamento em `noticia.html`) e **Bloco 4** (seção "Escolha seu Perfil" e Dicionário de Bolso "Sem Contabilês" em `index.html`/`js/glossario.js`, além de navegação unificada). Próximas novidades serão adicionadas na sequência antes da revisão final da Fase 5.
 
 ## Negócio e intenção
 
@@ -74,11 +77,11 @@
    - Em `public.posts`, constraints `posts_source_url_check` e `posts_cover_url_check` exigem URLs `http://` ou `https://`.
 4. **Content-Security-Policy (CSP) por perfil de página e formulário em `contato.html`:**
    - O formulário de contato ficou em `contato.html` (fora do `index.html`) por causa do CSP (no navegador, alterar `<meta http-equiv="Content-Security-Policy">` via JavaScript não libera novas origens) e para preservar intacta a garantia de privacidade `connect-src 'self'` das páginas de ferramentas.
-   - Páginas de ferramentas locais, serviços e guias (`index.html`, `ferramentas.html`, `servicos.html`, `extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`, `guias/*.html`, `privacidade.html`, `termos.html`, `404.html`) mantêm `connect-src 'self'` estrito e não possuem `<form` que envie dados para fora.
+   - Páginas de ferramentas locais, serviços e guias (`index.html`, `ferramentas.html`, `servicos.html`, `parceiros.html`, `extrator-xml-nfe.html`, `conciliador-bancario-ofx.html`, `organizador-fiscal.html`, `validador-cnpj.html`, `guias/*.html`, `privacidade.html`, `termos.html`, `404.html`) mantêm `connect-src 'self'` estrito e não possuem `<form` que envie dados para fora.
    - `contato.html` e `pro.html` possuem CSP estático no próprio HTML com `connect-src 'self' https://api.web3forms.com` (provedor escolhido: Web3Forms, plano gratuito de 250 envios/mês, feito para envio direto do navegador). Nenhuma outra página libera esse domínio.
-   - Páginas do portal (`noticias.html`, `noticia.html`, `entrar.html`, `admin.html`) utilizam `connect-src 'self' https://trnkzwserimzkftbwuge.supabase.co https://cdn.jsdelivr.net`.
+   - Páginas do portal (`noticias.html`, `noticia.html`, `comunidade.html`, `entrar.html`, `admin.html`) utilizam `connect-src 'self' https://trnkzwserimzkftbwuge.supabase.co https://cdn.jsdelivr.net`.
 5. **PWA e Service Worker (`sw.js`):**
-   - `CORE_ASSETS` inclui todas as páginas estáticas (`servicos.html`, `pro.html`, `contato.html`, `guias/*.html`) e todos os módulos locais importados por `index.html`, `contato.html` e `pro.html`, com cache versionado em `autocontabil-shell-v16` (incluindo `./js/cta.js`).
+   - `CORE_ASSETS` inclui todas as páginas estáticas (`servicos.html`, `comunidade.html`, `parceiros.html`, `pro.html`, `contato.html`, `guias/*.html`) e todos os módulos locais importados por `index.html`, `contato.html` e `pro.html`, com cache versionado em `autocontabil-shell-v20` (incluindo `./js/cta.js`).
 6. **Catálogo principal, Modo Guiado e Acessibilidade (`index.html`, `js/app.js`, `js/modal.js`):**
    - O **Catálogo de Ferramentas** é a tela inicial de `index.html` e possui links estáticos no HTML para indexação imediata por buscadores.
 7. **Regra única de "nota válida" no Extrator de XML (`js/xmlModule.js`):**
